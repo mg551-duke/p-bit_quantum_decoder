@@ -19,8 +19,11 @@ valid-hit count, final residual weight, best residual weight, and `used_linear_s
 The first committed mode relies only on Bernoulli randomness and asynchronous update order for
 symmetry breaking. `stop_on_first_valid = true` returns the first syndrome-valid correction, while
 `collect_valid_samples = true` continues after convergence and groups valid states by logical
-class. Persistent disorder is deliberately left off by default and should be added only as a
-follow-up comparison if the Bernoulli-only baseline cannot find valid corrections reliably.
+class. The reported correction defaults to `selection = "best_energy"`, meaning the lowest-prior
+energy valid hit is returned while sampled coset counts remain diagnostic; `selection = "counts"`
+is available for a raw sampled-mass comparison. Persistent disorder is deliberately left off by
+default and should be added only as a follow-up comparison if the Bernoulli-only baseline cannot
+find valid corrections reliably.
 
 ## PBitCosetSamplerDecoder
 

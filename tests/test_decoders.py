@@ -166,6 +166,16 @@ def test_pbit_syndrome_decoder_collects_valid_cosets() -> None:
     assert result.total_samples == 3
     assert sum(result.coset_counts.values()) >= 1
     assert result.metadata["collect_valid_samples"] is True
+    assert result.metadata["selection"] == "best_energy"
+
+
+def test_pbit_syndrome_decoder_rejects_unknown_selection() -> None:
+    code = make_toric_code(3)
+    syndrome = np.zeros(code.m, dtype=np.uint8)
+    decoder = PBitSyndromeDecoder(selection="mystery")
+
+    with pytest.raises(ValueError, match="selection"):
+        decoder.decode(code, syndrome, 0.08, np.random.default_rng(20))
 
 
 def test_invalid_pbit_syndrome_output_counts_as_logical_failure() -> None:

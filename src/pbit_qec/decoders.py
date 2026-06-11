@@ -221,6 +221,7 @@ class PBitSyndromeDecoder:
     initial_probability: Optional[float] = None
     stop_on_first_valid: bool = True
     collect_valid_samples: bool = False
+    selection: str = "best_energy"
     name: str = "pbit_syndrome"
 
     def decode(
@@ -238,6 +239,8 @@ class PBitSyndromeDecoder:
         col_checks = [np.flatnonzero(code.H[:, j]).astype(np.int64) for j in range(code.n)]
         beta_schedule = self._beta_schedule()
         initial_probability = self._initial_probability(probabilities)
+        if self.selection not in {"best_energy", "counts"}:
+            raise ValueError(f"unknown p-bit syndrome selection {self.selection!r}")
 
         counts: Dict[str, int] = defaultdict(int)
         best_rep_by_coset: Dict[str, BitArray] = {}
@@ -318,7 +321,7 @@ class PBitSyndromeDecoder:
                         invalid += after - before
                         energy += delta
 
-        if self.collect_valid_samples and counts:
+        if self.collect_valid_samples and counts and self.selection == "counts":
             best_key = max(counts, key=lambda key: (counts[key], -best_rep_energy[key]))
             correction = best_rep_by_coset[best_key]
         elif best_valid is not None:
@@ -433,6 +436,7 @@ class PBitSyndromeDecoder:
                 "best_residual_weight": best_residual_weight,
                 "stop_on_first_valid": self.stop_on_first_valid,
                 "collect_valid_samples": self.collect_valid_samples,
+                "selection": self.selection,
                 "used_linear_solve": False,
                 "persistent_disorder": False,
                 "state_space": "full_error_space",

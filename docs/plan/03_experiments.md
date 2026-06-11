@@ -76,7 +76,9 @@ The `v1_pbit_syndrome` config is the first no-linear-solve p-bit experiment. It 
 decoder lists so MWPM appears only on graphlike toric/surface sweeps and BP-OSD appears only on the
 BB144 sweep. The new `pbit_syndrome` row starts from Bernoulli physical error bits, updates local
 checks incrementally, and records whether plain p-bit randomness can find `H e = s` before any
-nullspace, BP, or OSD aid is introduced.
+nullspace, BP, or OSD aid is introduced. This first artifact is a 50-trial-per-group pilot with
+8 chains, 240 sweeps, annealing from `beta = 0.3` to `1.2`, valid-coset collection enabled, and
+best-prior valid-hit correction selection.
 
 This probe should be interpreted through valid correction rate, first-valid sweep, final residual
 weight, logical error, runtime, and valid coset counts. It is intentionally the

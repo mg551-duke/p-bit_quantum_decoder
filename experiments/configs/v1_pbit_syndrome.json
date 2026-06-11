@@ -17,21 +17,25 @@
     },
     "pbit_syndrome": {
       "chains": 8,
-      "sweeps": 500,
+      "sweeps": 240,
       "beta_start": 0.3,
       "beta_stop": 1.2,
       "update": "gibbs",
       "stop_on_first_valid": false,
-      "collect_valid_samples": true
+      "collect_valid_samples": true,
+      "selection": "best_energy"
     },
     "pbit_nullspace_sampler": {
       "samples": 400,
       "burn_in": 80,
-      "updates_per_sample": 32,
-      "beta": 0.75,
+      "updates_per_sample": 78,
+      "beta": 0.5,
+      "chains": 4,
       "max_nullity": 96,
-      "initial_state": "random",
-      "update_schedule": "sweep"
+      "initial_state": "particular",
+      "update_schedule": "sweep",
+      "target_beta": 1.0,
+      "selection": "importance"
     },
     "bp_guided_pbit_sampler": {
       "samples": 400,
@@ -56,35 +60,35 @@
     {
       "family": "toric",
       "size": 3,
-      "trials": 100,
+      "trials": 50,
       "exact": true,
       "decoders": ["exact_coset", "mwpm", "pbit_syndrome", "pbit_nullspace_sampler"]
     },
     {
       "family": "surface",
       "size": 3,
-      "trials": 100,
+      "trials": 50,
       "exact": true,
       "decoders": ["exact_coset", "mwpm", "pbit_syndrome", "pbit_nullspace_sampler"]
     },
     {
       "family": "toric",
       "size": 5,
-      "trials": 100,
+      "trials": 50,
       "exact": false,
       "decoders": ["mwpm", "pbit_syndrome", "pbit_nullspace_sampler"]
     },
     {
       "family": "surface",
       "size": 7,
-      "trials": 100,
+      "trials": 50,
       "exact": false,
       "decoders": ["mwpm", "pbit_syndrome", "pbit_nullspace_sampler"]
     },
     {
       "family": "bb",
       "size": 144,
-      "trials": 100,
+      "trials": 50,
       "exact": false,
       "decoders": [
         "bp_osd",

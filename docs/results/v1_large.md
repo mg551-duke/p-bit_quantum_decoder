@@ -4,8 +4,9 @@ This file summarizes the generated `results/v1_large` artifacts from
 `experiments/configs/v1_large.json` and `experiments/configs/v1_hard_cases.json`, plus the
 focused precision artifacts from `experiments/configs/v1_precision_focus.json` and
 `experiments/configs/v1_hard_cases_precision.json`, the topological MWPM comparison from
-`experiments/configs/v1_mwpm_comparison.json`, and the [[144,12,12]] bivariate-bicycle p-bit sweep
-from `experiments/configs/v1_bb144_pbit.json`.
+`experiments/configs/v1_mwpm_comparison.json`, the [[144,12,12]] bivariate-bicycle p-bit sweep
+from `experiments/configs/v1_bb144_pbit.json`, and the p-bit-native syndrome probe from
+`experiments/configs/v1_pbit_syndrome.json`.
 
 ## Artifact Contents
 
@@ -39,6 +40,9 @@ from `experiments/configs/v1_bb144_pbit.json`.
   coset-distribution rows for BP-OSD, the BP-guided p-bit sampler, the unguided p-bit sampler,
   and the plain nullspace sampler.
 - `figures/v1_bb144_pbit/`: five PNG figures for the BB144 p-bit sweep.
+- `results/v1_pbit_syndrome/`: 5,400 decoder-trial rows, 108 grouped summary rows, and 35,745
+  coset-distribution rows for the no-linear-solve p-bit syndrome pilot.
+- `figures/v1_pbit_syndrome/`: nine PNG figures including first-valid and residual diagnostics.
 
 The generated artifact directories are small enough for review, with no generated file near the
 50 MB limit.
@@ -178,6 +182,23 @@ artifact.
 The BB144 rows now use 400 trials per physical error rate. The worst logical-error Wilson
 half-width in `results/v1_bb144_pbit/summary.csv` is 0.0488, and every BB144 row reports zero
 additional trials needed for a 5% Wilson half-width target.
+
+## P-Bit-Native Syndrome Probe
+
+The `v1_pbit_syndrome` artifact tests whether Bernoulli p-bit randomness and asynchronous local
+updates can find `H e = s` directly, without `gf2.solve_affine`, BP, BP-OSD, MWPM, or nullspace
+sampling inside `PBitSyndromeDecoder`. It is a 50-trial-per-group pilot, so the Wilson intervals
+are wider than the precision artifacts.
+
+The p-bit syndrome row has 1.000 valid and first-valid rate on the configured toric and surface
+groups. On BB144, it has mean valid rate 0.927, mean first-valid sweep 20.9, and mean best residual
+weight 0.147. This supports the narrow claim that p-bit-native stochastic dynamics can often find
+syndrome-valid corrections without deterministic syndrome solving.
+
+It does not support a strong BB144 decoding claim. Mean BB144 logical error is 0.583 for
+`pbit_syndrome`, compared with 0.167 for BP-OSD, 0.297 for BP-guided p-bit sampling, and 0.587 for
+the unguided p-bit nullspace row in this pilot. The main BB144 bottleneck is therefore logical
+coset selection/mixing after validity, not only finding a valid correction.
 
 Required interpretation constraints:
 

@@ -170,6 +170,7 @@ def summarize_trials(trials: pd.DataFrame) -> pd.DataFrame:
         exact_target_trials = required_trials_for_wilson_half_width(
             exact_successes / exact_n if exact_n else 0.5
         )
+        first_valid = group["first_valid_sweep"].dropna()
 
         row = {
             **key_data,
@@ -191,10 +192,18 @@ def summarize_trials(trials: pd.DataFrame) -> pd.DataFrame:
             "se_valid_sample_rate": _standard_error(group["valid_sample_rate"]),
             "mean_valid_samples": float(group["valid_samples"].mean()),
             "se_valid_samples": _standard_error(group["valid_samples"]),
+            "first_valid_rate": float(group["first_valid_sweep"].notna().mean()),
+            "mean_first_valid_sweep": float(first_valid.mean()) if len(first_valid) else np.nan,
+            "se_first_valid_sweep": _standard_error(first_valid),
             "mean_distinct_logicals": float(group["distinct_logicals"].mean()),
             "se_distinct_logicals": _standard_error(group["distinct_logicals"]),
             "mean_coset_entropy": float(group["coset_entropy"].mean()),
             "se_coset_entropy": _standard_error(group["coset_entropy"]),
+            "mean_initial_residual_weight": _mean_metadata_number(
+                group, "initial_residual_weight"
+            ),
+            "mean_best_residual_weight": _mean_metadata_number(group, "best_residual_weight"),
+            "mean_final_residual_weight": _mean_metadata_number(group, "final_residual_weight"),
             "mean_runtime_s": float(group["runtime_s"].mean()),
             "se_runtime_s": _standard_error(group["runtime_s"]),
             "exact_observations": exact_n,
@@ -217,6 +226,23 @@ def _mean_optional_bool(values: pd.Series) -> float:
     if not present:
         return float("nan")
     return float(np.mean(present))
+
+
+def _mean_metadata_number(group: pd.DataFrame, key: str) -> float:
+    if "metadata_json" not in group.columns:
+        return float("nan")
+    values = []
+    for raw in group["metadata_json"]:
+        if pd.isna(raw):
+            continue
+        try:
+            metadata = json.loads(str(raw))
+        except json.JSONDecodeError:
+            continue
+        value = metadata.get(key)
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            values.append(float(value))
+    return float(np.mean(values)) if values else float("nan")
 
 
 def wilson_interval(successes: int, n: int, z: float = 1.959963984540054) -> tuple[float, float]:

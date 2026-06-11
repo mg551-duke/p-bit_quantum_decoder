@@ -63,6 +63,43 @@ def make_plots(results_dir: Path, figures_dir: Path) -> List[Path]:
                 ),
             ]
         )
+        optional_plots = [
+            (
+                "first_valid_rate",
+                "first_valid_rate.png",
+                "first-valid rate",
+                "First-valid convergence rate",
+            ),
+            (
+                "mean_first_valid_sweep",
+                "first_valid_sweep.png",
+                "mean first-valid sweep",
+                "First-valid convergence sweep",
+            ),
+            (
+                "mean_best_residual_weight",
+                "best_residual_weight.png",
+                "mean best residual weight",
+                "Best residual weight",
+            ),
+            (
+                "mean_final_residual_weight",
+                "final_residual_weight.png",
+                "mean final residual weight",
+                "Final residual weight",
+            ),
+        ]
+        for column, filename, ylabel, title in optional_plots:
+            if column in summary.columns and not summary[column].dropna().empty:
+                paths.append(
+                    _line_plot(
+                        summary,
+                        figures_dir / filename,
+                        y=column,
+                        ylabel=ylabel,
+                        title=title,
+                    )
+                )
     hard_recovery = results_dir / "hard_case_recovery.csv"
     hard_summary = results_dir / "hard_case_summary.csv"
     if hard_recovery.exists() and hard_recovery.stat().st_size:

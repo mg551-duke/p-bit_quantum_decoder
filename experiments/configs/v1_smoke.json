@@ -18,7 +18,8 @@
       "beta": 0.6,
       "update": "gibbs",
       "stop_on_first_valid": false,
-      "collect_valid_samples": true
+      "collect_valid_samples": true,
+      "selection": "best_energy"
     },
     "pbit_coset_sampler": {
       "chains": 2,

@@ -1,0 +1,9 @@
+{
+  "config_path": "experiments/configs/v1_pbit_syndrome.json",
+  "output_dir": "results/v1_pbit_syndrome",
+  "rows": {
+    "coset_distributions": 35745,
+    "summary": 108,
+    "trials": 5400
+  }
+}

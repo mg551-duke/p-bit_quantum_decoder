@@ -32,6 +32,10 @@ def test_smoke_experiment_csv_schema_and_plots(tmp_path: Path) -> None:
         "logical_error_additional_trials_5pct_ci",
         "mean_runtime_s",
         "se_runtime_s",
+        "first_valid_rate",
+        "mean_first_valid_sweep",
+        "mean_best_residual_weight",
+        "mean_final_residual_weight",
     }.issubset(summary.columns)
     assert {"logical", "sample_count"}.issubset(cosets.columns)
 
