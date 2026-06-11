@@ -47,6 +47,6 @@ sectors. MWPM is the expected strong baseline on these graphlike topological che
 ## BB144 Code-Capacity Probe
 
 The `v1_bb144_pbit` config tests the [[144,12,12]] bivariate-bicycle X-error sector. It compares
-particular-start nullspace-coordinate p-bits against the plain hard-constrained nullspace sampler.
-The goal is diagnostic: record whether p-bit coset sampling improves over a validity-only affine
-baseline, without claiming exact maximum-likelihood performance.
+particular-start chained-sweep nullspace-coordinate p-bits against the plain hard-constrained
+nullspace sampler and LDPC BP-OSD. The goal is diagnostic: record whether p-bit coset sampling
+improves over a validity-only affine baseline, while also comparing against a strong qLDPC decoder.

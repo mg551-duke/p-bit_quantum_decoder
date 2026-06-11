@@ -1,8 +1,10 @@
 import numpy as np
+import pytest
 
 from pbit_qec.analysis import analyze_cosets
-from pbit_qec.codes import make_toric_code
+from pbit_qec.codes import make_bb144_code, make_toric_code
 from pbit_qec.decoders import (
+    BPOSDDecoder,
     ExactCosetDecoder,
     MWPMDecoder,
     NullspaceCosetSamplerDecoder,
@@ -114,6 +116,33 @@ def test_pbit_nullspace_sampler_is_seed_deterministic_for_counts() -> None:
     assert np.array_equal(first.correction, second.correction)
 
 
+def test_pbit_nullspace_sampler_supports_chained_sweep_updates() -> None:
+    code = make_toric_code(3)
+    error = np.zeros(code.n, dtype=np.uint8)
+    error[[2, 6, 13]] = 1
+    syndrome = code.syndrome(error)
+    decoder = PBitNullspaceCosetSamplerDecoder(
+        samples=41,
+        burn_in=4,
+        updates_per_sample=code.n,
+        chains=4,
+        initial_state="particular",
+        update_schedule="sweep",
+    )
+
+    first = decoder.decode(code, syndrome, 0.08, np.random.default_rng(15))
+    second = decoder.decode(code, syndrome, 0.08, np.random.default_rng(15))
+
+    assert first.valid
+    assert first.valid_samples == 41
+    assert first.total_samples == 41
+    assert sum(first.coset_counts.values()) == 41
+    assert first.metadata["chains"] == 4
+    assert first.metadata["update_schedule"] == "sweep"
+    assert first.coset_counts == second.coset_counts
+    assert np.array_equal(first.correction, second.correction)
+
+
 def test_pbit_probability_is_logistic_conditional() -> None:
     assert np.isclose(_pbit_probability_one(0.0, beta=2.0), 0.5)
     assert np.isclose(
@@ -136,3 +165,22 @@ def test_mwpm_decoder_returns_valid_topological_correction() -> None:
 
     assert result.valid
     assert result.metadata["backend"] == "pymatching"
+
+
+def test_bposd_decoder_returns_valid_bb144_correction() -> None:
+    pytest.importorskip("ldpc")
+    code = make_bb144_code()
+    error = np.zeros(code.n, dtype=np.uint8)
+    error[[0, 17, 91]] = 1
+    syndrome = code.syndrome(error)
+
+    result = BPOSDDecoder(max_iter=50, osd_order=4).decode(
+        code,
+        syndrome,
+        0.02,
+        np.random.default_rng(16),
+    )
+
+    assert result.valid
+    assert result.metadata["backend"] == "ldpc.BpOsdDecoder"
+    assert result.metadata["osd_method"] == "OSD_CS"

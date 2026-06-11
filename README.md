@@ -27,7 +27,9 @@ CSV/plot generation.
 uv sync --extra dev
 ```
 
-For a core install plus only the MWPM dependency, use `uv sync --extra matching`.
+For a core install plus only one strong baseline dependency, use `uv sync --extra matching` for
+MWPM or `uv sync --extra osd` for BP-OSD. The BP-OSD extra uses the `ldpc` package and requires
+Python >=3.10.
 
 ## Reproduce
 
@@ -125,10 +127,10 @@ Topological MWPM comparison CSVs and figures live in `results/v1_mwpm_comparison
 - The topological MWPM comparison adds 29,000 decoder-trial rows. MWPM has mean logical error
   0.271, compared with 0.336 for `nullspace_coset_sampler` and 0.364 for
   `pbit_nullspace_sampler`; on exact-feasible small cases, MWPM exact-coset agreement is 0.910.
-- The BB144 code-capacity sweep adds 3,600 decoder-trial rows on the [[144,12,12]] bivariate
-  bicycle X-error sector. With particular-solution initialization, `pbit_nullspace_sampler` has
-  mean logical error 0.669 versus 0.752 for `nullspace_coset_sampler`; this is an improvement over
-  the baseline, not a positive high-p decoding result.
+- The BB144 code-capacity sweep adds 5,400 decoder-trial rows on the [[144,12,12]] bivariate
+  bicycle X-error sector. BP-OSD has mean logical error 0.143. The chained-sweep
+  `pbit_nullspace_sampler` improves over the plain nullspace sampler, 0.569 versus 0.752, but it is
+  not competitive with BP-OSD.
 
 ## Interpretation Rules
 
@@ -140,7 +142,7 @@ Topological MWPM comparison CSVs and figures live in `results/v1_mwpm_comparison
   coordinates, so every collected correction is syndrome-valid.
 - MWPM is reported only for graphlike topological syndrome matrices with column weight at most two.
 - The BB144 artifact does not include exact enumeration; interpret it through logical success,
-  coset entropy, runtime, and comparison with the nullspace baseline.
+  coset entropy, runtime, and comparison with BP-OSD plus the nullspace baseline.
 - Invalid decoder outputs count as logical failures.
 - Positive claims require exact-coset agreement or logical-success evidence in the CSVs.
 - Negative outcomes should be interpreted through valid-sample rate, mixing, coset entropy,
@@ -154,6 +156,8 @@ Topological MWPM comparison CSVs and figures live in `results/v1_mwpm_comparison
 - [Fujisaki et al.](https://arxiv.org/abs/2308.00369): practical QEC decoding as Ising optimization.
 - [Poulin and Chung](https://authors.library.caltech.edu/records/fgska-n5w47): BP failures from short cycles and degeneracy.
 - [Panteleev and Kalachev](https://quantum-journal.org/papers/q-2021-11-22-585/): BP+OSD improvements for degenerate QLDPC codes.
+- [LDPC Python package](https://roffe.eu/software/ldpc): BP-OSD implementation used for the BB144
+  strong-decoder baseline.
 - [IBM Quantum](https://www.ibm.com/quantum/blog/nature-qldpc-error-correction): gross-code
   context for the [[144,12,12]] bivariate-bicycle benchmark.
 - [Phys. Rev. A 111, 022433](https://link.aps.org/doi/10.1103/PhysRevA.111.022433): explicit

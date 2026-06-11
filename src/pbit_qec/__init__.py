@@ -2,6 +2,7 @@
 
 from pbit_qec.codes import make_bb144_code, make_surface_code, make_toric_code
 from pbit_qec.decoders import (
+    BPOSDDecoder,
     ExactCosetDecoder,
     MWPMDecoder,
     NullspaceCosetSamplerDecoder,
@@ -13,6 +14,7 @@ from pbit_qec.types import CSSCode, Decoder, DecodeResult, TrialResult
 
 __all__ = [
     "CSSCode",
+    "BPOSDDecoder",
     "DecodeResult",
     "Decoder",
     "ExactCosetDecoder",

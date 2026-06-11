@@ -3,17 +3,29 @@
   "output_dir": "results/v1_bb144_pbit",
   "p_values": [0.01, 0.02, 0.04, 0.06, 0.08, 0.1],
   "decoders": [
+    "bp_osd",
     "pbit_nullspace_sampler",
     "nullspace_coset_sampler"
   ],
   "decoder_settings": {
+    "bp_osd": {
+      "max_iter": 100,
+      "bp_method": "minimum_sum",
+      "ms_scaling_factor": 0.625,
+      "schedule": "parallel",
+      "osd_method": "OSD_CS",
+      "osd_order": 10,
+      "omp_thread_count": 1
+    },
     "pbit_nullspace_sampler": {
       "samples": 1200,
       "burn_in": 200,
       "updates_per_sample": 78,
       "beta": 0.5,
+      "chains": 4,
       "max_nullity": 96,
-      "initial_state": "particular"
+      "initial_state": "particular",
+      "update_schedule": "sweep"
     },
     "nullspace_coset_sampler": {
       "samples": 1200,

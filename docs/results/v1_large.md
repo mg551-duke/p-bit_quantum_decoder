@@ -35,9 +35,9 @@ from `experiments/configs/v1_bb144_pbit.json`.
   p-bit decoders.
 - `figures/v1_mwpm_comparison/`: five PNG figures for logical error, exact-coset agreement,
   valid-sampling, logical-class diversity, and coset entropy in the MWPM comparison.
-- `results/v1_bb144_pbit/`: 3,600 BB144 decoder-trial rows, 12 grouped summary rows, and 202,491
-  coset-distribution rows for the nullspace and particular-start nullspace-coordinate p-bit
-  samplers.
+- `results/v1_bb144_pbit/`: 5,400 BB144 decoder-trial rows, 18 grouped summary rows, and 252,087
+  coset-distribution rows for BP-OSD, the nullspace sampler, and the chained-sweep
+  nullspace-coordinate p-bit sampler.
 - `figures/v1_bb144_pbit/`: five PNG figures for the BB144 p-bit sweep.
 
 The generated artifact directories are small enough for review, with no generated file near the
@@ -127,29 +127,32 @@ only on the small surface-3 aggregate in this sweep.
 ## BB144 P-bit Sweep
 
 The BB144 artifact tests the X-error sector of the [[144,12,12]] bivariate-bicycle gross code with
-`l = 12`, `m = 6`, `A = x^3 + y + y^2`, and `B = y^3 + x + x^2`. The p-bit sampler uses a
-particular-solution initialization, `beta = 0.5`, and `updates_per_sample = 78`, matching one
-expected pass over the 78-dimensional affine nullspace per collected sample.
+`l = 12`, `m = 6`, `A = x^3 + y + y^2`, and `B = y^3 + x + x^2`. It now includes LDPC BP-OSD as
+the strong qLDPC baseline. The p-bit sampler uses particular-solution initialization, `beta = 0.5`,
+`updates_per_sample = 78`, four chains, and a random-sweep schedule, matching one full randomized
+pass over the 78-dimensional affine nullspace per collected sample.
 
 BB144 logical error by physical error rate:
 
-- p=0.01: nullspace 0.297, p-bit nullspace 0.217
-- p=0.02: nullspace 0.500, p-bit nullspace 0.390
-- p=0.04: nullspace 0.817, p-bit nullspace 0.670
-- p=0.06: nullspace 0.930, p-bit nullspace 0.803
-- p=0.08: nullspace 0.970, p-bit nullspace 0.940
-- p=0.10: nullspace 0.997, p-bit nullspace 0.993
+- p=0.01: BP-OSD 0.000, nullspace 0.320, p-bit nullspace 0.113
+- p=0.02: BP-OSD 0.000, nullspace 0.490, p-bit nullspace 0.230
+- p=0.04: BP-OSD 0.003, nullspace 0.823, p-bit nullspace 0.487
+- p=0.06: BP-OSD 0.097, nullspace 0.900, p-bit nullspace 0.717
+- p=0.08: BP-OSD 0.270, nullspace 0.977, p-bit nullspace 0.910
+- p=0.10: BP-OSD 0.490, nullspace 1.000, p-bit nullspace 0.957
 
 Aggregate BB144 readout:
 
-- `pbit_nullspace_sampler`: mean logical error 0.669, mean half-width 0.040, mean runtime 247 ms,
-  mean coset entropy 2.849 bits
+- `bp_osd`: mean logical error 0.143, mean half-width 0.027, mean runtime 0.6 ms
+- `pbit_nullspace_sampler`: mean logical error 0.569, mean half-width 0.041, mean runtime 253 ms,
+  mean coset entropy 3.618 bits
 - `nullspace_coset_sampler`: mean logical error 0.752, mean half-width 0.035, mean runtime 14 ms,
-  mean coset entropy 0.609 bits
+  mean coset entropy 0.635 bits
 
-This is cautiously positive for the particular-start p-bit sampler relative to the plain nullspace
-baseline, but it is not a strong BB144 decoding result. The high-p logical-error rates remain large,
-and exact coset enumeration is not feasible in this artifact.
+This is negative for p-bit competitiveness against a strong BB144 decoder: BP-OSD is much faster
+and lower-error. The p-bit mixing change is still useful because it improves the p-bit/nullspace
+comparison relative to the previous artifact and beats the plain nullspace sampler, but it is not a
+state-of-the-art BB144 decoder. Exact coset enumeration is not feasible in this artifact.
 
 Required interpretation constraints:
 

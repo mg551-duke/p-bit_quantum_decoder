@@ -328,11 +328,11 @@
         </p>
 
         <div class="metrics">
-          <div class="metric"><strong>68,800</strong><span>decoder-trial rows across report artifacts</span></div>
+          <div class="metric"><strong>70,600</strong><span>decoder-trial rows across report artifacts</span></div>
           <div class="metric"><strong>18,200</strong><span>precision-focus trial rows</span></div>
           <div class="metric"><strong>29,000</strong><span>topological MWPM comparison rows</span></div>
-          <div class="metric"><strong>3,600</strong><span>BB144 decoder-trial rows</span></div>
-          <div class="metric"><strong>341,024</strong><span>coset-distribution rows across report artifacts</span></div>
+          <div class="metric"><strong>5,400</strong><span>BB144 decoder-trial rows with BP-OSD</span></div>
+          <div class="metric"><strong>390,620</strong><span>coset-distribution rows across report artifacts</span></div>
           <div class="metric"><strong>59</strong><span>min-energy disagreement cases</span></div>
           <div class="metric"><strong>37,760</strong><span>precision hard-case attempts</span></div>
         </div>
@@ -344,10 +344,10 @@
           nullspace-coordinate p-bit sampler has comparable non-exact exact-coset agreement in the
           v1-large sweep and the best high-repeat hard-case recovery. The tuned hard-case run
           reduces overall Wilson half-width to about 0.010, so the hard-case ordering is much less
-          noisy than before. New topological-code comparisons show MWPM remains the best
-          non-exact decoder overall. New BB144 tests show the particular-start nullspace p-bit
-          sampler improves over the plain nullspace sampler, but high-p BB144 logical error remains
-          large.
+          noisy than before. Topological-code comparisons show MWPM remains the best non-exact
+          decoder overall. The BB144 comparison now includes BP-OSD, which is dramatically stronger
+          than the p-bit and nullspace baselines. The chained-sweep p-bit sampler improves over the
+          plain nullspace sampler, but it is not competitive with BP-OSD on BB144.
         </p>
 
         <div class="takeaway-grid" aria-label="headline result comparisons">
@@ -356,14 +356,44 @@
             <span>mean topological logical error for MWPM in the comparison sweep</span>
           </div>
           <div class="takeaway">
-            <b>0.669</b>
-            <span>mean BB144 logical error for particular-start nullspace p-bits</span>
+            <b>0.143</b>
+            <span>mean BB144 logical error for BP-OSD in the comparison sweep</span>
           </div>
           <div class="takeaway">
-            <b>57.4%</b>
-            <span>high-precision mined hard-case recovery for nullspace-coordinate p-bits</span>
+            <b>0.569</b>
+            <span>mean BB144 logical error for chained-sweep nullspace p-bits</span>
           </div>
         </div>
+      </section>
+
+      <section aria-labelledby="baseline-comparison">
+        <h2 id="baseline-comparison">Good Decoder Baselines</h2>
+        <p>
+          The headline comparison is against the appropriate strong decoder for each regime:
+          PyMatching MWPM for graphlike toric/surface sectors, and LDPC BP-OSD for the BB144
+          qLDPC sector. The p-bit decoder is not beating these baselines in the current artifacts.
+        </p>
+
+        <h3>Topological Codes: MWPM Baseline</h3>
+        <table>
+          <thead><tr><th>Decoder</th><th>Mean Logical Error</th><th>Exact-Coset Agreement</th><th>Mean Runtime</th></tr></thead>
+          <tbody>
+            <tr><td>exact_coset</td><td class="value">0.244</td><td class="value">1.000</td><td class="value">44.9 ms</td></tr>
+            <tr><td>mwpm</td><td class="value">0.271</td><td class="value">0.910</td><td class="value">0.1 ms</td></tr>
+            <tr><td>pbit_nullspace_sampler</td><td class="value">0.364</td><td class="value">0.891</td><td class="value">11.9 ms</td></tr>
+            <tr><td>nullspace_coset_sampler</td><td class="value">0.336</td><td class="value">0.867</td><td class="value">6.2 ms</td></tr>
+          </tbody>
+        </table>
+
+        <h3>BB144: BP-OSD Baseline</h3>
+        <table>
+          <thead><tr><th>Decoder</th><th>Mean Logical Error</th><th>Mean CI Half-Width</th><th>Mean Runtime</th><th>Interpretation</th></tr></thead>
+          <tbody>
+            <tr><td>bp_osd</td><td class="value">0.143</td><td class="value">0.027</td><td class="value">0.6 ms</td><td>strong qLDPC baseline</td></tr>
+            <tr><td>pbit_nullspace_sampler</td><td class="value">0.569</td><td class="value">0.041</td><td class="value">253.4 ms</td><td>improved mixing, not competitive with BP-OSD</td></tr>
+            <tr><td>nullspace_coset_sampler</td><td class="value">0.752</td><td class="value">0.035</td><td class="value">14.5 ms</td><td>validity-only stochastic baseline</td></tr>
+          </tbody>
+        </table>
       </section>
 
       <section aria-labelledby="visuals">
@@ -479,7 +509,7 @@
 
           <figure>
             <img src="../../figures/v1_bb144_pbit/valid_sample_rate.png" alt="BB144 valid sample rate plot" />
-            <figcaption>Both BB144 decoders sample inside the affine syndrome-valid space, so the collected-sample validity rate is one.</figcaption>
+            <figcaption>All BB144 decoders return syndrome-valid corrections in this artifact.</figcaption>
           </figure>
 
           <figure>
@@ -578,14 +608,14 @@
 
         <h3>BB144 Logical Error Rate</h3>
         <table>
-          <thead><tr><th>Physical Error p</th><th>Nullspace Sampler</th><th>P-bit Nullspace</th></tr></thead>
+          <thead><tr><th>Physical Error p</th><th>BP-OSD</th><th>Nullspace Sampler</th><th>P-bit Nullspace</th></tr></thead>
           <tbody>
-            <tr><td class="value">0.01</td><td class="value">0.297</td><td class="value">0.217</td></tr>
-            <tr><td class="value">0.02</td><td class="value">0.500</td><td class="value">0.390</td></tr>
-            <tr><td class="value">0.04</td><td class="value">0.817</td><td class="value">0.670</td></tr>
-            <tr><td class="value">0.06</td><td class="value">0.930</td><td class="value">0.803</td></tr>
-            <tr><td class="value">0.08</td><td class="value">0.970</td><td class="value">0.940</td></tr>
-            <tr><td class="value">0.10</td><td class="value">0.997</td><td class="value">0.993</td></tr>
+            <tr><td class="value">0.01</td><td class="value">0.000</td><td class="value">0.320</td><td class="value">0.113</td></tr>
+            <tr><td class="value">0.02</td><td class="value">0.000</td><td class="value">0.490</td><td class="value">0.230</td></tr>
+            <tr><td class="value">0.04</td><td class="value">0.003</td><td class="value">0.823</td><td class="value">0.487</td></tr>
+            <tr><td class="value">0.06</td><td class="value">0.097</td><td class="value">0.900</td><td class="value">0.717</td></tr>
+            <tr><td class="value">0.08</td><td class="value">0.270</td><td class="value">0.977</td><td class="value">0.910</td></tr>
+            <tr><td class="value">0.10</td><td class="value">0.490</td><td class="value">1.000</td><td class="value">0.957</td></tr>
           </tbody>
         </table>
 
@@ -593,8 +623,9 @@
         <table>
           <thead><tr><th>Decoder</th><th>Mean Logical Error</th><th>Mean CI Half-Width</th><th>Mean Runtime</th><th>Mean Coset Entropy</th></tr></thead>
           <tbody>
-            <tr><td>pbit_nullspace_sampler</td><td class="value">0.669</td><td class="value">0.040</td><td class="value">247.4 ms</td><td class="value">2.849</td></tr>
-            <tr><td>nullspace_coset_sampler</td><td class="value">0.752</td><td class="value">0.035</td><td class="value">13.7 ms</td><td class="value">0.609</td></tr>
+            <tr><td>bp_osd</td><td class="value">0.143</td><td class="value">0.027</td><td class="value">0.6 ms</td><td class="value">0.000</td></tr>
+            <tr><td>pbit_nullspace_sampler</td><td class="value">0.569</td><td class="value">0.041</td><td class="value">253.4 ms</td><td class="value">3.618</td></tr>
+            <tr><td>nullspace_coset_sampler</td><td class="value">0.752</td><td class="value">0.035</td><td class="value">14.5 ms</td><td class="value">0.635</td></tr>
           </tbody>
         </table>
 
@@ -663,11 +694,10 @@
           The tuned setting is <code>beta = 0.75</code> with four nullspace-coordinate updates per
           collected sample, selected from the committed calibration CSV. The topological MWPM
           comparison adds a clear baseline: MWPM is faster and lower-error than the stochastic
-          p-bit/nullspace samplers on the medium toric and surface-code sectors. The BB144 result is
-          also limited but useful: particular-start nullspace p-bits improve over the plain
-          nullspace sampler, while still producing large logical-error rates above low p. This is
-          evidence for coset-mass sampling once validity and initialization are handled, not evidence
-          that the unconstrained soft penalty alone is sufficient.
+          p-bit/nullspace samplers on the medium toric and surface-code sectors. The BB144 result now
+          adds the right qLDPC baseline: BP-OSD is much stronger than the p-bit sampler. The
+          chained-sweep p-bit sampler still improves over the plain nullspace sampler, so the mixing
+          change is useful, but the current p-bit approach is not competitive with BP-OSD.
         </p>
 
         <p class="note">

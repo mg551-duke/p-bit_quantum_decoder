@@ -53,8 +53,8 @@ Because every state in the affine parameterization is syndrome-valid, this decod
 hardware-style stochastic update question from the validity-search problem. It is the strongest
 non-exact hard-case recovery decoder in the current artifact. The v1 hard-case calibration selected
 `beta = 0.75` and `updates_per_sample = 4`. The BB144 sweep uses a separate particular-start
-setting, `beta = 0.5` and `updates_per_sample = 78`, because random nullspace starts failed in the
-78-dimensional BB144 affine solution space.
+setting, `beta = 0.5`, `updates_per_sample = 78`, four chains, and random-sweep coordinate updates,
+because random single-chain starts mixed poorly in the 78-dimensional BB144 affine solution space.
 
 ## NullspaceCosetSamplerDecoder
 
@@ -67,3 +67,10 @@ estimation.
 Use PyMatching for graphlike topological syndrome matrices with column weight at most two. This is
 the topological-code baseline requested after the initial prototype. It is deliberately not applied
 to BB144, whose syndrome matrix is not graphlike in this representation.
+
+## BPOSDDecoder
+
+Use the LDPC package's BP-OSD implementation for qLDPC-style syndrome matrices. This is the strong
+BB144 baseline. In the committed artifact it uses minimum-sum BP, 100 maximum iterations, OSD-CS,
+and OSD order 10. BP-OSD is not a p-bit decoder; it is included to make the performance comparison
+honest.

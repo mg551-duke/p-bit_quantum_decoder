@@ -49,6 +49,17 @@ def _empty_result(
     )
 
 
+def _prior_probabilities(p: Union[float, Sequence[float]], n: int) -> np.ndarray:
+    probs = np.asarray(p, dtype=float)
+    if probs.ndim == 0:
+        probs = np.full(n, float(probs))
+    if probs.shape != (n,):
+        raise ValueError(f"expected scalar p or vector shape {(n,)}, got {probs.shape}")
+    if np.any(probs <= 0.0) or np.any(probs >= 0.5):
+        raise ValueError("p must be in the open interval (0, 0.5)")
+    return probs
+
+
 @dataclass
 class ExactCosetDecoder:
     max_nullity: int = 24
@@ -333,13 +344,109 @@ class MWPMDecoder:
 
 
 @dataclass
+class BPOSDDecoder:
+    max_iter: int = 100
+    bp_method: str = "minimum_sum"
+    ms_scaling_factor: float = 0.625
+    schedule: str = "parallel"
+    osd_method: str = "OSD_CS"
+    osd_order: int = 10
+    omp_thread_count: int = 1
+    name: str = "bp_osd"
+    _decoder_cache: Dict[bytes, object] = field(default_factory=dict, init=False, repr=False)
+
+    def decode(
+        self,
+        code: CSSCode,
+        syndrome: Sequence[int],
+        p: Union[float, Sequence[float]],
+        rng: np.random.Generator,
+    ) -> DecodeResult:
+        del rng
+        start = time.perf_counter()
+        lambdas = prior_lambdas(p, code.n)
+        target = np.asarray(syndrome, dtype=np.uint8) % 2
+        decoder = self._cached_decoder(code, p)
+        correction = np.asarray(decoder.decode(target), dtype=np.uint8) % 2
+        valid = code.is_valid_correction(correction, target)
+        logical = gf2.bit_tuple(code.logical(correction))
+        key = _coset_key(logical)
+        return DecodeResult(
+            correction=correction,
+            logical_class=logical,
+            valid=valid,
+            energy=prior_energy(correction, lambdas),
+            runtime_s=time.perf_counter() - start,
+            valid_samples=int(valid),
+            total_samples=1,
+            first_valid_sweep=0 if valid else None,
+            distinct_logicals=1 if valid else 0,
+            coset_counts={key: 1} if valid else {},
+            metadata={
+                "backend": "ldpc.BpOsdDecoder",
+                "max_iter": self.max_iter,
+                "bp_method": self.bp_method,
+                "ms_scaling_factor": self.ms_scaling_factor,
+                "schedule": self.schedule,
+                "osd_method": self.osd_method,
+                "osd_order": self.osd_order,
+                "converge": bool(getattr(decoder, "converge", False)),
+                "iterations": int(getattr(decoder, "iter", 0)),
+            },
+        )
+
+    def _cached_decoder(self, code: CSSCode, p: Union[float, Sequence[float]]) -> object:
+        probabilities = _prior_probabilities(p, code.n)
+        cache_key = b"|".join(
+            [
+                code.H.shape[0].to_bytes(4, "little"),
+                code.H.shape[1].to_bytes(4, "little"),
+                code.H.tobytes(),
+                probabilities.tobytes(),
+                repr(
+                    (
+                        self.max_iter,
+                        self.bp_method,
+                        self.ms_scaling_factor,
+                        self.schedule,
+                        self.osd_method,
+                        self.osd_order,
+                        self.omp_thread_count,
+                    )
+                ).encode("utf-8"),
+            ]
+        )
+        if cache_key not in self._decoder_cache:
+            from ldpc import BpOsdDecoder as LdpcBpOsdDecoder
+
+            if np.all(probabilities == probabilities[0]):
+                channel_kwargs = {"error_rate": float(probabilities[0])}
+            else:
+                channel_kwargs = {"error_channel": probabilities.astype(float).tolist()}
+            self._decoder_cache[cache_key] = LdpcBpOsdDecoder(
+                code.H,
+                max_iter=self.max_iter,
+                bp_method=self.bp_method,
+                ms_scaling_factor=self.ms_scaling_factor,
+                schedule=self.schedule,
+                osd_method=self.osd_method,
+                osd_order=self.osd_order,
+                omp_thread_count=self.omp_thread_count,
+                **channel_kwargs,
+            )
+        return self._decoder_cache[cache_key]
+
+
+@dataclass
 class PBitNullspaceCosetSamplerDecoder:
     samples: int = 2000
     burn_in: int = 100
     updates_per_sample: int = 1
     beta: float = 1.0
+    chains: int = 1
     max_nullity: int = 64
     initial_state: str = "random"
+    update_schedule: str = "random"
     name: str = "pbit_nullspace_sampler"
 
     def decode(
@@ -360,6 +467,10 @@ class PBitNullspaceCosetSamplerDecoder:
             raise ValueError(f"unknown nullspace p-bit initial_state {self.initial_state!r}")
         if self.updates_per_sample <= 0:
             raise ValueError("updates_per_sample must be positive")
+        if self.chains <= 0:
+            raise ValueError("chains must be positive")
+        if self.update_schedule not in {"random", "sweep"}:
+            raise ValueError(f"unknown nullspace p-bit update_schedule {self.update_schedule!r}")
         if basis.shape[0] == 0:
             logical = gf2.bit_tuple(code.logical(x0))
             key = _coset_key(logical)
@@ -377,48 +488,59 @@ class PBitNullspaceCosetSamplerDecoder:
                 metadata={
                     "nullity": 0,
                     "beta": self.beta,
+                    "chains": self.chains,
                     "updates_per_sample": self.updates_per_sample,
                     "update": "gibbs",
+                    "update_schedule": self.update_schedule,
                     "state_space": "affine_nullspace",
                     "initial_state": self.initial_state,
                 },
             )
 
-        z = np.zeros(basis.shape[0], dtype=np.uint8)
-        e = x0.copy()
-        if self.initial_state == "random":
-            z = rng.integers(0, 2, size=basis.shape[0], dtype=np.uint8)
-            selected = z.astype(bool)
-            if np.any(selected):
-                e ^= np.bitwise_xor.reduce(basis[selected], axis=0)
-        energy = prior_energy(e, lambdas)
         basis_indices = [np.flatnonzero(row).astype(np.int64) for row in basis]
-        signed_lambdas = lambdas * (1 - 2 * e.astype(np.int8))
 
         counts: Dict[str, int] = defaultdict(int)
         best_rep_by_coset: Dict[str, BitArray] = {}
         best_rep_energy: Dict[str, float] = {}
 
-        for step in range(self.burn_in + self.samples):
-            for _ in range(self.updates_per_sample):
-                i = int(rng.integers(0, basis.shape[0]))
-                indices = basis_indices[i]
-                delta = _basis_flip_delta(signed_lambdas, indices)
-                delta_one_minus_zero = delta if z[i] == 0 else -delta
-                probability_one = _pbit_probability_one(delta_one_minus_zero, self.beta)
-                next_bit = int(rng.random() < probability_one)
-                if next_bit != int(z[i]):
-                    e[indices] ^= 1
-                    signed_lambdas[indices] *= -1
-                    energy += delta
-                    z[i] = next_bit
-            if step < self.burn_in:
+        sample_counts = _split_samples(self.samples, self.chains)
+        for chain_samples in sample_counts:
+            if chain_samples == 0:
                 continue
-            key = _coset_key(code.logical(e))
-            counts[key] += 1
-            if key not in best_rep_energy or energy < best_rep_energy[key]:
-                best_rep_energy[key] = energy
-                best_rep_by_coset[key] = e.copy()
+            z = np.zeros(basis.shape[0], dtype=np.uint8)
+            e = x0.copy()
+            if self.initial_state == "random":
+                z = rng.integers(0, 2, size=basis.shape[0], dtype=np.uint8)
+                selected = z.astype(bool)
+                if np.any(selected):
+                    e ^= np.bitwise_xor.reduce(basis[selected], axis=0)
+            energy = prior_energy(e, lambdas)
+            signed_lambdas = lambdas * (1 - 2 * e.astype(np.int8))
+
+            for step in range(self.burn_in + chain_samples):
+                for i in _pbit_update_indices(
+                    basis.shape[0],
+                    self.updates_per_sample,
+                    self.update_schedule,
+                    rng,
+                ):
+                    indices = basis_indices[i]
+                    delta = _basis_flip_delta(signed_lambdas, indices)
+                    delta_one_minus_zero = delta if z[i] == 0 else -delta
+                    probability_one = _pbit_probability_one(delta_one_minus_zero, self.beta)
+                    next_bit = int(rng.random() < probability_one)
+                    if next_bit != int(z[i]):
+                        e[indices] ^= 1
+                        signed_lambdas[indices] *= -1
+                        energy += delta
+                        z[i] = next_bit
+                if step < self.burn_in:
+                    continue
+                key = _coset_key(code.logical(e))
+                counts[key] += 1
+                if key not in best_rep_energy or energy < best_rep_energy[key]:
+                    best_rep_energy[key] = energy
+                    best_rep_by_coset[key] = e.copy()
 
         best_key = max(counts, key=lambda key: (counts[key], -best_rep_energy[key]))
         correction = best_rep_by_coset[best_key]
@@ -437,8 +559,10 @@ class PBitNullspaceCosetSamplerDecoder:
             metadata={
                 "nullity": int(basis.shape[0]),
                 "beta": self.beta,
+                "chains": self.chains,
                 "updates_per_sample": self.updates_per_sample,
                 "update": "gibbs",
+                "update_schedule": self.update_schedule,
                 "state_space": "affine_nullspace",
                 "initial_state": self.initial_state,
             },
@@ -557,6 +681,30 @@ def _pbit_probability_one(delta_one_minus_zero: float, beta: float) -> float:
 
 def _basis_flip_delta(signed_lambdas: np.ndarray, indices: np.ndarray) -> float:
     return float(signed_lambdas[indices].sum())
+
+
+def _split_samples(samples: int, chains: int) -> list[int]:
+    base = samples // chains
+    remainder = samples % chains
+    return [base + int(chain < remainder) for chain in range(chains)]
+
+
+def _pbit_update_indices(
+    width: int,
+    updates: int,
+    schedule: str,
+    rng: np.random.Generator,
+) -> list[int]:
+    if schedule == "random":
+        return [int(rng.integers(0, width)) for _ in range(updates)]
+    if schedule != "sweep":
+        raise ValueError(f"unknown p-bit update schedule {schedule!r}")
+    order = []
+    while len(order) < updates:
+        remaining = updates - len(order)
+        permutation = rng.permutation(width)
+        order.extend(int(i) for i in permutation[:remaining])
+    return order
 
 
 def _affine_seed_state(
