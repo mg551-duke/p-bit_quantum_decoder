@@ -10,8 +10,10 @@ from pbit_qec.decoders import (
     NullspaceCosetSamplerDecoder,
     PBitCosetSamplerDecoder,
     PBitNullspaceCosetSamplerDecoder,
+    PBitSyndromeDecoder,
     _pbit_probability_one,
 )
+from pbit_qec.simulation import run_trial
 
 
 def test_exact_decoder_matches_coset_analysis() -> None:
@@ -86,6 +88,101 @@ def test_pbit_sampler_supports_affine_warm_start() -> None:
 
     assert result.metadata["initial_state"] == "affine"
     assert result.total_samples == 12
+
+
+def test_pbit_syndrome_decoder_does_not_use_linear_solve(monkeypatch: pytest.MonkeyPatch) -> None:
+    code = make_toric_code(3)
+    error = np.zeros(code.n, dtype=np.uint8)
+    error[[1, 5]] = 1
+    syndrome = code.syndrome(error)
+
+    def fail_solve_affine(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("pbit_syndrome must not call solve_affine")
+
+    monkeypatch.setattr("pbit_qec.decoders.gf2.solve_affine", fail_solve_affine)
+    result = PBitSyndromeDecoder(chains=1, sweeps=2, initial_probability=0.0).decode(
+        code,
+        syndrome,
+        0.08,
+        np.random.default_rng(8),
+    )
+
+    assert result.metadata["used_linear_solve"] is False
+    assert result.metadata["state_space"] == "full_error_space"
+
+
+def test_pbit_syndrome_decoder_is_seed_deterministic() -> None:
+    code = make_toric_code(3)
+    error = np.zeros(code.n, dtype=np.uint8)
+    error[[0, 4, 11]] = 1
+    syndrome = code.syndrome(error)
+    decoder = PBitSyndromeDecoder(chains=2, sweeps=8, beta=0.7, collect_valid_samples=True)
+
+    first = decoder.decode(code, syndrome, 0.08, np.random.default_rng(10))
+    second = decoder.decode(code, syndrome, 0.08, np.random.default_rng(10))
+    recomputed_residual = int((code.syndrome(first.correction) ^ syndrome).sum())
+
+    assert first.first_valid_sweep == second.first_valid_sweep
+    assert first.coset_counts == second.coset_counts
+    assert np.array_equal(first.correction, second.correction)
+    assert first.metadata["final_residual_weight"] == recomputed_residual
+
+
+def test_pbit_syndrome_decoder_stops_on_first_valid_state() -> None:
+    code = make_toric_code(3)
+    syndrome = np.zeros(code.m, dtype=np.uint8)
+    decoder = PBitSyndromeDecoder(
+        chains=3,
+        sweeps=20,
+        initial_probability=0.0,
+        stop_on_first_valid=True,
+    )
+
+    result = decoder.decode(code, syndrome, 0.08, np.random.default_rng(12))
+
+    assert result.valid
+    assert result.first_valid_sweep == 0
+    assert result.valid_samples == 1
+    assert result.total_samples == 1
+    assert result.metadata["final_residual_weight"] == 0
+
+
+def test_pbit_syndrome_decoder_collects_valid_cosets() -> None:
+    code = make_toric_code(3)
+    syndrome = np.zeros(code.m, dtype=np.uint8)
+    decoder = PBitSyndromeDecoder(
+        chains=1,
+        sweeps=2,
+        initial_probability=0.0,
+        beta=0.5,
+        stop_on_first_valid=False,
+        collect_valid_samples=True,
+    )
+
+    result = decoder.decode(code, syndrome, 0.08, np.random.default_rng(19))
+
+    assert result.valid
+    assert result.valid_samples >= 1
+    assert result.total_samples == 3
+    assert sum(result.coset_counts.values()) >= 1
+    assert result.metadata["collect_valid_samples"] is True
+
+
+def test_invalid_pbit_syndrome_output_counts_as_logical_failure() -> None:
+    code = make_toric_code(3)
+    decoder = PBitSyndromeDecoder(chains=1, sweeps=0, initial_probability=0.0)
+
+    rows, _ = run_trial(
+        code=code,
+        p=0.2,
+        trial=0,
+        seed=1,
+        decoders=[decoder],
+    )
+
+    assert not rows[0].valid
+    assert not rows[0].logical_success
+    assert rows[0].metadata["used_linear_solve"] is False
 
 
 def test_pbit_nullspace_sampler_returns_valid_correction() -> None:

@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import pandas as pd
@@ -17,6 +18,11 @@ def test_smoke_experiment_csv_schema_and_plots(tmp_path: Path) -> None:
     summary = pd.read_csv(paths["summary"])
     cosets = pd.read_csv(paths["coset_distributions"])
     assert {"decoder", "logical_success", "valid_sample_rate"}.issubset(trials.columns)
+    syndrome_rows = trials[trials["decoder"] == "pbit_syndrome"]
+    assert not syndrome_rows.empty
+    syndrome_metadata = syndrome_rows["metadata_json"].map(json.loads)
+    assert all(row["used_linear_solve"] is False for row in syndrome_metadata)
+    assert all("final_residual_weight" in row for row in syndrome_metadata)
     assert {
         "logical_error_rate",
         "logical_error_rate_ci_low",
@@ -64,3 +70,37 @@ def test_sweep_specific_p_values(tmp_path: Path) -> None:
 
     assert set(trials.loc[trials["code_family"] == "toric", "p"]) == {0.06}
     assert set(trials.loc[trials["code_family"] == "surface", "p"]) == {0.1}
+
+
+def test_sweep_specific_decoders(tmp_path: Path) -> None:
+    config = load_config(Path("experiments/configs/v1_smoke.json"))
+    config["output_dir"] = str(tmp_path / "decoder_override")
+    config["p_values"] = [0.06]
+    config["decoders"] = ["pbit_syndrome"]
+    config["sweeps"] = [
+        {
+            "family": "toric",
+            "size": 3,
+            "trials": 1,
+            "exact": True,
+            "decoders": ["exact_coset", "pbit_syndrome"],
+        },
+        {
+            "family": "surface",
+            "size": 3,
+            "trials": 1,
+            "exact": False,
+            "decoders": ["pbit_nullspace_sampler"],
+        },
+    ]
+
+    paths = run_config(config)
+    trials = pd.read_csv(paths["trials"])
+
+    assert set(trials.loc[trials["code_family"] == "toric", "decoder"]) == {
+        "exact_coset",
+        "pbit_syndrome",
+    }
+    assert set(trials.loc[trials["code_family"] == "surface", "decoder"]) == {
+        "pbit_nullspace_sampler"
+    }

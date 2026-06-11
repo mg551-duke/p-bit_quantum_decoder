@@ -13,8 +13,10 @@ Additional committed comparison configs are:
 ```bash
 uv run python scripts/run_experiments.py --config experiments/configs/v1_mwpm_comparison.json
 uv run python scripts/run_experiments.py --config experiments/configs/v1_bb144_pbit.json
+uv run python scripts/run_experiments.py --config experiments/configs/v1_pbit_syndrome.json
 uv run python scripts/make_plots.py --results results/v1_mwpm_comparison --figures figures/v1_mwpm_comparison
 uv run python scripts/make_plots.py --results results/v1_bb144_pbit --figures figures/v1_bb144_pbit
+uv run python scripts/make_plots.py --results results/v1_pbit_syndrome --figures figures/v1_pbit_syndrome
 ```
 
 ## Exact Small-Code Validation
@@ -67,3 +69,16 @@ whether BP guidance closes the gap, and how both compare against a strong qLDPC 
 400 trials per physical error rate, which brings the worst BB144 logical-error Wilson half-width
 below 0.049. The p-bit BB144 rows sample at `beta = 0.5` for mixing but select the reported coset
 with importance-weighted posterior scores targeting `target_beta = 1.0`.
+
+## P-Bit-Native Syndrome Probe
+
+The `v1_pbit_syndrome` config is the first no-linear-solve p-bit experiment. It uses sweep-level
+decoder lists so MWPM appears only on graphlike toric/surface sweeps and BP-OSD appears only on the
+BB144 sweep. The new `pbit_syndrome` row starts from Bernoulli physical error bits, updates local
+checks incrementally, and records whether plain p-bit randomness can find `H e = s` before any
+nullspace, BP, or OSD aid is introduced.
+
+This probe should be interpreted through valid correction rate, first-valid sweep, final residual
+weight, logical error, runtime, and valid coset counts. It is intentionally the
+no-persistent-disorder baseline; persistent bit/check/edge disorder should be added only after this
+baseline shows whether intrinsic Bernoulli firing is enough to break degeneracy.

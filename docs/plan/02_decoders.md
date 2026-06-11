@@ -8,6 +8,20 @@ Logical success is evaluated with `A(e_true xor e_hat) = 0 mod 2`.
 For small affine solution spaces, enumerate all `e` satisfying `H e = s`, group by `A e`, compute
 coset log weights, and return a representative from the maximum-posterior coset.
 
+## PBitSyndromeDecoder
+
+Start from Bernoulli-sampled physical error bits and search the full error space directly, without
+calling `gf2.solve_affine`, BP, BP-OSD, MWPM, or a nullspace sampler. The decoder uses the same soft
+syndrome-penalty energy and local Gibbs/p-bit conditional as the physical-bit sampler, but it is
+instrumented around syndrome convergence: incremental residual updates, first valid sweep,
+valid-hit count, final residual weight, best residual weight, and `used_linear_solve = false`.
+
+The first committed mode relies only on Bernoulli randomness and asynchronous update order for
+symmetry breaking. `stop_on_first_valid = true` returns the first syndrome-valid correction, while
+`collect_valid_samples = true` continues after convergence and groups valid states by logical
+class. Persistent disorder is deliberately left off by default and should be added only as a
+follow-up comparison if the Bernoulli-only baseline cannot find valid corrections reliably.
+
 ## PBitCosetSamplerDecoder
 
 Use a soft syndrome-penalty energy:

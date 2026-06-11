@@ -210,6 +210,238 @@ class PBitCosetSamplerDecoder:
 
 
 @dataclass
+class PBitSyndromeDecoder:
+    chains: int = 8
+    sweeps: int = 500
+    beta: float = 0.6
+    beta_start: Optional[float] = None
+    beta_stop: Optional[float] = None
+    rho: Optional[float] = None
+    update: str = "gibbs"
+    initial_probability: Optional[float] = None
+    stop_on_first_valid: bool = True
+    collect_valid_samples: bool = False
+    name: str = "pbit_syndrome"
+
+    def decode(
+        self,
+        code: CSSCode,
+        syndrome: Sequence[int],
+        p: Union[float, Sequence[float]],
+        rng: np.random.Generator,
+    ) -> DecodeResult:
+        start = time.perf_counter()
+        lambdas = prior_lambdas(p, code.n)
+        probabilities = _prior_probabilities(p, code.n)
+        rho = default_rho(lambdas) if self.rho is None else self.rho
+        target = np.asarray(syndrome, dtype=np.uint8) % 2
+        col_checks = [np.flatnonzero(code.H[:, j]).astype(np.int64) for j in range(code.n)]
+        beta_schedule = self._beta_schedule()
+        initial_probability = self._initial_probability(probabilities)
+
+        counts: Dict[str, int] = defaultdict(int)
+        best_rep_by_coset: Dict[str, BitArray] = {}
+        best_rep_energy: Dict[str, float] = {}
+        best_valid: Optional[BitArray] = None
+        best_valid_energy = float("inf")
+        best_any: Optional[BitArray] = None
+        best_any_energy = float("inf")
+        best_residual_weight = code.m + 1
+        final_residual_weight = code.m
+        first_valid_sweep: Optional[int] = None
+        first_valid_chain: Optional[int] = None
+        valid_hits = 0
+        total_samples = 0
+        initial_residual_weight: Optional[int] = None
+
+        for chain in range(self.chains):
+            e = (rng.random(code.n) < initial_probability).astype(np.uint8)
+            residual = (code.H @ e % 2).astype(np.uint8) ^ target
+            invalid = int(residual.sum())
+            if initial_residual_weight is None:
+                initial_residual_weight = invalid
+            energy = prior_energy(e, lambdas) + rho * invalid
+
+            for sweep in range(self.sweeps + 1):
+                total_samples += 1
+                final_residual_weight = invalid
+                if invalid < best_residual_weight or (
+                    invalid == best_residual_weight and energy < best_any_energy
+                ):
+                    best_residual_weight = invalid
+                    best_any_energy = energy
+                    best_any = e.copy()
+                if invalid == 0:
+                    valid_hits += 1
+                    e_prior = prior_energy(e, lambdas)
+                    if first_valid_sweep is None:
+                        first_valid_sweep = sweep
+                        first_valid_chain = chain
+                    logical_key = _coset_key(code.logical(e))
+                    if self.collect_valid_samples or self.stop_on_first_valid:
+                        counts[logical_key] += 1
+                    if logical_key not in best_rep_energy or e_prior < best_rep_energy[logical_key]:
+                        best_rep_energy[logical_key] = e_prior
+                        best_rep_by_coset[logical_key] = e.copy()
+                    if e_prior < best_valid_energy:
+                        best_valid_energy = e_prior
+                        best_valid = e.copy()
+                    if self.stop_on_first_valid:
+                        return self._result(
+                            code=code,
+                            correction=e.copy(),
+                            syndrome=target,
+                            lambdas=lambdas,
+                            rho=rho,
+                            start=start,
+                            valid_hits=valid_hits,
+                            total_samples=total_samples,
+                            first_valid_sweep=first_valid_sweep,
+                            first_valid_chain=first_valid_chain,
+                            counts=dict(counts),
+                            initial_residual_weight=initial_residual_weight,
+                            final_residual_weight=0,
+                            best_residual_weight=0,
+                            initial_probability=initial_probability,
+                        )
+                if sweep == self.sweeps:
+                    break
+                beta = float(beta_schedule[sweep])
+                for j in rng.permutation(code.n):
+                    checks = col_checks[int(j)]
+                    before = int(residual[checks].sum())
+                    after = int(len(checks) - before)
+                    delta = (1 - 2 * int(e[j])) * lambdas[j] + rho * (after - before)
+                    if _should_flip(delta, int(e[j]), beta, rng, self.update):
+                        e[j] ^= 1
+                        residual[checks] ^= 1
+                        invalid += after - before
+                        energy += delta
+
+        if self.collect_valid_samples and counts:
+            best_key = max(counts, key=lambda key: (counts[key], -best_rep_energy[key]))
+            correction = best_rep_by_coset[best_key]
+        elif best_valid is not None:
+            correction = best_valid
+        elif best_any is not None:
+            correction = best_any
+        else:
+            correction = np.zeros(code.n, dtype=np.uint8)
+        final_residual_weight = int((code.syndrome(correction) ^ target).sum())
+        return self._result(
+            code=code,
+            correction=correction,
+            syndrome=target,
+            lambdas=lambdas,
+            rho=rho,
+            start=start,
+            valid_hits=valid_hits,
+            total_samples=total_samples,
+            first_valid_sweep=first_valid_sweep,
+            first_valid_chain=first_valid_chain,
+            counts=dict(counts),
+            initial_residual_weight=initial_residual_weight or 0,
+            final_residual_weight=final_residual_weight,
+            best_residual_weight=best_residual_weight,
+            initial_probability=initial_probability,
+        )
+
+    def _beta_schedule(self) -> np.ndarray:
+        if self.chains <= 0:
+            raise ValueError("chains must be positive")
+        if self.sweeps < 0:
+            raise ValueError("sweeps must be nonnegative")
+        if self.beta_start is None and self.beta_stop is None:
+            if self.beta <= 0.0:
+                raise ValueError("beta must be positive")
+            return np.full(max(self.sweeps, 1), float(self.beta))
+        if self.beta_start is None or self.beta_stop is None:
+            raise ValueError("beta_start and beta_stop must be provided together")
+        if self.beta_start <= 0.0 or self.beta_stop <= 0.0:
+            raise ValueError("beta_start and beta_stop must be positive")
+        return np.geomspace(float(self.beta_start), float(self.beta_stop), max(self.sweeps, 1))
+
+    def _initial_probability(self, probabilities: np.ndarray) -> Union[float, np.ndarray]:
+        if self.initial_probability is None:
+            return probabilities
+        if self.initial_probability < 0.0 or self.initial_probability > 1.0:
+            raise ValueError("initial_probability must be in [0, 1]")
+        return float(self.initial_probability)
+
+    def _result(
+        self,
+        code: CSSCode,
+        correction: BitArray,
+        syndrome: BitArray,
+        lambdas: np.ndarray,
+        rho: float,
+        start: float,
+        valid_hits: int,
+        total_samples: int,
+        first_valid_sweep: Optional[int],
+        first_valid_chain: Optional[int],
+        counts: Dict[str, int],
+        initial_residual_weight: int,
+        final_residual_weight: int,
+        best_residual_weight: int,
+        initial_probability: Union[float, np.ndarray],
+    ) -> DecodeResult:
+        valid = code.is_valid_correction(correction, syndrome)
+        logical = gf2.bit_tuple(code.logical(correction))
+        key = _coset_key(logical)
+        if valid and not counts:
+            counts = {key: max(valid_hits, 1)}
+        beta_metadata: Dict[str, float]
+        if self.beta_start is None and self.beta_stop is None:
+            beta_metadata = {"beta": self.beta}
+        else:
+            beta_metadata = {
+                "beta_start": float(self.beta_start),
+                "beta_stop": float(self.beta_stop),
+            }
+        if isinstance(initial_probability, np.ndarray):
+            initial_probability_metadata: Union[float, str] = "channel"
+        else:
+            initial_probability_metadata = float(initial_probability)
+        return DecodeResult(
+            correction=correction,
+            logical_class=logical,
+            valid=valid,
+            energy=(
+                prior_energy(correction, lambdas)
+                if valid
+                else prior_energy(correction, lambdas) + rho * final_residual_weight
+            ),
+            runtime_s=time.perf_counter() - start,
+            valid_samples=valid_hits,
+            total_samples=total_samples,
+            first_valid_sweep=first_valid_sweep,
+            distinct_logicals=len(counts),
+            coset_counts=counts,
+            metadata={
+                **beta_metadata,
+                "rho": rho,
+                "update": self.update,
+                "chains": self.chains,
+                "sweeps": self.sweeps,
+                "initial_probability": initial_probability_metadata,
+                "initial_residual_weight": initial_residual_weight,
+                "final_residual_weight": final_residual_weight,
+                "first_valid_sweep": first_valid_sweep,
+                "first_valid_chain": first_valid_chain,
+                "valid_hits": valid_hits,
+                "best_residual_weight": best_residual_weight,
+                "stop_on_first_valid": self.stop_on_first_valid,
+                "collect_valid_samples": self.collect_valid_samples,
+                "used_linear_solve": False,
+                "persistent_disorder": False,
+                "state_space": "full_error_space",
+                "symmetry_breaking": "bernoulli_randomness",
+            },
+        )
+
+
+@dataclass
 class PBitAnnealedOptimizerDecoder:
     chains: int = 32
     sweeps: int = 1500

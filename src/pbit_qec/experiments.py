@@ -19,6 +19,7 @@ from pbit_qec.decoders import (
     PBitAnnealedOptimizerDecoder,
     PBitCosetSamplerDecoder,
     PBitNullspaceCosetSamplerDecoder,
+    PBitSyndromeDecoder,
 )
 from pbit_qec.simulation import run_trial, summarize_trials, trial_results_to_frame
 from pbit_qec.types import Decoder
@@ -39,6 +40,8 @@ def build_decoder(name: str, settings: Mapping[str, object]) -> Decoder:
         return BPOSDDecoder(**kwargs)
     if name == "pbit_coset_sampler":
         return PBitCosetSamplerDecoder(**kwargs)
+    if name == "pbit_syndrome":
+        return PBitSyndromeDecoder(**kwargs)
     if name == "pbit_annealed_optimizer":
         return PBitAnnealedOptimizerDecoder(**kwargs)
     if name == "pbit_nullspace_sampler":
@@ -79,6 +82,9 @@ def run_config(config: Mapping[str, object], config_path: Optional[Path] = None)
         trials = int(sweep["trials"])
         use_exact = bool(sweep.get("exact", False))
         p_values = [float(p) for p in sweep.get("p_values", global_p_values)]
+        sweep_decoder_names = [
+            str(name) for name in sweep.get("decoders", decoder_names)  # type: ignore[arg-type]
+        ]
         code = make_code(family, size)
         nullity = code.n - gf2.rank(code.H)
         exact_decoder = ExactCosetDecoder(max_nullity=exact_max_nullity) if use_exact else None
@@ -86,7 +92,7 @@ def run_config(config: Mapping[str, object], config_path: Optional[Path] = None)
             exact_decoder = None
         decoders = [
             build_decoder(name, settings)
-            for name in decoder_names
+            for name in sweep_decoder_names
             if name != "exact_coset" or exact_decoder is not None
         ]
         for p_idx, p in enumerate(p_values):

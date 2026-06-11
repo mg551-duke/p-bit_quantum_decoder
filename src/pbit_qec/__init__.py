@@ -9,6 +9,7 @@ from pbit_qec.decoders import (
     PBitAnnealedOptimizerDecoder,
     PBitCosetSamplerDecoder,
     PBitNullspaceCosetSamplerDecoder,
+    PBitSyndromeDecoder,
 )
 from pbit_qec.types import CSSCode, Decoder, DecodeResult, TrialResult
 
@@ -23,6 +24,7 @@ __all__ = [
     "PBitAnnealedOptimizerDecoder",
     "PBitCosetSamplerDecoder",
     "PBitNullspaceCosetSamplerDecoder",
+    "PBitSyndromeDecoder",
     "TrialResult",
     "make_surface_code",
     "make_bb144_code",

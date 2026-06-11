@@ -16,10 +16,10 @@ P(l | s) proportional to sum_{e: H e = s, A e = l} exp[-E_prior(e)]
 ```
 
 The prototype implements small toric and surface-code sectors, exact small-code coset
-enumeration, finite-temperature p-bit/Gibbs conditional sampling, a hard-constrained
-nullspace-coordinate p-bit sampler, PyMatching-backed MWPM topological-code baselines, the
-[[144,12,12]] bivariate-bicycle X-error sector, annealed optimization baselines, and reproducible
-CSV/plot generation.
+enumeration, finite-temperature p-bit/Gibbs conditional sampling, a p-bit-native syndrome solver
+that does not use a GF(2) linear solve, a hard-constrained nullspace-coordinate p-bit sampler,
+PyMatching-backed MWPM topological-code baselines, the [[144,12,12]] bivariate-bicycle X-error
+sector, annealed optimization baselines, and reproducible CSV/plot generation.
 
 ## Install
 
@@ -64,8 +64,10 @@ Topological MWPM comparison and BB144 p-bit artifacts:
 ```bash
 uv run python scripts/run_experiments.py --config experiments/configs/v1_mwpm_comparison.json
 uv run python scripts/run_experiments.py --config experiments/configs/v1_bb144_pbit.json
+uv run python scripts/run_experiments.py --config experiments/configs/v1_pbit_syndrome.json
 uv run python scripts/make_plots.py --results results/v1_mwpm_comparison --figures figures/v1_mwpm_comparison
 uv run python scripts/make_plots.py --results results/v1_bb144_pbit --figures figures/v1_bb144_pbit
+uv run python scripts/make_plots.py --results results/v1_pbit_syndrome --figures figures/v1_pbit_syndrome
 ```
 
 The heavier sampler-setting target from the original study brief is encoded in
@@ -105,7 +107,8 @@ Focused precision figures live in `figures/v1_precision_focus/` and
 
 Topological MWPM comparison CSVs and figures live in `results/v1_mwpm_comparison/` and
 `figures/v1_mwpm_comparison/`. BB144 p-bit CSVs and figures live in `results/v1_bb144_pbit/` and
-`figures/v1_bb144_pbit/`.
+`figures/v1_bb144_pbit/`. The p-bit-native syndrome probe writes to `results/v1_pbit_syndrome/`
+and `figures/v1_pbit_syndrome/`.
 
 ## Current Readout
 
@@ -146,6 +149,9 @@ Topological MWPM comparison CSVs and figures live in `results/v1_mwpm_comparison
 - Equality to the sampled physical error is not used as a success criterion.
 - The soft physical-bit p-bit sampler updates each binary error bit with
   `P(e_j = 1 | rest, s) = 1 / (1 + exp(beta * Delta_j))`.
+- The `pbit_syndrome` decoder uses that physical-bit p-bit update to search for `H e = s` directly
+  in the full error space. It records `used_linear_solve = false` and relies on Bernoulli firing
+  plus asynchronous update order for the first symmetry-breaking baseline.
 - The hard-constrained p-bit sampler uses the same logistic conditional on affine nullspace
   coordinates, so every collected correction is syndrome-valid.
 - MWPM is reported only for graphlike topological syndrome matrices with column weight at most two.

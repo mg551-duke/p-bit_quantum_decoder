@@ -4,6 +4,7 @@
   "p_values": [0.06],
   "decoders": [
     "exact_coset",
+    "pbit_syndrome",
     "pbit_coset_sampler",
     "pbit_nullspace_sampler",
     "nullspace_coset_sampler",
@@ -11,6 +12,14 @@
   ],
   "decoder_settings": {
     "exact_coset": { "max_nullity": 24 },
+    "pbit_syndrome": {
+      "chains": 2,
+      "sweeps": 12,
+      "beta": 0.6,
+      "update": "gibbs",
+      "stop_on_first_valid": false,
+      "collect_valid_samples": true
+    },
     "pbit_coset_sampler": {
       "chains": 2,
       "burn_in_sweeps": 4,
