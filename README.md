@@ -133,11 +133,12 @@ Topological MWPM comparison CSVs and figures live in `results/v1_mwpm_comparison
   mean logical error 0.270, compared with 0.336 for `nullspace_coset_sampler` and 0.302 for
   `pbit_nullspace_sampler`; on exact-feasible small cases, MWPM exact-coset agreement is 0.910
   and `pbit_nullspace_sampler` exact-coset agreement is 0.948.
-- The BB144 code-capacity sweep adds 7,200 decoder-trial rows on the [[144,12,12]] bivariate
+- The BB144 code-capacity sweep adds 9,600 decoder-trial rows on the [[144,12,12]] bivariate
   bicycle X-error sector. Its worst logical-error Wilson half-width is now 0.0488, with zero
   additional trials requested for the 5% target. BP-OSD has mean logical error 0.146. The
-  importance-scored chained-sweep `pbit_nullspace_sampler` improves over the plain nullspace
-  sampler, 0.548 versus 0.753, but it is not competitive with BP-OSD.
+  `bp_guided_pbit_sampler` improves to 0.267 by using BP as a syndrome-valid affine origin before
+  p-bit nullspace sampling. The unguided importance-scored `pbit_nullspace_sampler` is 0.548,
+  still better than plain nullspace sampling at 0.753 but not competitive with BP-OSD.
 
 ## Interpretation Rules
 

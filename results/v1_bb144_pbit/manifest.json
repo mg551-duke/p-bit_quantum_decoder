@@ -2,8 +2,8 @@
   "config_path": "experiments/configs/v1_bb144_pbit.json",
   "output_dir": "results/v1_bb144_pbit",
   "rows": {
-    "coset_distributions": 334926,
-    "summary": 18,
-    "trials": 7200
+    "coset_distributions": 558415,
+    "summary": 24,
+    "trials": 9600
   }
 }

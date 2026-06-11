@@ -35,9 +35,9 @@ from `experiments/configs/v1_bb144_pbit.json`.
   p-bit decoders.
 - `figures/v1_mwpm_comparison/`: five PNG figures for logical error, exact-coset agreement,
   valid-sampling, logical-class diversity, and coset entropy in the MWPM comparison.
-- `results/v1_bb144_pbit/`: 7,200 BB144 decoder-trial rows, 18 grouped summary rows, and 334,926
-  coset-distribution rows for BP-OSD, the nullspace sampler, and the chained-sweep
-  nullspace-coordinate p-bit sampler.
+- `results/v1_bb144_pbit/`: 9,600 BB144 decoder-trial rows, 24 grouped summary rows, and 558,415
+  coset-distribution rows for BP-OSD, the BP-guided p-bit sampler, the unguided p-bit sampler,
+  and the plain nullspace sampler.
 - `figures/v1_bb144_pbit/`: five PNG figures for the BB144 p-bit sweep.
 
 The generated artifact directories are small enough for review, with no generated file near the
@@ -146,30 +146,34 @@ the strong qLDPC baseline. The p-bit sampler uses particular-solution initializa
 `updates_per_sample = 78`, four chains, and a random-sweep schedule, matching one full randomized
 pass over the 78-dimensional affine nullspace per collected sample. It samples at the tempered
 mixing beta but selects the decoded coset with importance-weighted scores targeting the physical
-posterior at `target_beta = 1`.
+posterior at `target_beta = 1`. The BP-guided p-bit row uses plain BP, not OSD, as a valid affine
+origin when BP converges and falls back to the GF(2) particular solution otherwise.
 
 BB144 logical error by physical error rate:
 
-- p=0.01: BP-OSD 0.000, nullspace 0.315, p-bit nullspace 0.085
-- p=0.02: BP-OSD 0.000, nullspace 0.528, p-bit nullspace 0.212
-- p=0.04: BP-OSD 0.005, nullspace 0.808, p-bit nullspace 0.458
-- p=0.06: BP-OSD 0.083, nullspace 0.898, p-bit nullspace 0.680
-- p=0.08: BP-OSD 0.273, nullspace 0.978, p-bit nullspace 0.900
-- p=0.10: BP-OSD 0.518, nullspace 0.995, p-bit nullspace 0.955
+- p=0.01: BP-OSD 0.000, BP-guided p-bit 0.000, p-bit nullspace 0.085, nullspace 0.315
+- p=0.02: BP-OSD 0.000, BP-guided p-bit 0.000, p-bit nullspace 0.212, nullspace 0.528
+- p=0.04: BP-OSD 0.005, BP-guided p-bit 0.042, p-bit nullspace 0.458, nullspace 0.808
+- p=0.06: BP-OSD 0.083, BP-guided p-bit 0.208, p-bit nullspace 0.680, nullspace 0.898
+- p=0.08: BP-OSD 0.273, BP-guided p-bit 0.545, p-bit nullspace 0.900, nullspace 0.978
+- p=0.10: BP-OSD 0.518, BP-guided p-bit 0.808, p-bit nullspace 0.955, nullspace 0.995
 
 Aggregate BB144 readout:
 
-- `bp_osd`: mean logical error 0.146, mean half-width 0.023, mean runtime 0.4 ms
-- `pbit_nullspace_sampler`: mean logical error 0.548, mean half-width 0.035, mean runtime 236 ms,
+- `bp_osd`: mean logical error 0.146, mean half-width 0.023, mean runtime 0.9 ms
+- `bp_guided_pbit_sampler`: mean logical error 0.267, mean half-width 0.026, mean runtime 224 ms,
+  mean coset entropy 1.860 bits
+- `pbit_nullspace_sampler`: mean logical error 0.548, mean half-width 0.035, mean runtime 226 ms,
   mean coset entropy 3.615 bits
 - `nullspace_coset_sampler`: mean logical error 0.753, mean half-width 0.031, mean runtime 13 ms,
   mean coset entropy 0.628 bits
 
-This is negative for p-bit competitiveness against a strong BB144 decoder: BP-OSD is much faster
-and lower-error. The p-bit mixing and posterior-importance scoring changes are still useful because
-they improve the p-bit/nullspace comparison relative to the previous artifact and beat the plain
-nullspace sampler, but this is not a state-of-the-art BB144 decoder. Exact coset enumeration is not
-feasible in this artifact.
+This is still negative for p-bit competitiveness against a strong BB144 decoder: BP-OSD is much
+faster and lower-error. The BP-guided p-bit row is scientifically useful because it shows where BP
+information helps: BP finds a much better valid affine origin, and p-bit sampling then explores
+nearby nullspace cosets. It closes much of the gap between unguided p-bit sampling and BP-OSD, but
+it is not a state-of-the-art BB144 decoder. Exact coset enumeration is not feasible in this
+artifact.
 
 The BB144 rows now use 400 trials per physical error rate. The worst logical-error Wilson
 half-width in `results/v1_bb144_pbit/summary.csv` is 0.0488, and every BB144 row reports zero

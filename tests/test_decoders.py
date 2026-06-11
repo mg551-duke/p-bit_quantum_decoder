@@ -167,6 +167,29 @@ def test_pbit_nullspace_sampler_supports_importance_selection() -> None:
     assert np.array_equal(first.correction, second.correction)
 
 
+def test_pbit_nullspace_sampler_supports_bp_guidance() -> None:
+    pytest.importorskip("ldpc")
+    code = make_toric_code(3)
+    error = np.zeros(code.n, dtype=np.uint8)
+    error[[0, 3, 9]] = 1
+    syndrome = code.syndrome(error)
+    decoder = PBitNullspaceCosetSamplerDecoder(
+        samples=30,
+        burn_in=5,
+        guide="bp",
+        initial_state="particular",
+    )
+
+    first = decoder.decode(code, syndrome, 0.08, np.random.default_rng(18))
+    second = decoder.decode(code, syndrome, 0.08, np.random.default_rng(18))
+
+    assert first.valid
+    assert first.metadata["guide"] == "bp"
+    assert isinstance(first.metadata["guide_valid"], bool)
+    assert first.coset_counts == second.coset_counts
+    assert np.array_equal(first.correction, second.correction)
+
+
 def test_pbit_probability_is_logistic_conditional() -> None:
     assert np.isclose(_pbit_probability_one(0.0, beta=2.0), 0.5)
     assert np.isclose(

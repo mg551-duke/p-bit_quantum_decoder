@@ -449,7 +449,16 @@ class PBitNullspaceCosetSamplerDecoder:
     initial_state: str = "random"
     update_schedule: str = "random"
     selection: str = "counts"
+    guide: str = "none"
+    guide_max_iter: int = 100
+    guide_bp_method: str = "minimum_sum"
+    guide_ms_scaling_factor: float = 0.625
+    guide_schedule: str = "parallel"
+    guide_osd_method: str = "OSD_CS"
+    guide_osd_order: int = 10
+    guide_omp_thread_count: int = 1
     name: str = "pbit_nullspace_sampler"
+    _guide_cache: Dict[bytes, object] = field(default_factory=dict, init=False, repr=False)
 
     def decode(
         self,
@@ -467,6 +476,8 @@ class PBitNullspaceCosetSamplerDecoder:
             raise ValueError(f"nullity {basis.shape[0]} exceeds {self.max_nullity}")
         if self.initial_state not in {"particular", "random"}:
             raise ValueError(f"unknown nullspace p-bit initial_state {self.initial_state!r}")
+        if self.guide not in {"none", "bp", "bp_osd"}:
+            raise ValueError(f"unknown nullspace p-bit guide {self.guide!r}")
         if self.updates_per_sample <= 0:
             raise ValueError("updates_per_sample must be positive")
         if self.chains <= 0:
@@ -477,6 +488,14 @@ class PBitNullspaceCosetSamplerDecoder:
             raise ValueError(f"unknown nullspace p-bit update_schedule {self.update_schedule!r}")
         if self.selection not in {"counts", "importance"}:
             raise ValueError(f"unknown nullspace p-bit selection {self.selection!r}")
+
+        guide_valid = False
+        if self.guide != "none":
+            guided = self._guided_particular_solution(code, syndrome, p)
+            if guided is not None:
+                x0 = guided
+                guide_valid = True
+
         if basis.shape[0] == 0:
             logical = gf2.bit_tuple(code.logical(x0))
             key = _coset_key(logical)
@@ -498,6 +517,8 @@ class PBitNullspaceCosetSamplerDecoder:
                     "chains": self.chains,
                     "updates_per_sample": self.updates_per_sample,
                     "selection": self.selection,
+                    "guide": self.guide,
+                    "guide_valid": guide_valid,
                     "update": "gibbs",
                     "update_schedule": self.update_schedule,
                     "state_space": "affine_nullspace",
@@ -583,6 +604,8 @@ class PBitNullspaceCosetSamplerDecoder:
                 "chains": self.chains,
                 "updates_per_sample": self.updates_per_sample,
                 "selection": self.selection,
+                "guide": self.guide,
+                "guide_valid": guide_valid,
                 "update": "gibbs",
                 "update_schedule": self.update_schedule,
                 "state_space": "affine_nullspace",
@@ -590,6 +613,76 @@ class PBitNullspaceCosetSamplerDecoder:
                 "selected_log_importance_score": score_log_weight,
             },
         )
+
+    def _guided_particular_solution(
+        self,
+        code: CSSCode,
+        syndrome: Sequence[int],
+        p: Union[float, Sequence[float]],
+    ) -> Optional[BitArray]:
+        decoder = self._cached_guide_decoder(code, p)
+        target = np.asarray(syndrome, dtype=np.uint8) % 2
+        correction = np.asarray(decoder.decode(target), dtype=np.uint8) % 2
+        if not code.is_valid_correction(correction, target):
+            return None
+        return correction
+
+    def _cached_guide_decoder(self, code: CSSCode, p: Union[float, Sequence[float]]) -> object:
+        probabilities = _prior_probabilities(p, code.n)
+        cache_key = b"|".join(
+            [
+                self.guide.encode("utf-8"),
+                code.H.shape[0].to_bytes(4, "little"),
+                code.H.shape[1].to_bytes(4, "little"),
+                code.H.tobytes(),
+                probabilities.tobytes(),
+                repr(
+                    (
+                        self.guide_max_iter,
+                        self.guide_bp_method,
+                        self.guide_ms_scaling_factor,
+                        self.guide_schedule,
+                        self.guide_osd_method,
+                        self.guide_osd_order,
+                        self.guide_omp_thread_count,
+                    )
+                ).encode("utf-8"),
+            ]
+        )
+        if cache_key not in self._guide_cache:
+            if np.all(probabilities == probabilities[0]):
+                channel_kwargs = {"error_rate": float(probabilities[0])}
+            else:
+                channel_kwargs = {"error_channel": probabilities.astype(float).tolist()}
+            if self.guide == "bp":
+                from ldpc import BpDecoder as LdpcBpDecoder
+
+                self._guide_cache[cache_key] = LdpcBpDecoder(
+                    code.H,
+                    max_iter=self.guide_max_iter,
+                    bp_method=self.guide_bp_method,
+                    ms_scaling_factor=self.guide_ms_scaling_factor,
+                    schedule=self.guide_schedule,
+                    omp_thread_count=self.guide_omp_thread_count,
+                    **channel_kwargs,
+                )
+            elif self.guide == "bp_osd":
+                from ldpc import BpOsdDecoder as LdpcBpOsdDecoder
+
+                self._guide_cache[cache_key] = LdpcBpOsdDecoder(
+                    code.H,
+                    max_iter=self.guide_max_iter,
+                    bp_method=self.guide_bp_method,
+                    ms_scaling_factor=self.guide_ms_scaling_factor,
+                    schedule=self.guide_schedule,
+                    osd_method=self.guide_osd_method,
+                    osd_order=self.guide_osd_order,
+                    omp_thread_count=self.guide_omp_thread_count,
+                    **channel_kwargs,
+                )
+            else:
+                raise ValueError(f"unknown nullspace p-bit guide {self.guide!r}")
+        return self._guide_cache[cache_key]
 
 
 @dataclass

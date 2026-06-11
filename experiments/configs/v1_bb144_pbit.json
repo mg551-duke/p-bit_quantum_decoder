@@ -5,7 +5,8 @@
   "decoders": [
     "bp_osd",
     "pbit_nullspace_sampler",
-    "nullspace_coset_sampler"
+    "nullspace_coset_sampler",
+    "bp_guided_pbit_sampler"
   ],
   "decoder_settings": {
     "bp_osd": {
@@ -28,6 +29,24 @@
       "update_schedule": "sweep",
       "target_beta": 1.0,
       "selection": "importance"
+    },
+    "bp_guided_pbit_sampler": {
+      "samples": 1200,
+      "burn_in": 200,
+      "updates_per_sample": 78,
+      "beta": 0.5,
+      "chains": 4,
+      "max_nullity": 96,
+      "initial_state": "particular",
+      "update_schedule": "sweep",
+      "target_beta": 1.0,
+      "selection": "importance",
+      "guide": "bp",
+      "guide_max_iter": 100,
+      "guide_bp_method": "minimum_sum",
+      "guide_ms_scaling_factor": 0.625,
+      "guide_schedule": "parallel",
+      "guide_omp_thread_count": 1
     },
     "nullspace_coset_sampler": {
       "samples": 1200,

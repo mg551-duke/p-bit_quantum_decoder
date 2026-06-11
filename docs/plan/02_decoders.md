@@ -61,6 +61,13 @@ the 78-dimensional BB144 affine solution space. Since `beta = 0.5` samples a tem
 BB144 coset selection uses importance-weighted scores targeting `target_beta = 1.0` instead of raw
 tempered sample counts.
 
+The `bp_guided_pbit_sampler` artifact row uses the same nullspace p-bit sampler but first asks
+plain BP, without OSD, for a valid correction. If BP converges to a syndrome-valid correction, that
+correction becomes the affine origin and all p-bit chains start from the corresponding
+zero-coordinate state. If BP does not return a valid correction, the sampler falls back to the
+ordinary GF(2) particular solution. This tests whether BP can supply a good region of the affine
+solution space while p-bit updates still perform the coset exploration.
+
 ## NullspaceCosetSamplerDecoder
 
 Solve `H e = s`, sample inside the affine solution space using a GF(2) nullspace basis, and group

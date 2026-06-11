@@ -394,14 +394,15 @@
                 <tr><th>Decoder</th><th>Mean Logical Error</th><th>Mean CI Half-Width</th><th>Mean Runtime</th></tr>
               </thead>
               <tbody>
-                <tr><td>bp_osd</td><td class="value">0.146</td><td class="value">0.023</td><td class="value">0.4 ms</td></tr>
-                <tr><td>pbit_nullspace_sampler</td><td class="value">0.548</td><td class="value">0.035</td><td class="value">236.2 ms</td></tr>
-                <tr><td>nullspace_coset_sampler</td><td class="value">0.753</td><td class="value">0.031</td><td class="value">12.9 ms</td></tr>
+                <tr><td>bp_osd</td><td class="value">0.146</td><td class="value">0.023</td><td class="value">0.9 ms</td></tr>
+                <tr><td>bp_guided_pbit_sampler</td><td class="value">0.267</td><td class="value">0.026</td><td class="value">224.1 ms</td></tr>
+                <tr><td>pbit_nullspace_sampler</td><td class="value">0.548</td><td class="value">0.035</td><td class="value">226.1 ms</td></tr>
+                <tr><td>nullspace_coset_sampler</td><td class="value">0.753</td><td class="value">0.031</td><td class="value">12.8 ms</td></tr>
               </tbody>
             </table>
             <p class="verdict">
-              BP-OSD is dramatically stronger on [[144,12,12]]: lower logical error than the p-bit
-              sampler at every tested physical error rate and over 500x faster in mean runtime.
+              BP-OSD is still strongest on [[144,12,12]], but BP-guided p-bit sampling closes much
+              of the gap versus unguided p-bit sampling by starting from a BP-valid affine origin.
             </p>
           </div>
         </div>
@@ -413,7 +414,7 @@
           </figure>
           <figure>
             <img src="../../figures/v1_bb144_pbit/logical_error_rate.png" alt="BB144 BP-OSD comparison logical error rate plot" />
-            <figcaption>BB144 comparison: BP-OSD, nullspace sampler, and chained-sweep p-bit sampler.</figcaption>
+            <figcaption>BB144 comparison: BP-OSD, BP-guided p-bit, unguided p-bit, and nullspace sampler.</figcaption>
           </figure>
         </div>
       </section>
@@ -429,12 +430,12 @@
         </p>
 
         <div class="metrics">
-          <div class="metric"><strong>214,800</strong><span>decoder-trial rows across report artifacts</span></div>
+          <div class="metric"><strong>217,200</strong><span>decoder-trial rows across report artifacts</span></div>
           <div class="metric"><strong>147,600</strong><span>v1-large trial rows</span></div>
           <div class="metric"><strong>28,000</strong><span>precision-focus trial rows</span></div>
           <div class="metric"><strong>32,000</strong><span>topological MWPM comparison rows</span></div>
-          <div class="metric"><strong>7,200</strong><span>BB144 decoder-trial rows with BP-OSD</span></div>
-          <div class="metric"><strong>772,108</strong><span>coset-distribution rows across report artifacts</span></div>
+          <div class="metric"><strong>9,600</strong><span>BB144 decoder-trial rows with BP-OSD</span></div>
+          <div class="metric"><strong>995,597</strong><span>coset-distribution rows across report artifacts</span></div>
           <div class="metric"><strong>59</strong><span>min-energy disagreement cases</span></div>
           <div class="metric"><strong>37,760</strong><span>precision hard-case attempts</span></div>
         </div>
@@ -449,8 +450,9 @@
           0.884 to 0.948. MWPM remains faster and lower-error overall. The tuned hard-case run
           reduces overall Wilson half-width to about 0.010, so the hard-case ordering is much less
           noisy than before. The BB144 comparison uses 400 trials per physical error rate, with
-          worst Wilson half-width 0.0488 and zero additional trials requested. BP-OSD is
-          dramatically stronger than the p-bit and nullspace baselines on BB144.
+          worst Wilson half-width 0.0488 and zero additional trials requested. BP-guided p-bit
+          sampling improves BB144 mean logical error to 0.267 versus 0.548 for unguided p-bit
+          sampling, while BP-OSD remains the strongest BB144 decoder at 0.146.
         </p>
 
         <div class="takeaway-grid" aria-label="headline result comparisons">
@@ -461,6 +463,10 @@
           <div class="takeaway">
             <b>0.146</b>
             <span>mean BB144 logical error for BP-OSD in the comparison sweep</span>
+          </div>
+          <div class="takeaway">
+            <b>0.267</b>
+            <span>mean BB144 logical error for BP-guided p-bit sampling</span>
           </div>
           <div class="takeaway">
             <b>0.548</b>
@@ -681,14 +687,14 @@
 
         <h3>BB144 Logical Error Rate</h3>
         <table>
-          <thead><tr><th>Physical Error p</th><th>BP-OSD</th><th>Nullspace Sampler</th><th>P-bit Nullspace</th></tr></thead>
+          <thead><tr><th>Physical Error p</th><th>BP-OSD</th><th>BP-Guided P-bit</th><th>P-bit Nullspace</th><th>Nullspace Sampler</th></tr></thead>
           <tbody>
-            <tr><td class="value">0.01</td><td class="value">0.000</td><td class="value">0.315</td><td class="value">0.085</td></tr>
-            <tr><td class="value">0.02</td><td class="value">0.000</td><td class="value">0.528</td><td class="value">0.212</td></tr>
-            <tr><td class="value">0.04</td><td class="value">0.005</td><td class="value">0.808</td><td class="value">0.458</td></tr>
-            <tr><td class="value">0.06</td><td class="value">0.083</td><td class="value">0.898</td><td class="value">0.680</td></tr>
-            <tr><td class="value">0.08</td><td class="value">0.273</td><td class="value">0.978</td><td class="value">0.900</td></tr>
-            <tr><td class="value">0.10</td><td class="value">0.518</td><td class="value">0.995</td><td class="value">0.955</td></tr>
+            <tr><td class="value">0.01</td><td class="value">0.000</td><td class="value">0.000</td><td class="value">0.085</td><td class="value">0.315</td></tr>
+            <tr><td class="value">0.02</td><td class="value">0.000</td><td class="value">0.000</td><td class="value">0.212</td><td class="value">0.528</td></tr>
+            <tr><td class="value">0.04</td><td class="value">0.005</td><td class="value">0.042</td><td class="value">0.458</td><td class="value">0.808</td></tr>
+            <tr><td class="value">0.06</td><td class="value">0.083</td><td class="value">0.208</td><td class="value">0.680</td><td class="value">0.898</td></tr>
+            <tr><td class="value">0.08</td><td class="value">0.273</td><td class="value">0.545</td><td class="value">0.900</td><td class="value">0.978</td></tr>
+            <tr><td class="value">0.10</td><td class="value">0.518</td><td class="value">0.808</td><td class="value">0.955</td><td class="value">0.995</td></tr>
           </tbody>
         </table>
 
@@ -696,9 +702,10 @@
         <table>
           <thead><tr><th>Decoder</th><th>Mean Logical Error</th><th>Mean CI Half-Width</th><th>Mean Runtime</th><th>Mean Coset Entropy</th></tr></thead>
           <tbody>
-            <tr><td>bp_osd</td><td class="value">0.146</td><td class="value">0.023</td><td class="value">0.4 ms</td><td class="value">0.000</td></tr>
-            <tr><td>pbit_nullspace_sampler</td><td class="value">0.548</td><td class="value">0.035</td><td class="value">236.2 ms</td><td class="value">3.615</td></tr>
-            <tr><td>nullspace_coset_sampler</td><td class="value">0.753</td><td class="value">0.031</td><td class="value">12.9 ms</td><td class="value">0.628</td></tr>
+            <tr><td>bp_osd</td><td class="value">0.146</td><td class="value">0.023</td><td class="value">0.9 ms</td><td class="value">0.000</td></tr>
+            <tr><td>bp_guided_pbit_sampler</td><td class="value">0.267</td><td class="value">0.026</td><td class="value">224.1 ms</td><td class="value">1.860</td></tr>
+            <tr><td>pbit_nullspace_sampler</td><td class="value">0.548</td><td class="value">0.035</td><td class="value">226.1 ms</td><td class="value">3.615</td></tr>
+            <tr><td>nullspace_coset_sampler</td><td class="value">0.753</td><td class="value">0.031</td><td class="value">12.8 ms</td><td class="value">0.628</td></tr>
           </tbody>
         </table>
 
@@ -770,7 +777,8 @@
           which improves p-bit exact-coset agreement and logical error. The topological MWPM
           comparison adds a clear baseline: MWPM is still faster and lower-error overall, but the
           better-mixed p-bit sampler now beats the plain nullspace sampler in that comparison. The
-          BB144 result adds the right qLDPC baseline: BP-OSD is much stronger than the p-bit sampler.
+          BB144 result adds the right qLDPC baseline: BP-OSD is still stronger than the p-bit
+          samplers, but BP-guided p-bit sampling closes much of the unguided p-bit gap.
         </p>
 
         <p class="note">
