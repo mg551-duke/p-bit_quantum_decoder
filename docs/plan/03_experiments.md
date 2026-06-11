@@ -36,7 +36,9 @@ cases for the project.
 ## Medium Scaling
 
 Medium toric and surface-code runs omit exact decoding and compare logical error rate,
-valid-sample rate, logical classes visited, empirical coset entropy, and runtime.
+valid-sample rate, logical classes visited, empirical coset entropy, and runtime. The committed
+`v1_large` artifact uses 1000 trials for exact-feasible small groups and 400 trials for medium
+groups, bringing every broad-sweep logical-error Wilson half-width below 0.049.
 
 ## Precision Focus
 
@@ -50,7 +52,10 @@ The `v1_mwpm_comparison` config compares exact decoding where feasible, PyMatchi
 hard-constrained nullspace sampling, and nullspace-coordinate p-bit sampling on toric and surface
 sectors. MWPM is the expected strong baseline on these graphlike topological checks. Medium
 topological groups use 400 trials per physical error rate in the committed precision artifact,
-which brings the worst logical-error Wilson half-width below 0.049.
+which brings the worst logical-error Wilson half-width below 0.049. The topological
+nullspace-coordinate p-bit rows use `beta = 0.75`, `updates_per_sample = 32`, and
+`update_schedule = "sweep"` after a pilot showed better exact-coset agreement than the older
+four-update random schedule.
 
 ## BB144 Code-Capacity Probe
 

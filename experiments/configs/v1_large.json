@@ -29,10 +29,11 @@
     "pbit_nullspace_sampler": {
       "samples": 400,
       "burn_in": 80,
-      "updates_per_sample": 4,
+      "updates_per_sample": 32,
       "beta": 0.75,
       "max_nullity": 64,
-      "initial_state": "random"
+      "initial_state": "random",
+      "update_schedule": "sweep"
     },
     "pbit_annealed_optimizer": {
       "chains": 4,
@@ -43,11 +44,11 @@
     }
   },
   "sweeps": [
-    { "family": "toric", "size": 3, "trials": 120, "exact": true },
-    { "family": "surface", "size": 3, "trials": 120, "exact": true },
-    { "family": "toric", "size": 4, "trials": 60, "exact": false },
-    { "family": "toric", "size": 5, "trials": 40, "exact": false },
-    { "family": "surface", "size": 5, "trials": 60, "exact": false },
-    { "family": "surface", "size": 7, "trials": 40, "exact": false }
+    { "family": "toric", "size": 3, "trials": 1000, "exact": true },
+    { "family": "surface", "size": 3, "trials": 1000, "exact": true },
+    { "family": "toric", "size": 4, "trials": 400, "exact": false },
+    { "family": "toric", "size": 5, "trials": 400, "exact": false },
+    { "family": "surface", "size": 5, "trials": 400, "exact": false },
+    { "family": "surface", "size": 7, "trials": 400, "exact": false }
   ]
 }

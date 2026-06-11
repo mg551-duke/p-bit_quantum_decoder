@@ -52,9 +52,12 @@ Delta_i = E(z_i = 1) - E(z_i = 0)
 Because every state in the affine parameterization is syndrome-valid, this decoder separates the
 hardware-style stochastic update question from the validity-search problem. It is the strongest
 non-exact hard-case recovery decoder in the current artifact. The v1 hard-case calibration selected
-`beta = 0.75` and `updates_per_sample = 4`. The BB144 sweep uses a separate particular-start
-setting, `beta = 0.5`, `updates_per_sample = 78`, four chains, and random-sweep coordinate updates,
-because random single-chain starts mixed poorly in the 78-dimensional BB144 affine solution space.
+`beta = 0.75` and `updates_per_sample = 4`. For broad topological and MWPM-comparison rows, the
+current artifact uses the same `beta = 0.75` but increases to `updates_per_sample = 32` with
+`update_schedule = "sweep"` so each recorded sample follows more local stochastic p-bit relaxation.
+The BB144 sweep uses a separate particular-start setting, `beta = 0.5`, `updates_per_sample = 78`,
+four chains, and random-sweep coordinate updates, because random single-chain starts mixed poorly in
+the 78-dimensional BB144 affine solution space.
 
 ## NullspaceCosetSamplerDecoder
 

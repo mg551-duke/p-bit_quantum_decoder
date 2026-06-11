@@ -14,10 +14,11 @@
     "pbit_nullspace_sampler": {
       "samples": 800,
       "burn_in": 120,
-      "updates_per_sample": 4,
+      "updates_per_sample": 32,
       "beta": 0.75,
       "max_nullity": 96,
-      "initial_state": "random"
+      "initial_state": "random",
+      "update_schedule": "sweep"
     },
     "nullspace_coset_sampler": {
       "samples": 800,

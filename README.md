@@ -68,9 +68,9 @@ uv run python scripts/make_plots.py --results results/v1_mwpm_comparison --figur
 uv run python scripts/make_plots.py --results results/v1_bb144_pbit --figures figures/v1_bb144_pbit
 ```
 
-The heavier target from the original study brief is encoded in
-`experiments/configs/v1_full_target.json`; it keeps the 1000/300 trial target and the default
-16-chain/1000-sweep sampler settings, but is not used by CI.
+The heavier sampler-setting target from the original study brief is encoded in
+`experiments/configs/v1_full_target.json`; it keeps the default 16-chain/1000-sweep sampler
+settings, but is not used by CI.
 
 ## Outputs
 
@@ -109,8 +109,9 @@ Topological MWPM comparison CSVs and figures live in `results/v1_mwpm_comparison
 
 ## Current Readout
 
-- The v1-large run now includes `pbit_nullspace_sampler`, giving 18,000 decoder-trial rows and
-  9,440 mined hard-case recovery attempts.
+- The v1-large run now includes `pbit_nullspace_sampler`, giving 147,600 decoder-trial rows and
+  9,440 mined hard-case recovery attempts. Its worst logical-error Wilson half-width is now
+  0.0488, with zero additional trials requested for the 5% target.
 - The precision focus run adds 28,000 decoder-trial rows with 400 trials in every configured
   group. Its worst logical-error Wilson half-width is now 0.0488, with zero additional trials
   requested for the 5% target.
@@ -123,12 +124,15 @@ Topological MWPM comparison CSVs and figures live in `results/v1_mwpm_comparison
   0.574 [0.564, 0.583], while `nullspace_coset_sampler` recovers 0.469 [0.459, 0.479],
   `pbit_annealed_optimizer` recovers 0.460 [0.449, 0.470], and `pbit_coset_sampler` recovers
   0.432 [0.422, 0.442].
-- The tuned nullspace-coordinate p-bit setting is `beta = 0.75` with four updates per collected
-  sample, selected from `results/v1_hard_cases_precision/pbit_nullspace_calibration.csv`.
+- The hard-case tuned nullspace-coordinate p-bit setting is `beta = 0.75` with four updates per
+  collected sample, selected from `results/v1_hard_cases_precision/pbit_nullspace_calibration.csv`.
+  The broad topological and MWPM comparison artifacts use a stronger mixing setting with
+  `updates_per_sample = 32` and `update_schedule = "sweep"`.
 - The topological MWPM comparison adds 32,000 decoder-trial rows. Medium toric/surface groups now
   use 400 trials each, bringing the worst logical-error Wilson half-width below 0.049. MWPM has
-  mean logical error 0.270, compared with 0.336 for `nullspace_coset_sampler` and 0.367 for
-  `pbit_nullspace_sampler`; on exact-feasible small cases, MWPM exact-coset agreement is 0.910.
+  mean logical error 0.270, compared with 0.336 for `nullspace_coset_sampler` and 0.302 for
+  `pbit_nullspace_sampler`; on exact-feasible small cases, MWPM exact-coset agreement is 0.910
+  and `pbit_nullspace_sampler` exact-coset agreement is 0.948.
 - The BB144 code-capacity sweep adds 7,200 decoder-trial rows on the [[144,12,12]] bivariate
   bicycle X-error sector. Its worst logical-error Wilson half-width is now 0.0488, with zero
   additional trials requested for the 5% target. BP-OSD has mean logical error 0.146. The

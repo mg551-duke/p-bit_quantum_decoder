@@ -11,9 +11,9 @@ from `experiments/configs/v1_bb144_pbit.json`.
 
 - `docs/results/index.html`: static HTML report containing all generated plots and current
   aggregate results.
-- `trials.csv`: 18,000 decoder-trial rows.
+- `trials.csv`: 147,600 decoder-trial rows.
 - `summary.csv`: 234 grouped summary rows.
-- `coset_distributions.csv`: 37,474 sampled/exact coset rows.
+- `coset_distributions.csv`: 309,418 sampled/exact coset rows.
 - `hard_cases.csv`: 59 small-code syndromes where the exact maximum-coset class differs from
   the minimum-energy class.
 - `hard_case_recovery.csv`: 9,440 recovery attempts on mined hard cases.
@@ -31,7 +31,7 @@ from `experiments/configs/v1_bb144_pbit.json`.
 - `figures/v1_hard_cases_precision/hard_case_recovery.png`: high-repeat hard-case recovery plot
   with interval bars.
 - `results/v1_mwpm_comparison/`: 32,000 topological decoder-trial rows, 70 grouped summary rows,
-  and 68,899 coset-distribution rows comparing exact, MWPM, nullspace, and nullspace-coordinate
+  and 69,599 coset-distribution rows comparing exact, MWPM, nullspace, and nullspace-coordinate
   p-bit decoders.
 - `figures/v1_mwpm_comparison/`: five PNG figures for logical error, exact-coset agreement,
   valid-sampling, logical-class diversity, and coset entropy in the MWPM comparison.
@@ -50,18 +50,24 @@ The p-bit decoders use direct Gibbs/p-bit conditional updates with
 `P(e_j = 1 | rest, s) = 1 / (1 + exp(beta Delta_j))`. Averaged over the configured grouped
 summaries, exact coset decoding is the best available small-code reference. The larger run improves
 the soft p-bit sampler's logical error rate, exact-coset agreement, and valid-sample rate relative
-to the earlier artifact. The new `pbit_nullspace_sampler` uses the same Gibbs/p-bit conditional over
+to the earlier artifact. The `pbit_nullspace_sampler` uses the same Gibbs/p-bit conditional over
 affine nullspace coordinates, keeping every sampled correction syndrome-valid by construction. The
-tuned setting has comparable non-exact exact-coset agreement in the v1-large sweep and the strongest
-mined hard-case recovery.
+stronger topological setting with 32 sweep-style local updates per collected sample now has the
+best non-exact exact-coset agreement in the v1-large sweep, while the separately calibrated
+hard-case setting still gives the strongest mined hard-case recovery.
 
 Mean exact-coset agreement where exact decoding is available:
 
 - `exact_coset`: 1.000
-- `nullspace_coset_sampler`: 0.863
-- `pbit_nullspace_sampler`: 0.861
-- `pbit_annealed_optimizer`: 0.529
-- `pbit_coset_sampler`: 0.514
+- `pbit_nullspace_sampler`: 0.941
+- `nullspace_coset_sampler`: 0.864
+- `pbit_annealed_optimizer`: 0.520
+- `pbit_coset_sampler`: 0.504
+
+The broad v1-large sweep now uses 1000 trials for exact-feasible small toric/surface groups and
+400 trials for medium toric/surface groups. The worst v1-large logical-error Wilson half-width is
+0.0488, and every v1-large summary row reports zero additional trials needed for a 5% Wilson
+half-width target.
 
 Overall hard-case exact-coset recovery with 95% Wilson intervals:
 
@@ -106,26 +112,27 @@ Mean logical error across configured topological groups:
 - `exact_coset`: 0.244, mean half-width 0.034
 - `mwpm`: 0.270, mean half-width 0.035
 - `nullspace_coset_sampler`: 0.336, mean half-width 0.039
-- `pbit_nullspace_sampler`: 0.367, mean half-width 0.041
+- `pbit_nullspace_sampler`: 0.302, mean half-width 0.039
 
 Logical error by code family and size:
 
-- surface 3: exact 0.204, MWPM 0.226, nullspace 0.232, p-bit nullspace 0.216
-- surface 7: MWPM 0.241, nullspace 0.364, p-bit nullspace 0.369
-- toric 3: exact 0.284, MWPM 0.283, nullspace 0.314, p-bit nullspace 0.337
-- toric 5: MWPM 0.329, nullspace 0.432, p-bit nullspace 0.547
+- surface 3: exact 0.204, MWPM 0.226, nullspace 0.232, p-bit nullspace 0.211
+- surface 7: MWPM 0.241, nullspace 0.364, p-bit nullspace 0.286
+- toric 3: exact 0.284, MWPM 0.283, nullspace 0.314, p-bit nullspace 0.293
+- toric 5: MWPM 0.329, nullspace 0.432, p-bit nullspace 0.419
 
 Mean exact-coset agreement on exact-feasible small groups:
 
 - `exact_coset`: 1.000
 - `mwpm`: 0.910
-- `pbit_nullspace_sampler`: 0.884
+- `pbit_nullspace_sampler`: 0.948
 - `nullspace_coset_sampler`: 0.867
 
-This is a negative topological-code comparison for the current stochastic p-bit implementation:
-MWPM is faster and has lower logical error overall, especially on the medium toric and surface-code
-sectors. The p-bit nullspace sampler remains useful as a coset-mass diagnostic and is competitive
-only on the small surface-3 aggregate in this sweep.
+This is now a mixed topological-code comparison rather than a simple negative result for the
+current stochastic p-bit implementation. MWPM is still faster and has lower mean logical error
+overall, but the better-mixed p-bit nullspace sampler reduces mean logical error from the previous
+0.367 artifact to 0.302, beats the plain nullspace sampler in the configured topological
+comparison, and has higher exact-coset agreement than MWPM on the exact-feasible small groups.
 
 The medium topological rows now use 400 trials per physical error rate. The worst logical-error
 Wilson half-width in `results/v1_mwpm_comparison/summary.csv` is 0.0488, and every medium
