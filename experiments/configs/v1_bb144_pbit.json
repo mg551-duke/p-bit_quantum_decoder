@@ -1,0 +1,28 @@
+{
+  "seed": 20260616,
+  "output_dir": "results/v1_bb144_pbit",
+  "p_values": [0.01, 0.02, 0.04, 0.06, 0.08, 0.1],
+  "decoders": [
+    "pbit_nullspace_sampler",
+    "nullspace_coset_sampler"
+  ],
+  "decoder_settings": {
+    "pbit_nullspace_sampler": {
+      "samples": 1200,
+      "burn_in": 200,
+      "updates_per_sample": 78,
+      "beta": 0.5,
+      "max_nullity": 96,
+      "initial_state": "particular"
+    },
+    "nullspace_coset_sampler": {
+      "samples": 1200,
+      "burn_in": 200,
+      "beta": 1.0,
+      "max_nullity": 96
+    }
+  },
+  "sweeps": [
+    { "family": "bb", "size": 144, "trials": 300, "exact": false }
+  ]
+}

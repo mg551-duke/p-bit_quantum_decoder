@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import time
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, Optional, Sequence, Union
 
 import numpy as np
@@ -280,6 +280,55 @@ class PBitAnnealedOptimizerDecoder:
                 "beta_stop": self.beta_stop,
                 "update": self.update,
             },
+        )
+
+
+@dataclass
+class MWPMDecoder:
+    name: str = "mwpm"
+    _matching_cache: Dict[bytes, object] = field(default_factory=dict, init=False, repr=False)
+
+    def decode(
+        self,
+        code: CSSCode,
+        syndrome: Sequence[int],
+        p: Union[float, Sequence[float]],
+        rng: np.random.Generator,
+    ) -> DecodeResult:
+        del rng
+        start = time.perf_counter()
+        lambdas = prior_lambdas(p, code.n)
+        if int(code.H.sum(axis=0).max()) > 2:
+            raise ValueError(
+                "MWPMDecoder requires a graphlike check matrix with column weight <= 2"
+            )
+        cache_key = lambdas.tobytes()
+        if cache_key not in self._matching_cache:
+            import pymatching
+
+            self._matching_cache[cache_key] = pymatching.Matching.from_check_matrix(
+                code.H,
+                weights=lambdas,
+                use_virtual_boundary_node=True,
+            )
+        matching = self._matching_cache[cache_key]
+        target = np.asarray(syndrome, dtype=np.uint8) % 2
+        correction = np.asarray(matching.decode(target), dtype=np.uint8) % 2
+        valid = code.is_valid_correction(correction, target)
+        logical = gf2.bit_tuple(code.logical(correction))
+        key = _coset_key(logical)
+        return DecodeResult(
+            correction=correction,
+            logical_class=logical,
+            valid=valid,
+            energy=prior_energy(correction, lambdas),
+            runtime_s=time.perf_counter() - start,
+            valid_samples=int(valid),
+            total_samples=1,
+            first_valid_sweep=0 if valid else None,
+            distinct_logicals=1 if valid else 0,
+            coset_counts={key: 1} if valid else {},
+            metadata={"weights": "log((1-p)/p)", "backend": "pymatching"},
         )
 
 

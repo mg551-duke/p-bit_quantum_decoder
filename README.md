@@ -17,14 +17,17 @@ P(l | s) proportional to sum_{e: H e = s, A e = l} exp[-E_prior(e)]
 
 The prototype implements small toric and surface-code sectors, exact small-code coset
 enumeration, finite-temperature p-bit/Gibbs conditional sampling, a hard-constrained
-nullspace-coordinate p-bit sampler, annealed optimization baselines, and reproducible CSV/plot
-generation.
+nullspace-coordinate p-bit sampler, PyMatching-backed MWPM topological-code baselines, the
+[[144,12,12]] bivariate-bicycle X-error sector, annealed optimization baselines, and reproducible
+CSV/plot generation.
 
 ## Install
 
 ```bash
 uv sync --extra dev
 ```
+
+For a core install plus only the MWPM dependency, use `uv sync --extra matching`.
 
 ## Reproduce
 
@@ -52,6 +55,15 @@ uv run python scripts/find_hard_cases.py --config experiments/configs/v1_hard_ca
 uv run python scripts/tune_pbit_nullspace.py --config experiments/configs/v1_pbit_nullspace_calibration.json
 uv run python scripts/make_plots.py --results results/v1_precision_focus --figures figures/v1_precision_focus
 uv run python scripts/make_plots.py --results results/v1_hard_cases_precision --figures figures/v1_hard_cases_precision
+```
+
+Topological MWPM comparison and BB144 p-bit artifacts:
+
+```bash
+uv run python scripts/run_experiments.py --config experiments/configs/v1_mwpm_comparison.json
+uv run python scripts/run_experiments.py --config experiments/configs/v1_bb144_pbit.json
+uv run python scripts/make_plots.py --results results/v1_mwpm_comparison --figures figures/v1_mwpm_comparison
+uv run python scripts/make_plots.py --results results/v1_bb144_pbit --figures figures/v1_bb144_pbit
 ```
 
 The heavier target from the original study brief is encoded in
@@ -89,6 +101,10 @@ Generated figures live in `figures/v1_large/`:
 Focused precision figures live in `figures/v1_precision_focus/` and
 `figures/v1_hard_cases_precision/`.
 
+Topological MWPM comparison CSVs and figures live in `results/v1_mwpm_comparison/` and
+`figures/v1_mwpm_comparison/`. BB144 p-bit CSVs and figures live in `results/v1_bb144_pbit/` and
+`figures/v1_bb144_pbit/`.
+
 ## Current Readout
 
 - The v1-large run now includes `pbit_nullspace_sampler`, giving 18,000 decoder-trial rows and
@@ -106,6 +122,13 @@ Focused precision figures live in `figures/v1_precision_focus/` and
   0.432 [0.422, 0.442].
 - The tuned nullspace-coordinate p-bit setting is `beta = 0.75` with four updates per collected
   sample, selected from `results/v1_hard_cases_precision/pbit_nullspace_calibration.csv`.
+- The topological MWPM comparison adds 29,000 decoder-trial rows. MWPM has mean logical error
+  0.271, compared with 0.336 for `nullspace_coset_sampler` and 0.364 for
+  `pbit_nullspace_sampler`; on exact-feasible small cases, MWPM exact-coset agreement is 0.910.
+- The BB144 code-capacity sweep adds 3,600 decoder-trial rows on the [[144,12,12]] bivariate
+  bicycle X-error sector. With particular-solution initialization, `pbit_nullspace_sampler` has
+  mean logical error 0.669 versus 0.752 for `nullspace_coset_sampler`; this is an improvement over
+  the baseline, not a positive high-p decoding result.
 
 ## Interpretation Rules
 
@@ -115,6 +138,9 @@ Focused precision figures live in `figures/v1_precision_focus/` and
   `P(e_j = 1 | rest, s) = 1 / (1 + exp(beta * Delta_j))`.
 - The hard-constrained p-bit sampler uses the same logistic conditional on affine nullspace
   coordinates, so every collected correction is syndrome-valid.
+- MWPM is reported only for graphlike topological syndrome matrices with column weight at most two.
+- The BB144 artifact does not include exact enumeration; interpret it through logical success,
+  coset entropy, runtime, and comparison with the nullspace baseline.
 - Invalid decoder outputs count as logical failures.
 - Positive claims require exact-coset agreement or logical-success evidence in the CSVs.
 - Negative outcomes should be interpreted through valid-sample rate, mixing, coset entropy,
@@ -128,6 +154,10 @@ Focused precision figures live in `figures/v1_precision_focus/` and
 - [Fujisaki et al.](https://arxiv.org/abs/2308.00369): practical QEC decoding as Ising optimization.
 - [Poulin and Chung](https://authors.library.caltech.edu/records/fgska-n5w47): BP failures from short cycles and degeneracy.
 - [Panteleev and Kalachev](https://quantum-journal.org/papers/q-2021-11-22-585/): BP+OSD improvements for degenerate QLDPC codes.
+- [IBM Quantum](https://www.ibm.com/quantum/blog/nature-qldpc-error-correction): gross-code
+  context for the [[144,12,12]] bivariate-bicycle benchmark.
+- [Phys. Rev. A 111, 022433](https://link.aps.org/doi/10.1103/PhysRevA.111.022433): explicit
+  `l = 12`, `m = 6`, `A = x^3 + y + y^2`, `B = y^3 + x + x^2` BB144 parameters.
 - [Kaiser and Datta](https://pubs.aip.org/aip/apl/article/119/15/150503/40486/Probabilistic-computing-with-p-bits): p-computers for randomized algorithms.
 - [Camsari, Sutton, and Datta](https://arxiv.org/abs/1809.04028): p-bits for probabilistic spin logic.
 - [Aadit et al.](https://arxiv.org/abs/2110.02481): massively parallel sparse p-bit Ising-machine sampling.

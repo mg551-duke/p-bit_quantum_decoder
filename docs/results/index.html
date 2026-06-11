@@ -301,12 +301,14 @@
       <div class="header-inner">
         <h1>p-bit QEC Decoder Results</h1>
         <p class="lede">
-          Current v1 artifact results for probabilistic-Ising coset decoding on toric and
-          surface-code one-sector benchmarks.
+          Current v1 artifact results for probabilistic-Ising coset decoding, MWPM comparison on
+          topological codes, and a [[144,12,12]] bivariate-bicycle code-capacity test.
         </p>
         <div class="stamp" aria-label="artifact metadata">
           <span>Config: experiments/configs/v1_large.json</span>
           <span>Precision: experiments/configs/v1_precision_focus.json</span>
+          <span>MWPM: experiments/configs/v1_mwpm_comparison.json</span>
+          <span>BB144: experiments/configs/v1_bb144_pbit.json</span>
           <span>Hard cases: experiments/configs/v1_hard_cases.json</span>
           <span>Hard precision: experiments/configs/v1_hard_cases_precision.json</span>
           <span>Update rule: Gibbs / p-bit logistic conditional</span>
@@ -326,10 +328,11 @@
         </p>
 
         <div class="metrics">
-          <div class="metric"><strong>18,000</strong><span>decoder-trial rows</span></div>
+          <div class="metric"><strong>68,800</strong><span>decoder-trial rows across report artifacts</span></div>
           <div class="metric"><strong>18,200</strong><span>precision-focus trial rows</span></div>
-          <div class="metric"><strong>304</strong><span>total grouped summary rows</span></div>
-          <div class="metric"><strong>75,266</strong><span>total coset-distribution rows</span></div>
+          <div class="metric"><strong>29,000</strong><span>topological MWPM comparison rows</span></div>
+          <div class="metric"><strong>3,600</strong><span>BB144 decoder-trial rows</span></div>
+          <div class="metric"><strong>341,024</strong><span>coset-distribution rows across report artifacts</span></div>
           <div class="metric"><strong>59</strong><span>min-energy disagreement cases</span></div>
           <div class="metric"><strong>37,760</strong><span>precision hard-case attempts</span></div>
         </div>
@@ -341,21 +344,24 @@
           nullspace-coordinate p-bit sampler has comparable non-exact exact-coset agreement in the
           v1-large sweep and the best high-repeat hard-case recovery. The tuned hard-case run
           reduces overall Wilson half-width to about 0.010, so the hard-case ordering is much less
-          noisy than before.
+          noisy than before. New topological-code comparisons show MWPM remains the best
+          non-exact decoder overall. New BB144 tests show the particular-start nullspace p-bit
+          sampler improves over the plain nullspace sampler, but high-p BB144 logical error remains
+          large.
         </p>
 
         <div class="takeaway-grid" aria-label="headline result comparisons">
           <div class="takeaway">
+            <b>0.271</b>
+            <span>mean topological logical error for MWPM in the comparison sweep</span>
+          </div>
+          <div class="takeaway">
+            <b>0.669</b>
+            <span>mean BB144 logical error for particular-start nullspace p-bits</span>
+          </div>
+          <div class="takeaway">
             <b>57.4%</b>
-            <span>high-precision hard-case recovery for nullspace-coordinate p-bits</span>
-          </div>
-          <div class="takeaway">
-            <b>+10.4 pp</b>
-            <span>hard-case recovery lift versus the hard-constrained nullspace baseline</span>
-          </div>
-          <div class="takeaway">
-            <b>0.010</b>
-            <span>overall high-precision hard-case Wilson half-width</span>
+            <span>high-precision mined hard-case recovery for nullspace-coordinate p-bits</span>
           </div>
         </div>
       </section>
@@ -430,6 +436,62 @@
             <figcaption>High-repeat hard-case recovery with Wilson confidence intervals from the summary CSV.</figcaption>
           </figure>
         </div>
+
+        <h3>Topological MWPM Comparison</h3>
+        <div class="figure-grid">
+          <figure>
+            <img src="../../figures/v1_mwpm_comparison/logical_error_rate.png" alt="MWPM comparison logical error rate plot" />
+            <figcaption>Logical error for exact, MWPM, nullspace, and nullspace-coordinate p-bit decoders on toric and surface-code sectors.</figcaption>
+          </figure>
+
+          <figure>
+            <img src="../../figures/v1_mwpm_comparison/exact_coset_agreement.png" alt="MWPM comparison exact coset agreement plot" />
+            <figcaption>Agreement with exact maximum-posterior cosets on the small toric and surface-code cases.</figcaption>
+          </figure>
+
+          <figure>
+            <img src="../../figures/v1_mwpm_comparison/valid_sample_rate.png" alt="MWPM comparison valid sample rate plot" />
+            <figcaption>Syndrome-valid sample rate for the topological-code comparison sweep.</figcaption>
+          </figure>
+
+          <figure>
+            <img src="../../figures/v1_mwpm_comparison/distinct_logical_classes.png" alt="MWPM comparison distinct logical classes plot" />
+            <figcaption>Logical-class diversity visited by stochastic topological-code decoders.</figcaption>
+          </figure>
+
+          <figure>
+            <img src="../../figures/v1_mwpm_comparison/coset_entropy.png" alt="MWPM comparison coset entropy plot" />
+            <figcaption>Empirical coset entropy for the topological-code comparison sweep.</figcaption>
+          </figure>
+        </div>
+
+        <h3>BB144 P-bit Sweep</h3>
+        <div class="figure-grid">
+          <figure>
+            <img src="../../figures/v1_bb144_pbit/logical_error_rate.png" alt="BB144 logical error rate plot" />
+            <figcaption>Code-capacity logical error on the [[144,12,12]] bivariate-bicycle X-error sector.</figcaption>
+          </figure>
+
+          <figure>
+            <img src="../../figures/v1_bb144_pbit/exact_coset_agreement.png" alt="BB144 exact coset agreement plot" />
+            <figcaption>No exact BB144 enumeration is available in this artifact, so this panel is intentionally blank.</figcaption>
+          </figure>
+
+          <figure>
+            <img src="../../figures/v1_bb144_pbit/valid_sample_rate.png" alt="BB144 valid sample rate plot" />
+            <figcaption>Both BB144 decoders sample inside the affine syndrome-valid space, so the collected-sample validity rate is one.</figcaption>
+          </figure>
+
+          <figure>
+            <img src="../../figures/v1_bb144_pbit/distinct_logical_classes.png" alt="BB144 distinct logical classes plot" />
+            <figcaption>The particular-start p-bit sampler visits many more logical classes as p increases.</figcaption>
+          </figure>
+
+          <figure>
+            <img src="../../figures/v1_bb144_pbit/coset_entropy.png" alt="BB144 coset entropy plot" />
+            <figcaption>BB144 empirical coset entropy rises sharply for the p-bit sampler at larger physical error rates.</figcaption>
+          </figure>
+        </div>
       </section>
 
       <section aria-labelledby="metrics">
@@ -478,6 +540,61 @@
             <tr><td>nullspace_coset_sampler</td><td class="value">0.861</td><td class="value">0.040</td></tr>
             <tr><td>pbit_annealed_optimizer</td><td class="value">0.630</td><td class="value">0.054</td></tr>
             <tr><td>pbit_coset_sampler</td><td class="value">0.516</td><td class="value">0.059</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Topological MWPM Comparison Mean Logical Error</h3>
+        <table>
+          <thead><tr><th>Decoder</th><th>Mean Logical Error</th><th>Mean CI Half-Width</th><th>Mean Runtime</th></tr></thead>
+          <tbody>
+            <tr><td>exact_coset</td><td class="value">0.244</td><td class="value">0.034</td><td class="value">44.9 ms</td></tr>
+            <tr><td>mwpm</td><td class="value">0.271</td><td class="value">0.038</td><td class="value">0.1 ms</td></tr>
+            <tr><td>nullspace_coset_sampler</td><td class="value">0.336</td><td class="value">0.042</td><td class="value">6.2 ms</td></tr>
+            <tr><td>pbit_nullspace_sampler</td><td class="value">0.364</td><td class="value">0.045</td><td class="value">11.9 ms</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Topological Logical Error By Code</h3>
+        <table>
+          <thead><tr><th>Code</th><th>Exact</th><th>MWPM</th><th>Nullspace Sampler</th><th>P-bit Nullspace</th></tr></thead>
+          <tbody>
+            <tr><td>surface 3</td><td class="value">0.204</td><td class="value">0.226</td><td class="value">0.232</td><td class="value">0.219</td></tr>
+            <tr><td>surface 7</td><td class="value">not run</td><td class="value">0.240</td><td class="value">0.355</td><td class="value">0.368</td></tr>
+            <tr><td>toric 3</td><td class="value">0.284</td><td class="value">0.283</td><td class="value">0.314</td><td class="value">0.323</td></tr>
+            <tr><td>toric 5</td><td class="value">not run</td><td class="value">0.334</td><td class="value">0.441</td><td class="value">0.547</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Topological Exact-Coset Agreement</h3>
+        <table>
+          <thead><tr><th>Decoder</th><th>Mean Agreement</th><th>Mean CI Half-Width</th></tr></thead>
+          <tbody>
+            <tr><td>exact_coset</td><td class="value">1.000</td><td class="value">0.004</td></tr>
+            <tr><td>mwpm</td><td class="value">0.910</td><td class="value">0.023</td></tr>
+            <tr><td>pbit_nullspace_sampler</td><td class="value">0.891</td><td class="value">0.026</td></tr>
+            <tr><td>nullspace_coset_sampler</td><td class="value">0.867</td><td class="value">0.028</td></tr>
+          </tbody>
+        </table>
+
+        <h3>BB144 Logical Error Rate</h3>
+        <table>
+          <thead><tr><th>Physical Error p</th><th>Nullspace Sampler</th><th>P-bit Nullspace</th></tr></thead>
+          <tbody>
+            <tr><td class="value">0.01</td><td class="value">0.297</td><td class="value">0.217</td></tr>
+            <tr><td class="value">0.02</td><td class="value">0.500</td><td class="value">0.390</td></tr>
+            <tr><td class="value">0.04</td><td class="value">0.817</td><td class="value">0.670</td></tr>
+            <tr><td class="value">0.06</td><td class="value">0.930</td><td class="value">0.803</td></tr>
+            <tr><td class="value">0.08</td><td class="value">0.970</td><td class="value">0.940</td></tr>
+            <tr><td class="value">0.10</td><td class="value">0.997</td><td class="value">0.993</td></tr>
+          </tbody>
+        </table>
+
+        <h3>BB144 Aggregate Readout</h3>
+        <table>
+          <thead><tr><th>Decoder</th><th>Mean Logical Error</th><th>Mean CI Half-Width</th><th>Mean Runtime</th><th>Mean Coset Entropy</th></tr></thead>
+          <tbody>
+            <tr><td>pbit_nullspace_sampler</td><td class="value">0.669</td><td class="value">0.040</td><td class="value">247.4 ms</td><td class="value">2.849</td></tr>
+            <tr><td>nullspace_coset_sampler</td><td class="value">0.752</td><td class="value">0.035</td><td class="value">13.7 ms</td><td class="value">0.609</td></tr>
           </tbody>
         </table>
 
@@ -544,9 +661,13 @@
           a stronger and more specific claim: constraining p-bit updates to the affine
           syndrome-valid nullspace improves exact max-coset recovery on mined disagreement cases.
           The tuned setting is <code>beta = 0.75</code> with four nullspace-coordinate updates per
-          collected sample, selected from the committed calibration CSV. This is evidence for
-          coset-mass sampling once validity is handled, not evidence that the unconstrained soft
-          penalty alone is sufficient.
+          collected sample, selected from the committed calibration CSV. The topological MWPM
+          comparison adds a clear baseline: MWPM is faster and lower-error than the stochastic
+          p-bit/nullspace samplers on the medium toric and surface-code sectors. The BB144 result is
+          also limited but useful: particular-start nullspace p-bits improve over the plain
+          nullspace sampler, while still producing large logical-error rates above low p. This is
+          evidence for coset-mass sampling once validity and initialization are handled, not evidence
+          that the unconstrained soft penalty alone is sufficient.
         </p>
 
         <p class="note">
@@ -583,6 +704,22 @@
           <a href="../../results/v1_hard_cases_precision/hard_case_summary.csv">hard_case_summary.csv</a>
           <a href="../../results/v1_hard_cases_precision/pbit_nullspace_calibration.csv">pbit_nullspace_calibration.csv</a>
           <a href="../../results/v1_hard_cases_precision/hard_cases_manifest.json">hard_cases_manifest.json</a>
+        </div>
+
+        <h3>Topological MWPM Comparison</h3>
+        <div class="data-links">
+          <a href="../../results/v1_mwpm_comparison/summary.csv">summary.csv</a>
+          <a href="../../results/v1_mwpm_comparison/trials.csv">trials.csv</a>
+          <a href="../../results/v1_mwpm_comparison/coset_distributions.csv">coset_distributions.csv</a>
+          <a href="../../results/v1_mwpm_comparison/manifest.json">manifest.json</a>
+        </div>
+
+        <h3>BB144 P-bit Sweep</h3>
+        <div class="data-links">
+          <a href="../../results/v1_bb144_pbit/summary.csv">summary.csv</a>
+          <a href="../../results/v1_bb144_pbit/trials.csv">trials.csv</a>
+          <a href="../../results/v1_bb144_pbit/coset_distributions.csv">coset_distributions.csv</a>
+          <a href="../../results/v1_bb144_pbit/manifest.json">manifest.json</a>
         </div>
       </section>
     </main>

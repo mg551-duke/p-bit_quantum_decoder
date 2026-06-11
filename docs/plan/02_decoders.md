@@ -52,10 +52,18 @@ Delta_i = E(z_i = 1) - E(z_i = 0)
 Because every state in the affine parameterization is syndrome-valid, this decoder separates the
 hardware-style stochastic update question from the validity-search problem. It is the strongest
 non-exact hard-case recovery decoder in the current artifact. The v1 hard-case calibration selected
-`beta = 0.75` and `updates_per_sample = 4`.
+`beta = 0.75` and `updates_per_sample = 4`. The BB144 sweep uses a separate particular-start
+setting, `beta = 0.5` and `updates_per_sample = 78`, because random nullspace starts failed in the
+78-dimensional BB144 affine solution space.
 
 ## NullspaceCosetSamplerDecoder
 
 Solve `H e = s`, sample inside the affine solution space using a GF(2) nullspace basis, and group
 valid states by logical class. This diagnostic separates validity search from coset-mass
 estimation.
+
+## MWPMDecoder
+
+Use PyMatching for graphlike topological syndrome matrices with column weight at most two. This is
+the topological-code baseline requested after the initial prototype. It is deliberately not applied
+to BB144, whose syndrome matrix is not graphlike in this representation.

@@ -1,9 +1,11 @@
-# v1 Large And Precision Results
+# v1 Large, Precision, MWPM, And BB144 Results
 
 This file summarizes the generated `results/v1_large` artifacts from
 `experiments/configs/v1_large.json` and `experiments/configs/v1_hard_cases.json`, plus the
 focused precision artifacts from `experiments/configs/v1_precision_focus.json` and
-`experiments/configs/v1_hard_cases_precision.json`.
+`experiments/configs/v1_hard_cases_precision.json`, the topological MWPM comparison from
+`experiments/configs/v1_mwpm_comparison.json`, and the [[144,12,12]] bivariate-bicycle p-bit sweep
+from `experiments/configs/v1_bb144_pbit.json`.
 
 ## Artifact Contents
 
@@ -28,6 +30,15 @@ focused precision artifacts from `experiments/configs/v1_precision_focus.json` a
   `beta = 0.75` and `updates_per_sample = 4` for `pbit_nullspace_sampler`.
 - `figures/v1_hard_cases_precision/hard_case_recovery.png`: high-repeat hard-case recovery plot
   with interval bars.
+- `results/v1_mwpm_comparison/`: 29,000 topological decoder-trial rows, 70 grouped summary rows,
+  and 63,267 coset-distribution rows comparing exact, MWPM, nullspace, and nullspace-coordinate
+  p-bit decoders.
+- `figures/v1_mwpm_comparison/`: five PNG figures for logical error, exact-coset agreement,
+  valid-sampling, logical-class diversity, and coset entropy in the MWPM comparison.
+- `results/v1_bb144_pbit/`: 3,600 BB144 decoder-trial rows, 12 grouped summary rows, and 202,491
+  coset-distribution rows for the nullspace and particular-start nullspace-coordinate p-bit
+  samplers.
+- `figures/v1_bb144_pbit/`: five PNG figures for the BB144 p-bit sweep.
 
 The generated artifact directories are small enough for review, with no generated file near the
 50 MB limit.
@@ -81,6 +92,64 @@ estimation. The high-repeat hard-case overall Wilson half-width is now about 0.0
 `pbit_nullspace_sampler` lower bound is above the other decoders' upper bounds. The focused
 precision run still supports a small logical-error advantage for the soft physical-bit sampler over
 annealed optimization in those configured groups.
+
+## Topological MWPM Comparison
+
+The MWPM comparison uses PyMatching on graphlike toric and surface-code syndrome matrices. MWPM is
+not run for BB144 because the BB syndrome matrix is not graphlike.
+
+Mean logical error across configured topological groups:
+
+- `exact_coset`: 0.244, mean half-width 0.034
+- `mwpm`: 0.271, mean half-width 0.038
+- `nullspace_coset_sampler`: 0.336, mean half-width 0.042
+- `pbit_nullspace_sampler`: 0.364, mean half-width 0.045
+
+Logical error by code family and size:
+
+- surface 3: exact 0.204, MWPM 0.226, nullspace 0.232, p-bit nullspace 0.219
+- surface 7: MWPM 0.240, nullspace 0.355, p-bit nullspace 0.368
+- toric 3: exact 0.284, MWPM 0.283, nullspace 0.314, p-bit nullspace 0.323
+- toric 5: MWPM 0.334, nullspace 0.441, p-bit nullspace 0.547
+
+Mean exact-coset agreement on exact-feasible small groups:
+
+- `exact_coset`: 1.000
+- `mwpm`: 0.910
+- `pbit_nullspace_sampler`: 0.891
+- `nullspace_coset_sampler`: 0.867
+
+This is a negative topological-code comparison for the current stochastic p-bit implementation:
+MWPM is faster and has lower logical error overall, especially on the medium toric and surface-code
+sectors. The p-bit nullspace sampler remains useful as a coset-mass diagnostic and is competitive
+only on the small surface-3 aggregate in this sweep.
+
+## BB144 P-bit Sweep
+
+The BB144 artifact tests the X-error sector of the [[144,12,12]] bivariate-bicycle gross code with
+`l = 12`, `m = 6`, `A = x^3 + y + y^2`, and `B = y^3 + x + x^2`. The p-bit sampler uses a
+particular-solution initialization, `beta = 0.5`, and `updates_per_sample = 78`, matching one
+expected pass over the 78-dimensional affine nullspace per collected sample.
+
+BB144 logical error by physical error rate:
+
+- p=0.01: nullspace 0.297, p-bit nullspace 0.217
+- p=0.02: nullspace 0.500, p-bit nullspace 0.390
+- p=0.04: nullspace 0.817, p-bit nullspace 0.670
+- p=0.06: nullspace 0.930, p-bit nullspace 0.803
+- p=0.08: nullspace 0.970, p-bit nullspace 0.940
+- p=0.10: nullspace 0.997, p-bit nullspace 0.993
+
+Aggregate BB144 readout:
+
+- `pbit_nullspace_sampler`: mean logical error 0.669, mean half-width 0.040, mean runtime 247 ms,
+  mean coset entropy 2.849 bits
+- `nullspace_coset_sampler`: mean logical error 0.752, mean half-width 0.035, mean runtime 14 ms,
+  mean coset entropy 0.609 bits
+
+This is cautiously positive for the particular-start p-bit sampler relative to the plain nullspace
+baseline, but it is not a strong BB144 decoding result. The high-p logical-error rates remain large,
+and exact coset enumeration is not feasible in this artifact.
 
 Required interpretation constraints:
 

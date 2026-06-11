@@ -112,7 +112,9 @@ def _line_plot(
     ax.set_xlabel("physical error rate p")
     ax.set_ylabel(ylabel)
     ax.grid(True, alpha=0.3)
-    ax.legend(fontsize=7, ncol=2)
+    handles, labels = ax.get_legend_handles_labels()
+    if handles:
+        ax.legend(handles, labels, fontsize=7, ncol=2)
     fig.tight_layout()
     fig.savefig(path, dpi=180)
     plt.close(fig)

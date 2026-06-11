@@ -17,8 +17,12 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+  "pymatching>=2.4.0",
   "pytest>=7.4",
   "ruff>=0.5",
+]
+matching = [
+  "pymatching>=2.4.0",
 ]
 
 [project.scripts]

@@ -13,6 +13,7 @@ import pbit_qec.gf2 as gf2
 from pbit_qec.codes import make_code
 from pbit_qec.decoders import (
     ExactCosetDecoder,
+    MWPMDecoder,
     NullspaceCosetSamplerDecoder,
     PBitAnnealedOptimizerDecoder,
     PBitCosetSamplerDecoder,
@@ -31,6 +32,8 @@ def build_decoder(name: str, settings: Mapping[str, object]) -> Decoder:
     kwargs = dict(settings.get(name, {})) if isinstance(settings.get(name, {}), dict) else {}
     if name == "exact_coset":
         return ExactCosetDecoder(**kwargs)
+    if name == "mwpm":
+        return MWPMDecoder(**kwargs)
     if name == "pbit_coset_sampler":
         return PBitCosetSamplerDecoder(**kwargs)
     if name == "pbit_annealed_optimizer":

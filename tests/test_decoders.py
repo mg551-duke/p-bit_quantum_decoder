@@ -4,6 +4,7 @@ from pbit_qec.analysis import analyze_cosets
 from pbit_qec.codes import make_toric_code
 from pbit_qec.decoders import (
     ExactCosetDecoder,
+    MWPMDecoder,
     NullspaceCosetSamplerDecoder,
     PBitCosetSamplerDecoder,
     PBitNullspaceCosetSamplerDecoder,
@@ -123,3 +124,15 @@ def test_pbit_probability_is_logistic_conditional() -> None:
         _pbit_probability_one(-1.5, beta=2.0),
         1.0 / (1.0 + np.exp(-3.0)),
     )
+
+
+def test_mwpm_decoder_returns_valid_topological_correction() -> None:
+    code = make_toric_code(3)
+    error = np.zeros(code.n, dtype=np.uint8)
+    error[[0, 4, 11]] = 1
+    syndrome = code.syndrome(error)
+
+    result = MWPMDecoder().decode(code, syndrome, 0.08, np.random.default_rng(14))
+
+    assert result.valid
+    assert result.metadata["backend"] == "pymatching"
