@@ -34,9 +34,9 @@
     }
   },
   "sweeps": [
-    { "family": "toric", "size": 3, "trials": 260, "exact": true },
-    { "family": "surface", "size": 3, "trials": 260, "exact": true },
-    { "family": "toric", "size": 5, "trials": 260, "exact": false },
-    { "family": "surface", "size": 7, "trials": 260, "exact": false }
+    { "family": "toric", "size": 3, "trials": 400, "exact": true },
+    { "family": "surface", "size": 3, "trials": 400, "exact": true },
+    { "family": "toric", "size": 5, "trials": 400, "exact": false },
+    { "family": "surface", "size": 7, "trials": 400, "exact": false }
   ]
 }

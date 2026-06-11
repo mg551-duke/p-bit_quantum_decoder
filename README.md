@@ -111,11 +111,12 @@ Topological MWPM comparison CSVs and figures live in `results/v1_mwpm_comparison
 
 - The v1-large run now includes `pbit_nullspace_sampler`, giving 18,000 decoder-trial rows and
   9,440 mined hard-case recovery attempts.
-- The precision focus run adds 18,200 decoder-trial rows with 260 trials in every configured
-  group.
-- The p-bit sampler's focused logical-error confidence half-width drops from about 0.112 to 0.057
+- The precision focus run adds 28,000 decoder-trial rows with 400 trials in every configured
+  group. Its worst logical-error Wilson half-width is now 0.0488, with zero additional trials
+  requested for the 5% target.
+- The p-bit sampler's focused logical-error confidence half-width drops from about 0.112 to 0.046
   on matched groups.
-- Focused mean logical error is 0.485 for `pbit_coset_sampler` and 0.498 for
+- Focused mean logical error is 0.486 for `pbit_coset_sampler` and 0.498 for
   `pbit_annealed_optimizer`.
 - The high-repeat hard-case run has 37,760 recovery attempts. It supports a hard-case advantage for
   syndrome-valid nullspace-coordinate p-bit sampling: `pbit_nullspace_sampler` recovers

@@ -20,8 +20,8 @@ from `experiments/configs/v1_bb144_pbit.json`.
 - `hard_case_summary.csv`: grouped hard-case recovery rates with Wilson confidence intervals.
 - `figures/v1_large/`: six PNG figures for logical error, exact agreement, valid sampling,
   logical-class diversity, coset entropy, and hard-case recovery.
-- `results/v1_precision_focus/`: 18,200 focused decoder-trial rows, 70 grouped summary rows, and
-  37,792 coset-distribution rows with 260 trials in every configured group.
+- `results/v1_precision_focus/`: 28,000 focused decoder-trial rows, 70 grouped summary rows, and
+  58,165 coset-distribution rows with 400 trials in every configured group.
 - `figures/v1_precision_focus/`: five PNG figures for the focused logical-error, exact-agreement,
   valid-sampling, logical-class diversity, and coset-entropy curves.
 - `results/v1_hard_cases_precision/`: 37,760 high-repeat hard-case recovery attempts and grouped
@@ -71,12 +71,15 @@ Overall hard-case exact-coset recovery with 95% Wilson intervals:
 - `pbit_coset_sampler`: 0.419 [0.400, 0.440]
 
 The precision focus run reduces mean logical-error Wilson half-widths on matching groups from about
-0.112 to 0.057 for `pbit_coset_sampler`, a 48.8% reduction. Focused mean logical error rates are:
+0.112 to 0.046 for `pbit_coset_sampler`, a 58.6% reduction. Focused mean logical error rates are:
 
-- `exact_coset`: 0.251, mean half-width 0.047
-- `nullspace_coset_sampler`: 0.335, mean half-width 0.052
-- `pbit_coset_sampler`: 0.485, mean half-width 0.057
-- `pbit_annealed_optimizer`: 0.498, mean half-width 0.057
+- `exact_coset`: 0.247, mean half-width 0.038
+- `nullspace_coset_sampler`: 0.330, mean half-width 0.042
+- `pbit_coset_sampler`: 0.486, mean half-width 0.046
+- `pbit_annealed_optimizer`: 0.498, mean half-width 0.046
+
+The worst precision-focus logical-error Wilson half-width is now 0.0488, and every
+precision-focus row reports zero additional trials needed for a 5% Wilson half-width target.
 
 The high-repeat hard-case run changes the hard-case readout:
 

@@ -38,6 +38,12 @@ cases for the project.
 Medium toric and surface-code runs omit exact decoding and compare logical error rate,
 valid-sample rate, logical classes visited, empirical coset entropy, and runtime.
 
+## Precision Focus
+
+The `v1_precision_focus` config uses 400 trials in every configured small and medium topological
+group. It is the higher-sample companion to the broader v1-large sweep and brings the worst focused
+logical-error Wilson half-width below 0.049.
+
 ## Topological MWPM Baseline
 
 The `v1_mwpm_comparison` config compares exact decoding where feasible, PyMatching MWPM,
