@@ -1,0 +1,45 @@
+{
+  "note": "Full target from the research plan. This is intentionally not used by CI because it is computationally heavy.",
+  "seed": 20260610,
+  "output_dir": "results/v1_full_target",
+  "p_values": [0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18],
+  "decoders": [
+    "exact_coset",
+    "pbit_coset_sampler",
+    "nullspace_coset_sampler",
+    "pbit_annealed_optimizer"
+  ],
+  "decoder_settings": {
+    "exact_coset": { "max_nullity": 24 },
+    "pbit_coset_sampler": {
+      "chains": 16,
+      "burn_in_sweeps": 200,
+      "sampling_sweeps": 1000,
+      "thinning": 5,
+      "beta": 1.0,
+      "update": "gibbs",
+      "initial_state": "random"
+    },
+    "nullspace_coset_sampler": {
+      "samples": 4000,
+      "burn_in": 400,
+      "beta": 1.0,
+      "max_nullity": 64
+    },
+    "pbit_annealed_optimizer": {
+      "chains": 32,
+      "sweeps": 1500,
+      "beta_start": 0.2,
+      "beta_stop": 6.0,
+      "update": "gibbs"
+    }
+  },
+  "sweeps": [
+    { "family": "toric", "size": 3, "trials": 1000, "exact": true },
+    { "family": "surface", "size": 3, "trials": 1000, "exact": true },
+    { "family": "toric", "size": 4, "trials": 300, "exact": false },
+    { "family": "toric", "size": 5, "trials": 300, "exact": false },
+    { "family": "surface", "size": 5, "trials": 300, "exact": false },
+    { "family": "surface", "size": 7, "trials": 300, "exact": false }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "seed": 20260613,
+  "output_dir": "results/v1_hard_cases_precision",
+  "p_values": [0.06, 0.1, 0.14, 0.18],
+  "recovery_decoders": [
+    "pbit_coset_sampler",
+    "nullspace_coset_sampler",
+    "pbit_annealed_optimizer"
+  ],
+  "max_cases_per_sweep": 8,
+  "recovery_repeats": 64,
+  "decoder_settings": {
+    "exact_coset": { "max_nullity": 24 },
+    "pbit_coset_sampler": {
+      "chains": 6,
+      "burn_in_sweeps": 30,
+      "sampling_sweeps": 160,
+      "thinning": 4,
+      "beta": 1.0,
+      "update": "gibbs",
+      "initial_state": "random"
+    },
+    "nullspace_coset_sampler": {
+      "samples": 800,
+      "burn_in": 120,
+      "beta": 1.0,
+      "max_nullity": 64
+    },
+    "pbit_annealed_optimizer": {
+      "chains": 6,
+      "sweeps": 180,
+      "beta_start": 0.2,
+      "beta_stop": 6.0,
+      "update": "gibbs"
+    }
+  },
+  "sweeps": [
+    { "family": "toric", "size": 3, "max_syndromes": 512 },
+    { "family": "surface", "size": 3, "max_syndromes": 256 }
+  ]
+}

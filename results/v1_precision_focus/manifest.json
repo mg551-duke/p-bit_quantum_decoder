@@ -1,0 +1,9 @@
+{
+  "config_path": "experiments/configs/v1_precision_focus.json",
+  "output_dir": "results/v1_precision_focus",
+  "rows": {
+    "coset_distributions": 37792,
+    "summary": 70,
+    "trials": 18200
+  }
+}

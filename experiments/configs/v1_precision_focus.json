@@ -1,0 +1,42 @@
+{
+  "seed": 20260612,
+  "output_dir": "results/v1_precision_focus",
+  "p_values": [0.04, 0.08, 0.12, 0.16, 0.18],
+  "decoders": [
+    "exact_coset",
+    "pbit_coset_sampler",
+    "nullspace_coset_sampler",
+    "pbit_annealed_optimizer"
+  ],
+  "decoder_settings": {
+    "exact_coset": { "max_nullity": 24 },
+    "pbit_coset_sampler": {
+      "chains": 6,
+      "burn_in_sweeps": 30,
+      "sampling_sweeps": 160,
+      "thinning": 4,
+      "beta": 1.0,
+      "update": "gibbs",
+      "initial_state": "random"
+    },
+    "nullspace_coset_sampler": {
+      "samples": 800,
+      "burn_in": 120,
+      "beta": 1.0,
+      "max_nullity": 64
+    },
+    "pbit_annealed_optimizer": {
+      "chains": 6,
+      "sweeps": 180,
+      "beta_start": 0.2,
+      "beta_stop": 6.0,
+      "update": "gibbs"
+    }
+  },
+  "sweeps": [
+    { "family": "toric", "size": 3, "trials": 260, "exact": true },
+    { "family": "surface", "size": 3, "trials": 260, "exact": true },
+    { "family": "toric", "size": 5, "trials": 260, "exact": false },
+    { "family": "surface", "size": 7, "trials": 260, "exact": false }
+  ]
+}

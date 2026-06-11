@@ -1,0 +1,6 @@
+{
+  "config_path": "experiments/configs/v1_hard_cases.json",
+  "hard_cases": 59,
+  "recovery_rows": 3540,
+  "summary_rows": 24
+}

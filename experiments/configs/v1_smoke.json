@@ -1,0 +1,40 @@
+{
+  "seed": 20260610,
+  "output_dir": "results/smoke",
+  "p_values": [0.06],
+  "decoders": [
+    "exact_coset",
+    "pbit_coset_sampler",
+    "nullspace_coset_sampler",
+    "pbit_annealed_optimizer"
+  ],
+  "decoder_settings": {
+    "exact_coset": { "max_nullity": 24 },
+    "pbit_coset_sampler": {
+      "chains": 2,
+      "burn_in_sweeps": 4,
+      "sampling_sweeps": 12,
+      "thinning": 2,
+      "beta": 1.0,
+      "update": "gibbs",
+      "initial_state": "random"
+    },
+    "nullspace_coset_sampler": {
+      "samples": 40,
+      "burn_in": 8,
+      "beta": 1.0,
+      "max_nullity": 64
+    },
+    "pbit_annealed_optimizer": {
+      "chains": 2,
+      "sweeps": 20,
+      "beta_start": 0.2,
+      "beta_stop": 4.0,
+      "update": "gibbs"
+    }
+  },
+  "sweeps": [
+    { "family": "toric", "size": 3, "trials": 4, "exact": true },
+    { "family": "surface", "size": 3, "trials": 4, "exact": true }
+  ]
+}

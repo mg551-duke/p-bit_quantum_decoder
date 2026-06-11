@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>p-bit QEC Decoder Results</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #172033;
+        --muted: #5a6475;
+        --line: #d8dee9;
+        --panel: #f7f9fc;
+        --accent: #0f766e;
+        --accent-2: #8a5a12;
+        --bg: #ffffff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.5;
+      }
+
+      header {
+        border-bottom: 1px solid var(--line);
+        background: #fbfcfe;
+      }
+
+      main,
+      .header-inner {
+        width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      .header-inner {
+        padding: 40px 0 28px;
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+        line-height: 1.15;
+      }
+
+      h1 {
+        max-width: 860px;
+        font-size: 40px;
+        font-weight: 760;
+        letter-spacing: 0;
+      }
+
+      h2 {
+        margin-top: 44px;
+        font-size: 24px;
+      }
+
+      h3 {
+        margin-top: 28px;
+        font-size: 16px;
+      }
+
+      p {
+        max-width: 860px;
+        color: var(--muted);
+      }
+
+      a {
+        color: var(--accent);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 3px;
+      }
+
+      .lede {
+        margin: 16px 0 0;
+        font-size: 18px;
+      }
+
+      .stamp {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 22px;
+      }
+
+      .stamp span {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 6px 10px;
+        background: white;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(130px, 1fr));
+        gap: 12px;
+        margin-top: 28px;
+      }
+
+      .metric {
+        border-top: 3px solid var(--accent);
+        background: var(--panel);
+        padding: 14px 14px 16px;
+      }
+
+      .metric strong {
+        display: block;
+        font-size: 28px;
+        line-height: 1.1;
+      }
+
+      .metric span {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .note {
+        border-left: 4px solid var(--accent-2);
+        margin-top: 24px;
+        padding: 12px 16px;
+        background: #fff9ed;
+        color: #45330f;
+      }
+
+      .takeaway-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 22px;
+      }
+
+      .takeaway {
+        border: 1px solid var(--line);
+        background: #ffffff;
+        padding: 16px;
+      }
+
+      .takeaway b {
+        display: block;
+        font-size: 22px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .takeaway span {
+        display: block;
+        margin-top: 5px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .bar-list {
+        display: grid;
+        gap: 10px;
+        margin-top: 16px;
+        max-width: 760px;
+      }
+
+      .bar-row {
+        display: grid;
+        grid-template-columns: 190px minmax(120px, 1fr) 70px;
+        gap: 10px;
+        align-items: center;
+        font-size: 14px;
+      }
+
+      .bar-track {
+        height: 12px;
+        border-radius: 999px;
+        overflow: hidden;
+        background: #e8edf4;
+      }
+
+      .bar-fill {
+        height: 100%;
+        background: var(--accent);
+      }
+
+      .bar-fill.secondary {
+        background: #64748b;
+      }
+
+      .bar-fill.warning {
+        background: var(--accent-2);
+      }
+
+      .figure-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px;
+        margin-top: 18px;
+      }
+
+      figure {
+        margin: 0;
+        border: 1px solid var(--line);
+        background: white;
+      }
+
+      figure img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      figcaption {
+        border-top: 1px solid var(--line);
+        padding: 12px 14px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      table {
+        width: 100%;
+        margin-top: 16px;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid var(--line);
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--panel);
+        color: #303a4d;
+        font-weight: 700;
+      }
+
+      td.value {
+        font-variant-numeric: tabular-nums;
+      }
+
+      .data-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin: 16px 0 22px;
+      }
+
+      .data-links a {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 8px 10px;
+        background: var(--panel);
+        text-decoration: none;
+      }
+
+      @media (max-width: 860px) {
+        h1 {
+          font-size: 30px;
+        }
+
+        .metrics {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .figure-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .takeaway-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .bar-row {
+          grid-template-columns: 1fr;
+          gap: 4px;
+        }
+      }
+
+      @media (max-width: 520px) {
+        main,
+        .header-inner {
+          width: min(100% - 20px, 1180px);
+        }
+
+        .metrics {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-inner">
+        <h1>p-bit QEC Decoder Results</h1>
+        <p class="lede">
+          Current v1 artifact results for probabilistic-Ising coset decoding on toric and
+          surface-code one-sector benchmarks.
+        </p>
+        <div class="stamp" aria-label="artifact metadata">
+          <span>Config: experiments/configs/v1_large.json</span>
+          <span>Precision: experiments/configs/v1_precision_focus.json</span>
+          <span>Hard cases: experiments/configs/v1_hard_cases.json</span>
+          <span>Hard precision: experiments/configs/v1_hard_cases_precision.json</span>
+          <span>Update rule: Gibbs / p-bit logistic conditional</span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section aria-labelledby="overview">
+        <h2 id="overview">Results So Far</h2>
+        <p>
+          The p-bit sampler now uses the direct stochastic-unit update
+          <code>P(e_j = 1 | rest, s) = 1 / (1 + exp(beta Delta_j))</code>, where
+          <code>Delta_j = E(e_j=1) - E(e_j=0)</code>. These results are reproducible benchmark
+          artifacts, not final publication-strength statistical claims.
+        </p>
+
+        <div class="metrics">
+          <div class="metric"><strong>14,040</strong><span>decoder-trial rows</span></div>
+          <div class="metric"><strong>18,200</strong><span>precision-focus trial rows</span></div>
+          <div class="metric"><strong>250</strong><span>total grouped summary rows</span></div>
+          <div class="metric"><strong>64,999</strong><span>total coset-distribution rows</span></div>
+          <div class="metric"><strong>59</strong><span>min-energy disagreement cases</span></div>
+          <div class="metric"><strong>11,328</strong><span>precision hard-case attempts</span></div>
+        </div>
+
+        <p class="note">
+          Current readout: exact coset decoding remains the small-code reference. The precision
+          focus run lifts matching groups to 260 trials each and cuts the p-bit logical-error
+          confidence half-width from about 0.112 to 0.057. The soft p-bit sampler remains slightly
+          better than annealed optimization on focused logical error, but the higher-repeat
+          hard-case recovery run does not support a p-bit hard-case advantage.
+        </p>
+
+        <div class="takeaway-grid" aria-label="headline result comparisons">
+          <div class="takeaway">
+            <b>48.8%</b>
+            <span>reduction in p-bit logical-error CI half-width on matched focus groups</span>
+          </div>
+          <div class="takeaway">
+            <b>-1.3 pp</b>
+            <span>focused p-bit logical-error-rate reduction versus annealed optimization</span>
+          </div>
+          <div class="takeaway">
+            <b>98.2%</b>
+            <span>focused mean syndrome-valid sample rate for the soft p-bit sampler</span>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="visuals">
+        <h2 id="visuals">All Visuals</h2>
+        <h3>v1 Large Sweep</h3>
+        <div class="figure-grid">
+          <figure>
+            <img src="../../figures/v1_large/logical_error_rate.png" alt="Logical error rate plot" />
+            <figcaption>Logical error rate across physical error rates, code families, sizes, and decoders.</figcaption>
+          </figure>
+
+          <figure>
+            <img src="../../figures/v1_large/exact_coset_agreement.png" alt="Exact coset agreement plot" />
+            <figcaption>Agreement with exact maximum-posterior coset where exact enumeration is available.</figcaption>
+          </figure>
+
+          <figure>
+            <img src="../../figures/v1_large/valid_sample_rate.png" alt="Syndrome-valid sample rate plot" />
+            <figcaption>Rate at which stochastic decoders produced syndrome-valid samples or valid annealed states.</figcaption>
+          </figure>
+
+          <figure>
+            <img src="../../figures/v1_large/distinct_logical_classes.png" alt="Distinct logical classes plot" />
+            <figcaption>Average number of logical classes visited by each decoder mode.</figcaption>
+          </figure>
+
+          <figure>
+            <img src="../../figures/v1_large/coset_entropy.png" alt="Coset entropy plot" />
+            <figcaption>Empirical entropy of sampled logical/coset distributions.</figcaption>
+          </figure>
+
+          <figure>
+            <img src="../../figures/v1_large/hard_case_recovery.png" alt="Hard-case recovery plot" />
+            <figcaption>Recovery rate on syndromes where the exact max-coset class differs from the min-energy class.</figcaption>
+          </figure>
+        </div>
+
+        <h3>Precision Focus Sweep</h3>
+        <div class="figure-grid">
+          <figure>
+            <img src="../../figures/v1_precision_focus/logical_error_rate.png" alt="Precision logical error rate plot" />
+            <figcaption>Focused 260-trial logical-error curves for selected small and medium codes.</figcaption>
+          </figure>
+
+          <figure>
+            <img src="../../figures/v1_precision_focus/exact_coset_agreement.png" alt="Precision exact coset agreement plot" />
+            <figcaption>Focused agreement with exact maximum-posterior cosets where exact enumeration is feasible.</figcaption>
+          </figure>
+
+          <figure>
+            <img src="../../figures/v1_precision_focus/valid_sample_rate.png" alt="Precision valid sample rate plot" />
+            <figcaption>Focused syndrome-valid sample rates for stochastic and annealed decoders.</figcaption>
+          </figure>
+
+          <figure>
+            <img src="../../figures/v1_precision_focus/distinct_logical_classes.png" alt="Precision distinct logical classes plot" />
+            <figcaption>Focused logical-class diversity under the higher-sample stochastic settings.</figcaption>
+          </figure>
+
+          <figure>
+            <img src="../../figures/v1_precision_focus/coset_entropy.png" alt="Precision coset entropy plot" />
+            <figcaption>Focused empirical coset entropy from sampled logical/coset distributions.</figcaption>
+          </figure>
+        </div>
+
+        <h3>Hard-Case Precision</h3>
+        <div class="figure-grid">
+          <figure>
+            <img src="../../figures/v1_hard_cases_precision/hard_case_recovery.png" alt="Precision hard-case recovery plot" />
+            <figcaption>High-repeat hard-case recovery with Wilson confidence intervals from the summary CSV.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section aria-labelledby="metrics">
+        <h2 id="metrics">Aggregate Metrics</h2>
+
+        <h3>Mean Logical Error Rate</h3>
+        <table>
+          <thead><tr><th>Decoder</th><th>Mean</th><th>Mean CI Half-Width</th></tr></thead>
+          <tbody>
+            <tr><td>exact_coset</td><td class="value">0.203</td><td class="value">0.063</td></tr>
+            <tr><td>nullspace_coset_sampler</td><td class="value">0.300</td><td class="value">0.098</td></tr>
+            <tr><td>pbit_coset_sampler</td><td class="value">0.487</td><td class="value">0.113</td></tr>
+            <tr><td>pbit_annealed_optimizer</td><td class="value">0.529</td><td class="value">0.113</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Mean Exact-Coset Agreement</h3>
+        <table>
+          <thead><tr><th>Decoder</th><th>Mean</th><th>Mean CI Half-Width</th></tr></thead>
+          <tbody>
+            <tr><td>exact_coset</td><td class="value">1.000</td><td class="value">0.016</td></tr>
+            <tr><td>nullspace_coset_sampler</td><td class="value">0.862</td><td class="value">0.056</td></tr>
+            <tr><td>pbit_annealed_optimizer</td><td class="value">0.519</td><td class="value">0.083</td></tr>
+            <tr><td>pbit_coset_sampler</td><td class="value">0.514</td><td class="value">0.087</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Precision Focus Mean Logical Error Rate</h3>
+        <table>
+          <thead><tr><th>Decoder</th><th>Mean</th><th>Mean CI Half-Width</th></tr></thead>
+          <tbody>
+            <tr><td>exact_coset</td><td class="value">0.251</td><td class="value">0.047</td></tr>
+            <tr><td>nullspace_coset_sampler</td><td class="value">0.335</td><td class="value">0.052</td></tr>
+            <tr><td>pbit_coset_sampler</td><td class="value">0.485</td><td class="value">0.057</td></tr>
+            <tr><td>pbit_annealed_optimizer</td><td class="value">0.498</td><td class="value">0.057</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Precision Focus Mean Exact-Coset Agreement</h3>
+        <table>
+          <thead><tr><th>Decoder</th><th>Mean</th><th>Mean CI Half-Width</th></tr></thead>
+          <tbody>
+            <tr><td>exact_coset</td><td class="value">1.000</td><td class="value">0.007</td></tr>
+            <tr><td>nullspace_coset_sampler</td><td class="value">0.861</td><td class="value">0.040</td></tr>
+            <tr><td>pbit_annealed_optimizer</td><td class="value">0.630</td><td class="value">0.054</td></tr>
+            <tr><td>pbit_coset_sampler</td><td class="value">0.516</td><td class="value">0.059</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Mean Hard-Case Exact-Coset Recovery</h3>
+        <div class="bar-list" aria-label="hard-case recovery bar chart">
+          <div class="bar-row">
+            <span>nullspace_coset_sampler</span>
+            <div class="bar-track"><div class="bar-fill secondary" style="width: 44.5%"></div></div>
+            <span class="value">0.445</span>
+          </div>
+          <div class="bar-row">
+            <span>pbit_coset_sampler</span>
+            <div class="bar-track"><div class="bar-fill" style="width: 43.5%"></div></div>
+            <span class="value">0.435</span>
+          </div>
+          <div class="bar-row">
+            <span>pbit_annealed_optimizer</span>
+            <div class="bar-track"><div class="bar-fill warning" style="width: 42.6%"></div></div>
+            <span class="value">0.426</span>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Decoder</th><th>Overall Mean</th><th>95% CI</th></tr></thead>
+          <tbody>
+            <tr><td>nullspace_coset_sampler</td><td class="value">0.445</td><td class="value">[0.417, 0.473]</td></tr>
+            <tr><td>pbit_coset_sampler</td><td class="value">0.435</td><td class="value">[0.407, 0.463]</td></tr>
+            <tr><td>pbit_annealed_optimizer</td><td class="value">0.426</td><td class="value">[0.398, 0.455]</td></tr>
+          </tbody>
+        </table>
+
+        <h3>High-Precision Hard-Case Exact-Coset Recovery</h3>
+        <table>
+          <thead><tr><th>Decoder</th><th>Recovered / Attempts</th><th>Overall Mean</th><th>95% CI</th></tr></thead>
+          <tbody>
+            <tr><td>nullspace_coset_sampler</td><td class="value">1747 / 3776</td><td class="value">0.463</td><td class="value">[0.447, 0.479]</td></tr>
+            <tr><td>pbit_annealed_optimizer</td><td class="value">1731 / 3776</td><td class="value">0.458</td><td class="value">[0.443, 0.474]</td></tr>
+            <tr><td>pbit_coset_sampler</td><td class="value">1639 / 3776</td><td class="value">0.434</td><td class="value">[0.418, 0.450]</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Mean Valid-Sample Rate</h3>
+        <table>
+          <thead><tr><th>Decoder</th><th>v1 Large Mean</th><th>Precision Focus Mean</th></tr></thead>
+          <tbody>
+            <tr><td>exact_coset</td><td class="value">1.000</td><td class="value">1.000</td></tr>
+            <tr><td>nullspace_coset_sampler</td><td class="value">1.000</td><td class="value">1.000</td></tr>
+            <tr><td>pbit_coset_sampler</td><td class="value">0.976</td><td class="value">0.982</td></tr>
+            <tr><td>pbit_annealed_optimizer</td><td class="value">0.844</td><td class="value">0.845</td></tr>
+          </tbody>
+        </table>
+
+        <p>
+          Interpretation remains conservative: the precision focus run reduces uncertainty enough
+          to support a small logical-error advantage for the soft p-bit sampler over annealed
+          optimization in these configured groups. The high-repeat hard-case run points the other
+          way: p-bit sampling is below both nullspace sampling and annealed optimization on exact
+          max-coset recovery. This is a useful negative result, not a failed artifact.
+        </p>
+
+        <p class="note">
+          Calibration note: an affine warm-start option was tested against the mined hard cases, but
+          it did not beat the current published p-bit hard-case recovery baseline in the bounded
+          check. The benchmark settings therefore remain unchanged for this artifact.
+        </p>
+      </section>
+
+      <section aria-labelledby="data">
+        <h2 id="data">Data Files</h2>
+        <h3>v1 Large Sweep</h3>
+        <div class="data-links">
+          <a href="../../results/v1_large/summary.csv">summary.csv</a>
+          <a href="../../results/v1_large/trials.csv">trials.csv</a>
+          <a href="../../results/v1_large/coset_distributions.csv">coset_distributions.csv</a>
+          <a href="../../results/v1_large/hard_cases.csv">hard_cases.csv</a>
+          <a href="../../results/v1_large/hard_case_recovery.csv">hard_case_recovery.csv</a>
+          <a href="../../results/v1_large/hard_case_summary.csv">hard_case_summary.csv</a>
+        </div>
+
+        <h3>Precision Focus Sweep</h3>
+        <div class="data-links">
+          <a href="../../results/v1_precision_focus/summary.csv">summary.csv</a>
+          <a href="../../results/v1_precision_focus/trials.csv">trials.csv</a>
+          <a href="../../results/v1_precision_focus/coset_distributions.csv">coset_distributions.csv</a>
+          <a href="../../results/v1_precision_focus/manifest.json">manifest.json</a>
+        </div>
+
+        <h3>Hard-Case Precision</h3>
+        <div class="data-links">
+          <a href="../../results/v1_hard_cases_precision/hard_cases.csv">hard_cases.csv</a>
+          <a href="../../results/v1_hard_cases_precision/hard_case_recovery.csv">hard_case_recovery.csv</a>
+          <a href="../../results/v1_hard_cases_precision/hard_case_summary.csv">hard_case_summary.csv</a>
+          <a href="../../results/v1_hard_cases_precision/hard_cases_manifest.json">hard_cases_manifest.json</a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
