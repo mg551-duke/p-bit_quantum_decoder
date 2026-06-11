@@ -23,7 +23,8 @@
       "update": "gibbs",
       "stop_on_first_valid": false,
       "collect_valid_samples": true,
-      "selection": "best_energy"
+      "selection": "min_weight",
+      "target_valid_solutions": 10
     },
     "pbit_nullspace_sampler": {
       "samples": 400,

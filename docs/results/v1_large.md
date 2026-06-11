@@ -40,9 +40,10 @@ from `experiments/configs/v1_bb144_pbit.json`, and the p-bit-native syndrome pro
   coset-distribution rows for BP-OSD, the BP-guided p-bit sampler, the unguided p-bit sampler,
   and the plain nullspace sampler.
 - `figures/v1_bb144_pbit/`: five PNG figures for the BB144 p-bit sweep.
-- `results/v1_pbit_syndrome/`: 5,400 decoder-trial rows, 108 grouped summary rows, and 35,745
+- `results/v1_pbit_syndrome/`: 5,400 decoder-trial rows, 108 grouped summary rows, and 35,372
   coset-distribution rows for the no-linear-solve p-bit syndrome pilot.
-- `figures/v1_pbit_syndrome/`: nine PNG figures including first-valid and residual diagnostics.
+- `figures/v1_pbit_syndrome/`: eleven PNG figures including first-valid, residual, distinct
+  valid-solution, and selected-weight diagnostics.
 
 The generated artifact directories are small enough for review, with no generated file near the
 50 MB limit.
@@ -190,15 +191,19 @@ updates can find `H e = s` directly, without `gf2.solve_affine`, BP, BP-OSD, MWP
 sampling inside `PBitSyndromeDecoder`. It is a 50-trial-per-group pilot, so the Wilson intervals
 are wider than the precision artifacts.
 
-The p-bit syndrome row has 1.000 valid and first-valid rate on the configured toric and surface
-groups. On BB144, it has mean valid rate 0.927, mean first-valid sweep 20.9, and mean best residual
-weight 0.147. This supports the narrow claim that p-bit-native stochastic dynamics can often find
+The p-bit syndrome row now uses minimum-weight selection over up to ten distinct valid physical
+corrections. It has 1.000 valid and first-valid rate on the configured toric and surface groups.
+On BB144, it has mean valid rate 0.927, mean first-valid sweep 20.9, and mean best residual weight
+0.147. This supports the narrow claim that p-bit-native stochastic dynamics can often find
 syndrome-valid corrections without deterministic syndrome solving.
 
 It does not support a strong BB144 decoding claim. Mean BB144 logical error is 0.583 for
 `pbit_syndrome`, compared with 0.167 for BP-OSD, 0.297 for BP-guided p-bit sampling, and 0.587 for
-the unguided p-bit nullspace row in this pilot. The main BB144 bottleneck is therefore logical
-coset selection/mixing after validity, not only finding a valid correction.
+the unguided p-bit nullspace row in this pilot. The ten-solution minimum-weight rule is also not
+exercised well on BB144: the BB144 rows average 1.91 distinct valid physical corrections and never
+hit the target of ten within this budget. The main BB144 bottleneck is therefore not just first
+validity; it is finding a diverse enough set of valid corrections, then selecting the right logical
+class from that set.
 
 Required interpretation constraints:
 

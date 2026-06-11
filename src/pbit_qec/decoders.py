@@ -222,6 +222,7 @@ class PBitSyndromeDecoder:
     stop_on_first_valid: bool = True
     collect_valid_samples: bool = False
     selection: str = "best_energy"
+    target_valid_solutions: int = 0
     name: str = "pbit_syndrome"
 
     def decode(
@@ -239,16 +240,20 @@ class PBitSyndromeDecoder:
         col_checks = [np.flatnonzero(code.H[:, j]).astype(np.int64) for j in range(code.n)]
         beta_schedule = self._beta_schedule()
         initial_probability = self._initial_probability(probabilities)
-        if self.selection not in {"best_energy", "counts"}:
+        if self.selection not in {"best_energy", "counts", "min_weight"}:
             raise ValueError(f"unknown p-bit syndrome selection {self.selection!r}")
+        if self.target_valid_solutions < 0:
+            raise ValueError("target_valid_solutions must be nonnegative")
 
         counts: Dict[str, int] = defaultdict(int)
         best_rep_by_coset: Dict[str, BitArray] = {}
         best_rep_energy: Dict[str, float] = {}
         best_valid: Optional[BitArray] = None
         best_valid_energy = float("inf")
+        best_valid_weight: Optional[int] = None
         best_any: Optional[BitArray] = None
         best_any_energy = float("inf")
+        valid_solution_keys: set[str] = set()
         best_residual_weight = code.m + 1
         final_residual_weight = code.m
         first_valid_sweep: Optional[int] = None
@@ -286,13 +291,29 @@ class PBitSyndromeDecoder:
                     if logical_key not in best_rep_energy or e_prior < best_rep_energy[logical_key]:
                         best_rep_energy[logical_key] = e_prior
                         best_rep_by_coset[logical_key] = e.copy()
-                    if e_prior < best_valid_energy:
+                    solution_key = gf2.bit_string(e)
+                    valid_solution_keys.add(solution_key)
+                    e_weight = int(e.sum())
+                    is_better_valid = (
+                        self.selection == "min_weight"
+                        and (
+                            best_valid_weight is None
+                            or e_weight < best_valid_weight
+                            or (e_weight == best_valid_weight and e_prior < best_valid_energy)
+                        )
+                    ) or (self.selection != "min_weight" and e_prior < best_valid_energy)
+                    if is_better_valid:
+                        best_valid_weight = e_weight
                         best_valid_energy = e_prior
                         best_valid = e.copy()
-                    if self.stop_on_first_valid:
+                    if self.stop_on_first_valid or (
+                        self.target_valid_solutions
+                        and len(valid_solution_keys) >= self.target_valid_solutions
+                    ):
+                        correction = best_valid if best_valid is not None else e.copy()
                         return self._result(
                             code=code,
-                            correction=e.copy(),
+                            correction=correction,
                             syndrome=target,
                             lambdas=lambdas,
                             rho=rho,
@@ -306,6 +327,7 @@ class PBitSyndromeDecoder:
                             final_residual_weight=0,
                             best_residual_weight=0,
                             initial_probability=initial_probability,
+                            distinct_valid_solutions=len(valid_solution_keys),
                         )
                 if sweep == self.sweeps:
                     break
@@ -347,6 +369,7 @@ class PBitSyndromeDecoder:
             final_residual_weight=final_residual_weight,
             best_residual_weight=best_residual_weight,
             initial_probability=initial_probability,
+            distinct_valid_solutions=len(valid_solution_keys),
         )
 
     def _beta_schedule(self) -> np.ndarray:
@@ -388,6 +411,7 @@ class PBitSyndromeDecoder:
         final_residual_weight: int,
         best_residual_weight: int,
         initial_probability: Union[float, np.ndarray],
+        distinct_valid_solutions: int,
     ) -> DecodeResult:
         valid = code.is_valid_correction(correction, syndrome)
         logical = gf2.bit_tuple(code.logical(correction))
@@ -433,10 +457,13 @@ class PBitSyndromeDecoder:
                 "first_valid_sweep": first_valid_sweep,
                 "first_valid_chain": first_valid_chain,
                 "valid_hits": valid_hits,
+                "distinct_valid_solutions": distinct_valid_solutions,
+                "selected_weight": int(correction.sum()),
                 "best_residual_weight": best_residual_weight,
                 "stop_on_first_valid": self.stop_on_first_valid,
                 "collect_valid_samples": self.collect_valid_samples,
                 "selection": self.selection,
+                "target_valid_solutions": self.target_valid_solutions,
                 "used_linear_solve": False,
                 "persistent_disorder": False,
                 "state_space": "full_error_space",

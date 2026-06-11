@@ -143,9 +143,11 @@ and `figures/v1_pbit_syndrome/`.
   p-bit nullspace sampling. The unguided importance-scored `pbit_nullspace_sampler` is 0.548,
   still better than plain nullspace sampling at 0.753 but not competitive with BP-OSD.
 - The p-bit-native syndrome pilot adds 5,400 decoder-trial rows. `pbit_syndrome` uses no GF(2)
-  solve, no BP, and no persistent disorder. It finds valid corrections reliably on the configured
-  topological rows and reaches 0.927 mean BB144 valid rate, but BB144 mean logical error is 0.583,
-  so the bottleneck is logical-coset selection after validity rather than syndrome validity alone.
+  solve, no BP, and no persistent disorder. It now chooses the minimum-weight correction among up
+  to ten distinct valid physical corrections. It finds valid corrections reliably on the configured
+  topological rows and reaches 0.927 mean BB144 valid rate, but BB144 averages only 1.91 distinct
+  valid corrections and 0.583 mean logical error, so this small valid-set minimum-weight rule is
+  not enough to compete with BP-OSD.
 
 ## Interpretation Rules
 
@@ -156,7 +158,8 @@ and `figures/v1_pbit_syndrome/`.
 - The `pbit_syndrome` decoder uses that physical-bit p-bit update to search for `H e = s` directly
   in the full error space. It records `used_linear_solve = false` and relies on Bernoulli firing
   plus asynchronous update order for the first symmetry-breaking baseline. The first
-  `v1_pbit_syndrome` artifact is a 50-trial-per-group pilot, not a precision claim.
+  `v1_pbit_syndrome` artifact is a 50-trial-per-group pilot using minimum-weight selection over up
+  to ten distinct valid corrections, not a precision claim.
 - The hard-constrained p-bit sampler uses the same logistic conditional on affine nullspace
   coordinates, so every collected correction is syndrome-valid.
 - MWPM is reported only for graphlike topological syndrome matrices with column weight at most two.

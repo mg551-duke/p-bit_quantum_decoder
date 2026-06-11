@@ -19,7 +19,8 @@
       "update": "gibbs",
       "stop_on_first_valid": false,
       "collect_valid_samples": true,
-      "selection": "best_energy"
+      "selection": "min_weight",
+      "target_valid_solutions": 3
     },
     "pbit_coset_sampler": {
       "chains": 2,

@@ -438,7 +438,7 @@
           <div class="metric"><strong>32,000</strong><span>topological MWPM comparison rows</span></div>
           <div class="metric"><strong>9,600</strong><span>BB144 decoder-trial rows with BP-OSD</span></div>
           <div class="metric"><strong>5,400</strong><span>p-bit-native syndrome pilot rows</span></div>
-          <div class="metric"><strong>1,031,342</strong><span>coset-distribution rows across report artifacts</span></div>
+          <div class="metric"><strong>1,030,969</strong><span>coset-distribution rows across report artifacts</span></div>
           <div class="metric"><strong>59</strong><span>min-energy disagreement cases</span></div>
           <div class="metric"><strong>37,760</strong><span>precision hard-case attempts</span></div>
         </div>
@@ -456,8 +456,10 @@
           worst Wilson half-width 0.0488 and zero additional trials requested. BP-guided p-bit
           sampling improves BB144 mean logical error to 0.267 versus 0.548 for unguided p-bit
           sampling, while BP-OSD remains the strongest BB144 decoder at 0.146. The p-bit-native
-          syndrome pilot shows that Bernoulli p-bit firing can usually find BB144-valid
-          corrections without a linear solve, but BB144 logical error remains high.
+          syndrome pilot now chooses the minimum-weight correction among up to ten distinct valid
+          physical corrections. It shows that Bernoulli p-bit firing can usually find BB144-valid
+          corrections without a linear solve, but BB144 averages only 1.91 distinct valid
+          corrections in this budget and logical error remains high.
         </p>
 
         <div class="takeaway-grid" aria-label="headline result comparisons">
@@ -484,6 +486,10 @@
           <div class="takeaway">
             <b>0.583</b>
             <span>mean BB144 logical error for no-linear-solve p-bit syndrome search</span>
+          </div>
+          <div class="takeaway">
+            <b>1.91</b>
+            <span>mean BB144 distinct valid corrections found before min-weight selection</span>
           </div>
         </div>
       </section>
@@ -648,6 +654,16 @@
           </figure>
 
           <figure>
+            <img src="../../figures/v1_pbit_syndrome/distinct_valid_solutions.png" alt="P-bit syndrome distinct valid solutions plot" />
+            <figcaption>Number of distinct valid physical corrections found before min-weight selection or sweep exhaustion.</figcaption>
+          </figure>
+
+          <figure>
+            <img src="../../figures/v1_pbit_syndrome/selected_weight.png" alt="P-bit syndrome selected correction weight plot" />
+            <figcaption>Hamming weight of the returned valid correction under the minimum-weight readout.</figcaption>
+          </figure>
+
+          <figure>
             <img src="../../figures/v1_pbit_syndrome/distinct_logical_classes.png" alt="P-bit syndrome distinct logical classes plot" />
             <figcaption>Logical-class diversity among valid states collected by the p-bit syndrome decoder.</figcaption>
           </figure>
@@ -772,19 +788,21 @@
 
         <h3>P-bit-Native Syndrome Probe</h3>
         <table>
-          <thead><tr><th>Group</th><th>Logical Error</th><th>Valid Rate</th><th>First-Valid Sweep</th><th>Runtime</th></tr></thead>
+          <thead><tr><th>Group</th><th>Logical Error</th><th>Valid Rate</th><th>First-Valid Sweep</th><th>Distinct Valid</th><th>Target Hit</th><th>Runtime</th></tr></thead>
           <tbody>
-            <tr><td>toric 3</td><td class="value">0.107</td><td class="value">1.000</td><td class="value">1.7</td><td class="value">70.2 ms</td></tr>
-            <tr><td>surface 3</td><td class="value">0.100</td><td class="value">1.000</td><td class="value">1.2</td><td class="value">95.2 ms</td></tr>
-            <tr><td>toric 5</td><td class="value">0.213</td><td class="value">1.000</td><td class="value">7.3</td><td class="value">183.0 ms</td></tr>
-            <tr><td>surface 7</td><td class="value">0.127</td><td class="value">1.000</td><td class="value">14.2</td><td class="value">408.2 ms</td></tr>
-            <tr><td>BB144</td><td class="value">0.583</td><td class="value">0.927</td><td class="value">20.9</td><td class="value">483.2 ms</td></tr>
+            <tr><td>toric 3</td><td class="value">0.133</td><td class="value">1.000</td><td class="value">1.7</td><td class="value">5.87</td><td class="value">0.330</td><td class="value">76.7 ms</td></tr>
+            <tr><td>surface 3</td><td class="value">0.293</td><td class="value">1.000</td><td class="value">1.2</td><td class="value">10.00</td><td class="value">1.000</td><td class="value">1.0 ms</td></tr>
+            <tr><td>toric 5</td><td class="value">0.277</td><td class="value">1.000</td><td class="value">7.3</td><td class="value">7.32</td><td class="value">0.523</td><td class="value">146.6 ms</td></tr>
+            <tr><td>surface 7</td><td class="value">0.370</td><td class="value">1.000</td><td class="value">14.2</td><td class="value">10.00</td><td class="value">1.000</td><td class="value">8.5 ms</td></tr>
+            <tr><td>BB144</td><td class="value">0.583</td><td class="value">0.927</td><td class="value">20.9</td><td class="value">1.91</td><td class="value">0.000</td><td class="value">544.9 ms</td></tr>
           </tbody>
         </table>
         <p class="note">
-          The no-linear-solve p-bit syndrome decoder usually finds valid corrections, including on
-          BB144, but the BB144 logical-coset decision remains weak versus BP-OSD and BP-guided
-          p-bit sampling.
+          This run tests the user-suggested readout: find up to ten different valid physical
+          corrections and choose the minimum-weight one. It is a negative result for this budget:
+          surface rows reach the ten-solution target, toric rows only partly reach it, and BB144
+          never reaches it. BB144 logical error remains weak versus BP-OSD and BP-guided p-bit
+          sampling.
         </p>
 
         <h3>Mean Hard-Case Exact-Coset Recovery</h3>
@@ -856,7 +874,10 @@
           comparison adds a clear baseline: MWPM is still faster and lower-error overall, but the
           better-mixed p-bit sampler now beats the plain nullspace sampler in that comparison. The
           BB144 result adds the right qLDPC baseline: BP-OSD is still stronger than the p-bit
-          samplers, but BP-guided p-bit sampling closes much of the unguided p-bit gap.
+          samplers, but BP-guided p-bit sampling closes much of the unguided p-bit gap. The
+          no-linear-solve p-bit syndrome result now tests minimum-weight selection over a small
+          valid set and shows that this local-search version does not discover enough BB144 valid
+          diversity to make that rule competitive.
         </p>
 
         <p class="note">

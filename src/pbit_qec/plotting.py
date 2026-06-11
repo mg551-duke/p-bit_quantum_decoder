@@ -88,6 +88,18 @@ def make_plots(results_dir: Path, figures_dir: Path) -> List[Path]:
                 "mean final residual weight",
                 "Final residual weight",
             ),
+            (
+                "mean_distinct_valid_solutions",
+                "distinct_valid_solutions.png",
+                "mean distinct valid solutions",
+                "Distinct valid solutions",
+            ),
+            (
+                "mean_selected_weight",
+                "selected_weight.png",
+                "mean selected correction weight",
+                "Selected correction weight",
+            ),
         ]
         for column, filename, ylabel, title in optional_plots:
             if column in summary.columns and not summary[column].dropna().empty:

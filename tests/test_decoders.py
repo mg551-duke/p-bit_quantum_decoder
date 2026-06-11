@@ -14,6 +14,7 @@ from pbit_qec.decoders import (
     _pbit_probability_one,
 )
 from pbit_qec.simulation import run_trial
+from pbit_qec.types import CSSCode
 
 
 def test_exact_decoder_matches_coset_analysis() -> None:
@@ -167,6 +168,59 @@ def test_pbit_syndrome_decoder_collects_valid_cosets() -> None:
     assert sum(result.coset_counts.values()) >= 1
     assert result.metadata["collect_valid_samples"] is True
     assert result.metadata["selection"] == "best_energy"
+
+
+def test_pbit_syndrome_decoder_can_stop_after_min_weight_solution_target() -> None:
+    code = make_toric_code(3)
+    syndrome = np.zeros(code.m, dtype=np.uint8)
+    decoder = PBitSyndromeDecoder(
+        chains=3,
+        sweeps=20,
+        initial_probability=0.0,
+        stop_on_first_valid=False,
+        collect_valid_samples=True,
+        selection="min_weight",
+        target_valid_solutions=1,
+    )
+
+    result = decoder.decode(code, syndrome, 0.08, np.random.default_rng(21))
+
+    assert result.valid
+    assert result.total_samples == 1
+    assert result.metadata["distinct_valid_solutions"] == 1
+    assert result.metadata["selected_weight"] == 0
+    assert result.metadata["selection"] == "min_weight"
+    assert result.metadata["target_valid_solutions"] == 1
+
+
+def test_pbit_syndrome_min_weight_prefers_lightest_valid_solution() -> None:
+    code = CSSCode(
+        H=np.zeros((0, 3), dtype=np.uint8),
+        A=np.zeros((1, 3), dtype=np.uint8),
+        qubit_labels=("q0", "q1", "q2"),
+        check_labels=(),
+        logical_labels=("logical",),
+        family="toy",
+        size=3,
+    )
+    decoder = PBitSyndromeDecoder(
+        chains=1,
+        sweeps=5,
+        initial_probability=1.0,
+        update="metropolis",
+        stop_on_first_valid=False,
+        collect_valid_samples=True,
+        selection="min_weight",
+        target_valid_solutions=2,
+    )
+
+    result = decoder.decode(code, np.zeros(0, dtype=np.uint8), 0.08, np.random.default_rng(22))
+
+    assert result.valid
+    assert result.total_samples == 2
+    assert int(result.correction.sum()) == 0
+    assert result.metadata["distinct_valid_solutions"] == 2
+    assert result.metadata["selected_weight"] == 0
 
 
 def test_pbit_syndrome_decoder_rejects_unknown_selection() -> None:

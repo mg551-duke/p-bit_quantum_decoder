@@ -78,7 +78,7 @@ BB144 sweep. The new `pbit_syndrome` row starts from Bernoulli physical error bi
 checks incrementally, and records whether plain p-bit randomness can find `H e = s` before any
 nullspace, BP, or OSD aid is introduced. This first artifact is a 50-trial-per-group pilot with
 8 chains, 240 sweeps, annealing from `beta = 0.3` to `1.2`, valid-coset collection enabled, and
-best-prior valid-hit correction selection.
+minimum-weight selection after up to ten distinct valid physical corrections.
 
 This probe should be interpreted through valid correction rate, first-valid sweep, final residual
 weight, logical error, runtime, and valid coset counts. It is intentionally the

@@ -204,6 +204,10 @@ def summarize_trials(trials: pd.DataFrame) -> pd.DataFrame:
             ),
             "mean_best_residual_weight": _mean_metadata_number(group, "best_residual_weight"),
             "mean_final_residual_weight": _mean_metadata_number(group, "final_residual_weight"),
+            "mean_distinct_valid_solutions": _mean_metadata_number(
+                group, "distinct_valid_solutions"
+            ),
+            "mean_selected_weight": _mean_metadata_number(group, "selected_weight"),
             "mean_runtime_s": float(group["runtime_s"].mean()),
             "se_runtime_s": _standard_error(group["runtime_s"]),
             "exact_observations": exact_n,

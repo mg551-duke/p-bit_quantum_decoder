@@ -9,3 +9,5 @@
 - `first_valid_sweep.png`
 - `best_residual_weight.png`
 - `final_residual_weight.png`
+- `distinct_valid_solutions.png`
+- `selected_weight.png`
