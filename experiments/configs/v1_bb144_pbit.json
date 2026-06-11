@@ -35,6 +35,6 @@
     }
   },
   "sweeps": [
-    { "family": "bb", "size": 144, "trials": 300, "exact": false }
+    { "family": "bb", "size": 144, "trials": 400, "exact": false }
   ]
 }

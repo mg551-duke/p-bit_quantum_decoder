@@ -35,7 +35,7 @@ from `experiments/configs/v1_bb144_pbit.json`.
   p-bit decoders.
 - `figures/v1_mwpm_comparison/`: five PNG figures for logical error, exact-coset agreement,
   valid-sampling, logical-class diversity, and coset entropy in the MWPM comparison.
-- `results/v1_bb144_pbit/`: 5,400 BB144 decoder-trial rows, 18 grouped summary rows, and 252,087
+- `results/v1_bb144_pbit/`: 7,200 BB144 decoder-trial rows, 18 grouped summary rows, and 334,926
   coset-distribution rows for BP-OSD, the nullspace sampler, and the chained-sweep
   nullspace-coordinate p-bit sampler.
 - `figures/v1_bb144_pbit/`: five PNG figures for the BB144 p-bit sweep.
@@ -138,25 +138,29 @@ pass over the 78-dimensional affine nullspace per collected sample.
 
 BB144 logical error by physical error rate:
 
-- p=0.01: BP-OSD 0.000, nullspace 0.320, p-bit nullspace 0.113
-- p=0.02: BP-OSD 0.000, nullspace 0.490, p-bit nullspace 0.230
-- p=0.04: BP-OSD 0.003, nullspace 0.823, p-bit nullspace 0.487
-- p=0.06: BP-OSD 0.097, nullspace 0.900, p-bit nullspace 0.717
-- p=0.08: BP-OSD 0.270, nullspace 0.977, p-bit nullspace 0.910
-- p=0.10: BP-OSD 0.490, nullspace 1.000, p-bit nullspace 0.957
+- p=0.01: BP-OSD 0.000, nullspace 0.315, p-bit nullspace 0.113
+- p=0.02: BP-OSD 0.000, nullspace 0.528, p-bit nullspace 0.253
+- p=0.04: BP-OSD 0.005, nullspace 0.808, p-bit nullspace 0.493
+- p=0.06: BP-OSD 0.083, nullspace 0.898, p-bit nullspace 0.728
+- p=0.08: BP-OSD 0.273, nullspace 0.978, p-bit nullspace 0.918
+- p=0.10: BP-OSD 0.518, nullspace 0.995, p-bit nullspace 0.963
 
 Aggregate BB144 readout:
 
-- `bp_osd`: mean logical error 0.143, mean half-width 0.027, mean runtime 0.6 ms
-- `pbit_nullspace_sampler`: mean logical error 0.569, mean half-width 0.041, mean runtime 253 ms,
-  mean coset entropy 3.618 bits
-- `nullspace_coset_sampler`: mean logical error 0.752, mean half-width 0.035, mean runtime 14 ms,
-  mean coset entropy 0.635 bits
+- `bp_osd`: mean logical error 0.146, mean half-width 0.023, mean runtime 0.4 ms
+- `pbit_nullspace_sampler`: mean logical error 0.578, mean half-width 0.035, mean runtime 223 ms,
+  mean coset entropy 3.615 bits
+- `nullspace_coset_sampler`: mean logical error 0.753, mean half-width 0.031, mean runtime 13 ms,
+  mean coset entropy 0.628 bits
 
 This is negative for p-bit competitiveness against a strong BB144 decoder: BP-OSD is much faster
 and lower-error. The p-bit mixing change is still useful because it improves the p-bit/nullspace
 comparison relative to the previous artifact and beats the plain nullspace sampler, but it is not a
 state-of-the-art BB144 decoder. Exact coset enumeration is not feasible in this artifact.
+
+The BB144 rows now use 400 trials per physical error rate. The worst logical-error Wilson
+half-width in `results/v1_bb144_pbit/summary.csv` is 0.0488, and every BB144 row reports zero
+additional trials needed for a 5% Wilson half-width target.
 
 Required interpretation constraints:
 

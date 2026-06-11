@@ -52,3 +52,5 @@ The `v1_bb144_pbit` config tests the [[144,12,12]] bivariate-bicycle X-error sec
 particular-start chained-sweep nullspace-coordinate p-bits against the plain hard-constrained
 nullspace sampler and LDPC BP-OSD. The goal is diagnostic: record whether p-bit coset sampling
 improves over a validity-only affine baseline, while also comparing against a strong qLDPC decoder.
+It uses 400 trials per physical error rate, which brings the worst BB144 logical-error Wilson
+half-width below 0.049.
