@@ -30,7 +30,7 @@
       "samples": 40,
       "burn_in": 8,
       "updates_per_sample": 4,
-      "beta": 1.0,
+      "beta": 0.75,
       "max_nullity": 64,
       "initial_state": "random"
     },

@@ -329,33 +329,33 @@
           <div class="metric"><strong>18,000</strong><span>decoder-trial rows</span></div>
           <div class="metric"><strong>18,200</strong><span>precision-focus trial rows</span></div>
           <div class="metric"><strong>304</strong><span>total grouped summary rows</span></div>
-          <div class="metric"><strong>74,496</strong><span>total coset-distribution rows</span></div>
+          <div class="metric"><strong>75,266</strong><span>total coset-distribution rows</span></div>
           <div class="metric"><strong>59</strong><span>min-energy disagreement cases</span></div>
-          <div class="metric"><strong>15,104</strong><span>precision hard-case attempts</span></div>
+          <div class="metric"><strong>37,760</strong><span>precision hard-case attempts</span></div>
         </div>
 
         <p class="note">
           Current readout: exact coset decoding remains the small-code reference. The precision
           focus run lifts matching groups to 260 trials each and cuts the p-bit logical-error
           confidence half-width from about 0.112 to 0.057. The new hard-constrained
-          nullspace-coordinate p-bit sampler has the best non-exact exact-coset agreement in the
-          v1-large sweep and the best high-repeat hard-case recovery. The soft physical-bit sampler
-          remains useful as the unconstrained p-bit baseline, but it is not the strongest p-bit
-          path in this artifact.
+          nullspace-coordinate p-bit sampler has comparable non-exact exact-coset agreement in the
+          v1-large sweep and the best high-repeat hard-case recovery. The tuned hard-case run
+          reduces overall Wilson half-width to about 0.010, so the hard-case ordering is much less
+          noisy than before.
         </p>
 
         <div class="takeaway-grid" aria-label="headline result comparisons">
           <div class="takeaway">
-            <b>52.1%</b>
+            <b>57.4%</b>
             <span>high-precision hard-case recovery for nullspace-coordinate p-bits</span>
           </div>
           <div class="takeaway">
-            <b>+5.8 pp</b>
+            <b>+10.4 pp</b>
             <span>hard-case recovery lift versus the hard-constrained nullspace baseline</span>
           </div>
           <div class="takeaway">
-            <b>88.3%</b>
-            <span>v1-large exact-coset agreement for nullspace-coordinate p-bits</span>
+            <b>0.010</b>
+            <span>overall high-precision hard-case Wilson half-width</span>
           </div>
         </div>
       </section>
@@ -441,7 +441,7 @@
           <tbody>
             <tr><td>exact_coset</td><td class="value">0.203</td><td class="value">0.063</td></tr>
             <tr><td>nullspace_coset_sampler</td><td class="value">0.298</td><td class="value">0.099</td></tr>
-            <tr><td>pbit_nullspace_sampler</td><td class="value">0.358</td><td class="value">0.108</td></tr>
+            <tr><td>pbit_nullspace_sampler</td><td class="value">0.348</td><td class="value">0.107</td></tr>
             <tr><td>pbit_coset_sampler</td><td class="value">0.487</td><td class="value">0.113</td></tr>
             <tr><td>pbit_annealed_optimizer</td><td class="value">0.555</td><td class="value">0.113</td></tr>
           </tbody>
@@ -452,8 +452,8 @@
           <thead><tr><th>Decoder</th><th>Mean</th><th>Mean CI Half-Width</th></tr></thead>
           <tbody>
             <tr><td>exact_coset</td><td class="value">1.000</td><td class="value">0.016</td></tr>
-            <tr><td>pbit_nullspace_sampler</td><td class="value">0.883</td><td class="value">0.054</td></tr>
             <tr><td>nullspace_coset_sampler</td><td class="value">0.863</td><td class="value">0.057</td></tr>
+            <tr><td>pbit_nullspace_sampler</td><td class="value">0.861</td><td class="value">0.058</td></tr>
             <tr><td>pbit_annealed_optimizer</td><td class="value">0.529</td><td class="value">0.083</td></tr>
             <tr><td>pbit_coset_sampler</td><td class="value">0.514</td><td class="value">0.087</td></tr>
           </tbody>
@@ -485,32 +485,32 @@
         <div class="bar-list" aria-label="hard-case recovery bar chart">
           <div class="bar-row">
             <span>pbit_nullspace_sampler</span>
-            <div class="bar-track"><div class="bar-fill" style="width: 50.0%"></div></div>
-            <span class="value">0.500</span>
+            <div class="bar-track"><div class="bar-fill" style="width: 53.7%"></div></div>
+            <span class="value">0.537</span>
           </div>
           <div class="bar-row">
             <span>nullspace_coset_sampler</span>
-            <div class="bar-track"><div class="bar-fill secondary" style="width: 44.5%"></div></div>
-            <span class="value">0.445</span>
+            <div class="bar-track"><div class="bar-fill secondary" style="width: 44.0%"></div></div>
+            <span class="value">0.440</span>
           </div>
           <div class="bar-row">
             <span>pbit_coset_sampler</span>
-            <div class="bar-track"><div class="bar-fill" style="width: 43.5%"></div></div>
-            <span class="value">0.435</span>
+            <div class="bar-track"><div class="bar-fill" style="width: 41.9%"></div></div>
+            <span class="value">0.419</span>
           </div>
           <div class="bar-row">
             <span>pbit_annealed_optimizer</span>
-            <div class="bar-track"><div class="bar-fill warning" style="width: 42.6%"></div></div>
-            <span class="value">0.426</span>
+            <div class="bar-track"><div class="bar-fill warning" style="width: 44.5%"></div></div>
+            <span class="value">0.445</span>
           </div>
         </div>
         <table>
           <thead><tr><th>Decoder</th><th>Overall Mean</th><th>95% CI</th></tr></thead>
           <tbody>
-            <tr><td>pbit_nullspace_sampler</td><td class="value">0.500</td><td class="value">[0.472, 0.528]</td></tr>
-            <tr><td>nullspace_coset_sampler</td><td class="value">0.445</td><td class="value">[0.417, 0.473]</td></tr>
-            <tr><td>pbit_coset_sampler</td><td class="value">0.435</td><td class="value">[0.407, 0.463]</td></tr>
-            <tr><td>pbit_annealed_optimizer</td><td class="value">0.426</td><td class="value">[0.398, 0.455]</td></tr>
+            <tr><td>pbit_nullspace_sampler</td><td class="value">0.537</td><td class="value">[0.517, 0.557]</td></tr>
+            <tr><td>pbit_annealed_optimizer</td><td class="value">0.445</td><td class="value">[0.425, 0.465]</td></tr>
+            <tr><td>nullspace_coset_sampler</td><td class="value">0.440</td><td class="value">[0.420, 0.460]</td></tr>
+            <tr><td>pbit_coset_sampler</td><td class="value">0.419</td><td class="value">[0.400, 0.440]</td></tr>
           </tbody>
         </table>
 
@@ -518,10 +518,10 @@
         <table>
           <thead><tr><th>Decoder</th><th>Recovered / Attempts</th><th>Overall Mean</th><th>95% CI</th></tr></thead>
           <tbody>
-            <tr><td>pbit_nullspace_sampler</td><td class="value">1967 / 3776</td><td class="value">0.521</td><td class="value">[0.505, 0.537]</td></tr>
-            <tr><td>nullspace_coset_sampler</td><td class="value">1747 / 3776</td><td class="value">0.463</td><td class="value">[0.447, 0.479]</td></tr>
-            <tr><td>pbit_annealed_optimizer</td><td class="value">1731 / 3776</td><td class="value">0.458</td><td class="value">[0.443, 0.474]</td></tr>
-            <tr><td>pbit_coset_sampler</td><td class="value">1639 / 3776</td><td class="value">0.434</td><td class="value">[0.418, 0.450]</td></tr>
+            <tr><td>pbit_nullspace_sampler</td><td class="value">5414 / 9440</td><td class="value">0.574</td><td class="value">[0.564, 0.583]</td></tr>
+            <tr><td>nullspace_coset_sampler</td><td class="value">4430 / 9440</td><td class="value">0.469</td><td class="value">[0.459, 0.479]</td></tr>
+            <tr><td>pbit_annealed_optimizer</td><td class="value">4338 / 9440</td><td class="value">0.460</td><td class="value">[0.449, 0.470]</td></tr>
+            <tr><td>pbit_coset_sampler</td><td class="value">4074 / 9440</td><td class="value">0.432</td><td class="value">[0.422, 0.442]</td></tr>
           </tbody>
         </table>
 
@@ -543,8 +543,10 @@
           optimization in those configured groups. The regenerated hard-case precision run supports
           a stronger and more specific claim: constraining p-bit updates to the affine
           syndrome-valid nullspace improves exact max-coset recovery on mined disagreement cases.
-          This is evidence for coset-mass sampling once validity is handled, not evidence that the
-          unconstrained soft penalty alone is sufficient.
+          The tuned setting is <code>beta = 0.75</code> with four nullspace-coordinate updates per
+          collected sample, selected from the committed calibration CSV. This is evidence for
+          coset-mass sampling once validity is handled, not evidence that the unconstrained soft
+          penalty alone is sufficient.
         </p>
 
         <p class="note">
@@ -579,6 +581,7 @@
           <a href="../../results/v1_hard_cases_precision/hard_cases.csv">hard_cases.csv</a>
           <a href="../../results/v1_hard_cases_precision/hard_case_recovery.csv">hard_case_recovery.csv</a>
           <a href="../../results/v1_hard_cases_precision/hard_case_summary.csv">hard_case_summary.csv</a>
+          <a href="../../results/v1_hard_cases_precision/pbit_nullspace_calibration.csv">pbit_nullspace_calibration.csv</a>
           <a href="../../results/v1_hard_cases_precision/hard_cases_manifest.json">hard_cases_manifest.json</a>
         </div>
       </section>

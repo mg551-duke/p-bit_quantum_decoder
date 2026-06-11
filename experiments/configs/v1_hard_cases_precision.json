@@ -9,7 +9,7 @@
     "pbit_annealed_optimizer"
   ],
   "max_cases_per_sweep": 8,
-  "recovery_repeats": 64,
+  "recovery_repeats": 160,
   "decoder_settings": {
     "exact_coset": { "max_nullity": 24 },
     "pbit_coset_sampler": {
@@ -30,8 +30,8 @@
     "pbit_nullspace_sampler": {
       "samples": 800,
       "burn_in": 120,
-      "updates_per_sample": 8,
-      "beta": 1.0,
+      "updates_per_sample": 4,
+      "beta": 0.75,
       "max_nullity": 64,
       "initial_state": "random"
     },

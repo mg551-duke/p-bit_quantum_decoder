@@ -11,10 +11,10 @@ focused precision artifacts from `experiments/configs/v1_precision_focus.json` a
   aggregate results.
 - `trials.csv`: 18,000 decoder-trial rows.
 - `summary.csv`: 234 grouped summary rows.
-- `coset_distributions.csv`: 36,704 sampled/exact coset rows.
+- `coset_distributions.csv`: 37,474 sampled/exact coset rows.
 - `hard_cases.csv`: 59 small-code syndromes where the exact maximum-coset class differs from
   the minimum-energy class.
-- `hard_case_recovery.csv`: 4,720 recovery attempts on mined hard cases.
+- `hard_case_recovery.csv`: 9,440 recovery attempts on mined hard cases.
 - `hard_case_summary.csv`: grouped hard-case recovery rates with Wilson confidence intervals.
 - `figures/v1_large/`: six PNG figures for logical error, exact agreement, valid sampling,
   logical-class diversity, coset entropy, and hard-case recovery.
@@ -22,8 +22,10 @@ focused precision artifacts from `experiments/configs/v1_precision_focus.json` a
   37,792 coset-distribution rows with 260 trials in every configured group.
 - `figures/v1_precision_focus/`: five PNG figures for the focused logical-error, exact-agreement,
   valid-sampling, logical-class diversity, and coset-entropy curves.
-- `results/v1_hard_cases_precision/`: 15,104 high-repeat hard-case recovery attempts and grouped
+- `results/v1_hard_cases_precision/`: 37,760 high-repeat hard-case recovery attempts and grouped
   Wilson intervals.
+- `results/v1_hard_cases_precision/pbit_nullspace_calibration.csv`: tuning grid used to select
+  `beta = 0.75` and `updates_per_sample = 4` for `pbit_nullspace_sampler`.
 - `figures/v1_hard_cases_precision/hard_case_recovery.png`: high-repeat hard-case recovery plot
   with interval bars.
 
@@ -38,24 +40,24 @@ The p-bit decoders use direct Gibbs/p-bit conditional updates with
 summaries, exact coset decoding is the best available small-code reference. The larger run improves
 the soft p-bit sampler's logical error rate, exact-coset agreement, and valid-sample rate relative
 to the earlier artifact. The new `pbit_nullspace_sampler` uses the same Gibbs/p-bit conditional over
-affine nullspace coordinates, keeping every sampled correction syndrome-valid by construction. It
-has the strongest non-exact exact-coset agreement in the v1-large sweep and the strongest mined
-hard-case recovery.
+affine nullspace coordinates, keeping every sampled correction syndrome-valid by construction. The
+tuned setting has comparable non-exact exact-coset agreement in the v1-large sweep and the strongest
+mined hard-case recovery.
 
 Mean exact-coset agreement where exact decoding is available:
 
 - `exact_coset`: 1.000
-- `pbit_nullspace_sampler`: 0.883
 - `nullspace_coset_sampler`: 0.863
+- `pbit_nullspace_sampler`: 0.861
 - `pbit_annealed_optimizer`: 0.529
 - `pbit_coset_sampler`: 0.514
 
 Overall hard-case exact-coset recovery with 95% Wilson intervals:
 
-- `pbit_nullspace_sampler`: 0.500 [0.472, 0.528]
-- `nullspace_coset_sampler`: 0.445 [0.417, 0.473]
-- `pbit_coset_sampler`: 0.435 [0.407, 0.463]
-- `pbit_annealed_optimizer`: 0.426 [0.398, 0.455]
+- `pbit_nullspace_sampler`: 0.537 [0.517, 0.557]
+- `pbit_annealed_optimizer`: 0.445 [0.425, 0.465]
+- `nullspace_coset_sampler`: 0.440 [0.420, 0.460]
+- `pbit_coset_sampler`: 0.419 [0.400, 0.440]
 
 The precision focus run reduces mean logical-error Wilson half-widths on matching groups from about
 0.112 to 0.057 for `pbit_coset_sampler`, a 48.8% reduction. Focused mean logical error rates are:
@@ -67,16 +69,18 @@ The precision focus run reduces mean logical-error Wilson half-widths on matchin
 
 The high-repeat hard-case run changes the hard-case readout:
 
-- `pbit_nullspace_sampler`: 1967/3776 = 0.521 [0.505, 0.537]
-- `nullspace_coset_sampler`: 1747/3776 = 0.463 [0.447, 0.479]
-- `pbit_annealed_optimizer`: 1731/3776 = 0.458 [0.443, 0.474]
-- `pbit_coset_sampler`: 1639/3776 = 0.434 [0.418, 0.450]
+- `pbit_nullspace_sampler`: 5414/9440 = 0.574 [0.564, 0.583]
+- `nullspace_coset_sampler`: 4430/9440 = 0.469 [0.459, 0.479]
+- `pbit_annealed_optimizer`: 4338/9440 = 0.460 [0.449, 0.470]
+- `pbit_coset_sampler`: 4074/9440 = 0.432 [0.422, 0.442]
 
 The current evidence is therefore not strong enough to claim a hard-case advantage for soft
 physical-bit p-bit coset sampling alone. It does support a hard-case advantage for
 nullspace-coordinate p-bit sampling, which separates syndrome validity from posterior coset-mass
-estimation. The focused precision run still supports a small logical-error advantage for the soft
-physical-bit sampler over annealed optimization in those configured groups.
+estimation. The high-repeat hard-case overall Wilson half-width is now about 0.010, and the
+`pbit_nullspace_sampler` lower bound is above the other decoders' upper bounds. The focused
+precision run still supports a small logical-error advantage for the soft physical-bit sampler over
+annealed optimization in those configured groups.
 
 Required interpretation constraints:
 

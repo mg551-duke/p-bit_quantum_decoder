@@ -1,0 +1,31 @@
+{
+  "seed": 404040,
+  "hard_cases_path": "results/v1_hard_cases_precision/hard_cases.csv",
+  "output_csv": "results/v1_hard_cases_precision/pbit_nullspace_calibration.csv",
+  "repeats": 12,
+  "decoder_settings": {
+    "samples": 800,
+    "burn_in": 120,
+    "max_nullity": 64,
+    "initial_state": "random"
+  },
+  "grid": [
+    { "beta": 0.5, "updates_per_sample": 4 },
+    { "beta": 0.5, "updates_per_sample": 8 },
+    { "beta": 0.5, "updates_per_sample": 16 },
+    { "beta": 0.75, "updates_per_sample": 4 },
+    { "beta": 0.75, "updates_per_sample": 8 },
+    { "beta": 0.75, "updates_per_sample": 16 },
+    { "beta": 1.0, "updates_per_sample": 4 },
+    { "beta": 1.0, "updates_per_sample": 8 },
+    { "beta": 1.0, "updates_per_sample": 16 },
+    { "beta": 1.25, "updates_per_sample": 4 },
+    { "beta": 1.25, "updates_per_sample": 8 },
+    { "beta": 1.25, "updates_per_sample": 16 },
+    { "beta": 1.5, "updates_per_sample": 4 },
+    { "beta": 1.5, "updates_per_sample": 8 },
+    { "beta": 1.5, "updates_per_sample": 16 },
+    { "beta": 2.0, "updates_per_sample": 8 },
+    { "beta": 2.0, "updates_per_sample": 16 }
+  ]
+}

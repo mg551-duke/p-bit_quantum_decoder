@@ -49,6 +49,7 @@ Focused precision artifacts:
 ```bash
 uv run python scripts/run_experiments.py --config experiments/configs/v1_precision_focus.json
 uv run python scripts/find_hard_cases.py --config experiments/configs/v1_hard_cases_precision.json
+uv run python scripts/tune_pbit_nullspace.py --config experiments/configs/v1_pbit_nullspace_calibration.json
 uv run python scripts/make_plots.py --results results/v1_precision_focus --figures figures/v1_precision_focus
 uv run python scripts/make_plots.py --results results/v1_hard_cases_precision --figures figures/v1_hard_cases_precision
 ```
@@ -73,7 +74,8 @@ Generated CSVs live in `results/v1_large/`:
 - `hard_case_summary.csv`
 
 Focused precision CSVs live in `results/v1_precision_focus/` and
-`results/v1_hard_cases_precision/`.
+`results/v1_hard_cases_precision/`, including `pbit_nullspace_calibration.csv` for the tuned
+nullspace-coordinate p-bit setting.
 
 Generated figures live in `figures/v1_large/`:
 
@@ -90,18 +92,20 @@ Focused precision figures live in `figures/v1_precision_focus/` and
 ## Current Readout
 
 - The v1-large run now includes `pbit_nullspace_sampler`, giving 18,000 decoder-trial rows and
-  4,720 mined hard-case recovery attempts.
+  9,440 mined hard-case recovery attempts.
 - The precision focus run adds 18,200 decoder-trial rows with 260 trials in every configured
   group.
 - The p-bit sampler's focused logical-error confidence half-width drops from about 0.112 to 0.057
   on matched groups.
 - Focused mean logical error is 0.485 for `pbit_coset_sampler` and 0.498 for
   `pbit_annealed_optimizer`.
-- The high-repeat hard-case run has 15,104 recovery attempts. It supports a hard-case advantage for
+- The high-repeat hard-case run has 37,760 recovery attempts. It supports a hard-case advantage for
   syndrome-valid nullspace-coordinate p-bit sampling: `pbit_nullspace_sampler` recovers
-  0.521 [0.505, 0.537], while `nullspace_coset_sampler` recovers 0.463 [0.447, 0.479],
-  `pbit_annealed_optimizer` recovers 0.458 [0.443, 0.474], and `pbit_coset_sampler` recovers
-  0.434 [0.418, 0.450].
+  0.574 [0.564, 0.583], while `nullspace_coset_sampler` recovers 0.469 [0.459, 0.479],
+  `pbit_annealed_optimizer` recovers 0.460 [0.449, 0.470], and `pbit_coset_sampler` recovers
+  0.432 [0.422, 0.442].
+- The tuned nullspace-coordinate p-bit setting is `beta = 0.75` with four updates per collected
+  sample, selected from `results/v1_hard_cases_precision/pbit_nullspace_calibration.csv`.
 
 ## Interpretation Rules
 

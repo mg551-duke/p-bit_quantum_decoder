@@ -51,7 +51,8 @@ Delta_i = E(z_i = 1) - E(z_i = 0)
 
 Because every state in the affine parameterization is syndrome-valid, this decoder separates the
 hardware-style stochastic update question from the validity-search problem. It is the strongest
-non-exact hard-case recovery decoder in the current artifact.
+non-exact hard-case recovery decoder in the current artifact. The v1 hard-case calibration selected
+`beta = 0.75` and `updates_per_sample = 4`.
 
 ## NullspaceCosetSamplerDecoder
 
