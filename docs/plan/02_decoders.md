@@ -39,6 +39,20 @@ Use the same soft energy but anneal from low to high beta with the same Gibbs/p-
 update and return the lowest-prior-energy valid correction found. This is the optimization-style
 Ising baseline.
 
+## PBitNullspaceCosetSamplerDecoder
+
+Solve `H e = s`, write valid corrections as `e = x0 + z B` over GF(2), and treat the binary
+nullspace coordinates `z_i` as p-bits. Each update uses the same logistic conditional:
+
+```text
+P(z_i = 1 | z_setminus_i, s) = 1 / (1 + exp(beta Delta_i))
+Delta_i = E(z_i = 1) - E(z_i = 0)
+```
+
+Because every state in the affine parameterization is syndrome-valid, this decoder separates the
+hardware-style stochastic update question from the validity-search problem. It is the strongest
+non-exact hard-case recovery decoder in the current artifact.
+
 ## NullspaceCosetSamplerDecoder
 
 Solve `H e = s`, sample inside the affine solution space using a GF(2) nullspace basis, and group

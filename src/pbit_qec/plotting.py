@@ -144,6 +144,7 @@ def _hard_case_plot(
     colors = {
         "nullspace_coset_sampler": "#64748b",
         "pbit_coset_sampler": "#0f766e",
+        "pbit_nullspace_sampler": "#2563eb",
         "pbit_annealed_optimizer": "#8a5a12",
     }
     ci_columns = {"recovered_exact_ci_low", "recovered_exact_ci_high"}

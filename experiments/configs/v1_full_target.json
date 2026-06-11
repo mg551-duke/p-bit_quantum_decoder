@@ -6,6 +6,7 @@
   "decoders": [
     "exact_coset",
     "pbit_coset_sampler",
+    "pbit_nullspace_sampler",
     "nullspace_coset_sampler",
     "pbit_annealed_optimizer"
   ],
@@ -25,6 +26,14 @@
       "burn_in": 400,
       "beta": 1.0,
       "max_nullity": 64
+    },
+    "pbit_nullspace_sampler": {
+      "samples": 4000,
+      "burn_in": 400,
+      "updates_per_sample": 16,
+      "beta": 1.0,
+      "max_nullity": 64,
+      "initial_state": "random"
     },
     "pbit_annealed_optimizer": {
       "chains": 32,

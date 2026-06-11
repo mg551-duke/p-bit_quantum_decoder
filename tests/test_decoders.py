@@ -6,6 +6,7 @@ from pbit_qec.decoders import (
     ExactCosetDecoder,
     NullspaceCosetSamplerDecoder,
     PBitCosetSamplerDecoder,
+    PBitNullspaceCosetSamplerDecoder,
     _pbit_probability_one,
 )
 
@@ -82,6 +83,34 @@ def test_pbit_sampler_supports_affine_warm_start() -> None:
 
     assert result.metadata["initial_state"] == "affine"
     assert result.total_samples == 12
+
+
+def test_pbit_nullspace_sampler_returns_valid_correction() -> None:
+    code = make_toric_code(3)
+    error = np.zeros(code.n, dtype=np.uint8)
+    error[[1, 4, 10]] = 1
+    syndrome = code.syndrome(error)
+    decoder = PBitNullspaceCosetSamplerDecoder(samples=60, burn_in=8)
+
+    result = decoder.decode(code, syndrome, 0.08, np.random.default_rng(11))
+
+    assert result.valid
+    assert result.valid_samples == 60
+    assert result.total_samples == 60
+    assert result.metadata["update"] == "gibbs"
+    assert result.metadata["state_space"] == "affine_nullspace"
+
+
+def test_pbit_nullspace_sampler_is_seed_deterministic_for_counts() -> None:
+    code = make_toric_code(3)
+    syndrome = np.zeros(code.m, dtype=np.uint8)
+    decoder = PBitNullspaceCosetSamplerDecoder(samples=40, burn_in=6)
+
+    first = decoder.decode(code, syndrome, 0.08, np.random.default_rng(13))
+    second = decoder.decode(code, syndrome, 0.08, np.random.default_rng(13))
+
+    assert first.coset_counts == second.coset_counts
+    assert np.array_equal(first.correction, second.correction)
 
 
 def test_pbit_probability_is_logistic_conditional() -> None:

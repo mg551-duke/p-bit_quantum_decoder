@@ -16,8 +16,9 @@ P(l | s) proportional to sum_{e: H e = s, A e = l} exp[-E_prior(e)]
 ```
 
 The prototype implements small toric and surface-code sectors, exact small-code coset
-enumeration, finite-temperature p-bit/Gibbs conditional sampling, annealed optimization baselines,
-and reproducible CSV/plot generation.
+enumeration, finite-temperature p-bit/Gibbs conditional sampling, a hard-constrained
+nullspace-coordinate p-bit sampler, annealed optimization baselines, and reproducible CSV/plot
+generation.
 
 ## Install
 
@@ -88,23 +89,28 @@ Focused precision figures live in `figures/v1_precision_focus/` and
 
 ## Current Readout
 
+- The v1-large run now includes `pbit_nullspace_sampler`, giving 18,000 decoder-trial rows and
+  4,720 mined hard-case recovery attempts.
 - The precision focus run adds 18,200 decoder-trial rows with 260 trials in every configured
   group.
 - The p-bit sampler's focused logical-error confidence half-width drops from about 0.112 to 0.057
   on matched groups.
 - Focused mean logical error is 0.485 for `pbit_coset_sampler` and 0.498 for
   `pbit_annealed_optimizer`.
-- The high-repeat hard-case run has 11,328 recovery attempts. It does not support a p-bit
-  hard-case advantage: `pbit_coset_sampler` recovers 0.434 [0.418, 0.450], while
-  `pbit_annealed_optimizer` recovers 0.458 [0.443, 0.474] and `nullspace_coset_sampler` recovers
-  0.463 [0.447, 0.479].
+- The high-repeat hard-case run has 15,104 recovery attempts. It supports a hard-case advantage for
+  syndrome-valid nullspace-coordinate p-bit sampling: `pbit_nullspace_sampler` recovers
+  0.521 [0.505, 0.537], while `nullspace_coset_sampler` recovers 0.463 [0.447, 0.479],
+  `pbit_annealed_optimizer` recovers 0.458 [0.443, 0.474], and `pbit_coset_sampler` recovers
+  0.434 [0.418, 0.450].
 
 ## Interpretation Rules
 
 - A decoder succeeds only when `A(e_true xor e_hat) = 0 mod 2`.
 - Equality to the sampled physical error is not used as a success criterion.
-- The p-bit sampler updates each binary error bit with
+- The soft physical-bit p-bit sampler updates each binary error bit with
   `P(e_j = 1 | rest, s) = 1 / (1 + exp(beta * Delta_j))`.
+- The hard-constrained p-bit sampler uses the same logistic conditional on affine nullspace
+  coordinates, so every collected correction is syndrome-valid.
 - Invalid decoder outputs count as logical failures.
 - Positive claims require exact-coset agreement or logical-success evidence in the CSVs.
 - Negative outcomes should be interpreted through valid-sample rate, mixing, coset entropy,

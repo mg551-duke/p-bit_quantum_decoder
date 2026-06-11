@@ -16,6 +16,7 @@ from pbit_qec.decoders import (
     NullspaceCosetSamplerDecoder,
     PBitAnnealedOptimizerDecoder,
     PBitCosetSamplerDecoder,
+    PBitNullspaceCosetSamplerDecoder,
 )
 from pbit_qec.simulation import run_trial, summarize_trials, trial_results_to_frame
 from pbit_qec.types import Decoder
@@ -34,6 +35,8 @@ def build_decoder(name: str, settings: Mapping[str, object]) -> Decoder:
         return PBitCosetSamplerDecoder(**kwargs)
     if name == "pbit_annealed_optimizer":
         return PBitAnnealedOptimizerDecoder(**kwargs)
+    if name == "pbit_nullspace_sampler":
+        return PBitNullspaceCosetSamplerDecoder(**kwargs)
     if name == "nullspace_coset_sampler":
         return NullspaceCosetSamplerDecoder(**kwargs)
     raise ValueError(f"unknown decoder {name!r}")

@@ -284,6 +284,119 @@ class PBitAnnealedOptimizerDecoder:
 
 
 @dataclass
+class PBitNullspaceCosetSamplerDecoder:
+    samples: int = 2000
+    burn_in: int = 100
+    updates_per_sample: int = 1
+    beta: float = 1.0
+    max_nullity: int = 64
+    initial_state: str = "random"
+    name: str = "pbit_nullspace_sampler"
+
+    def decode(
+        self,
+        code: CSSCode,
+        syndrome: Sequence[int],
+        p: Union[float, Sequence[float]],
+        rng: np.random.Generator,
+    ) -> DecodeResult:
+        start = time.perf_counter()
+        lambdas = prior_lambdas(p, code.n)
+        x0, basis = gf2.solve_affine(code.H, syndrome)
+        if x0 is None:
+            return _empty_result(code, syndrome, start, lambdas)
+        if basis.shape[0] > self.max_nullity:
+            raise ValueError(f"nullity {basis.shape[0]} exceeds {self.max_nullity}")
+        if self.initial_state not in {"particular", "random"}:
+            raise ValueError(f"unknown nullspace p-bit initial_state {self.initial_state!r}")
+        if self.updates_per_sample <= 0:
+            raise ValueError("updates_per_sample must be positive")
+        if basis.shape[0] == 0:
+            logical = gf2.bit_tuple(code.logical(x0))
+            key = _coset_key(logical)
+            return DecodeResult(
+                correction=x0,
+                logical_class=logical,
+                valid=True,
+                energy=prior_energy(x0, lambdas),
+                runtime_s=time.perf_counter() - start,
+                valid_samples=self.samples,
+                total_samples=self.samples,
+                first_valid_sweep=0,
+                distinct_logicals=1,
+                coset_counts={key: self.samples},
+                metadata={
+                    "nullity": 0,
+                    "beta": self.beta,
+                    "updates_per_sample": self.updates_per_sample,
+                    "update": "gibbs",
+                    "state_space": "affine_nullspace",
+                    "initial_state": self.initial_state,
+                },
+            )
+
+        z = np.zeros(basis.shape[0], dtype=np.uint8)
+        e = x0.copy()
+        if self.initial_state == "random":
+            z = rng.integers(0, 2, size=basis.shape[0], dtype=np.uint8)
+            selected = z.astype(bool)
+            if np.any(selected):
+                e ^= np.bitwise_xor.reduce(basis[selected], axis=0)
+        energy = prior_energy(e, lambdas)
+        basis_indices = [np.flatnonzero(row).astype(np.int64) for row in basis]
+        signed_lambdas = lambdas * (1 - 2 * e.astype(np.int8))
+
+        counts: Dict[str, int] = defaultdict(int)
+        best_rep_by_coset: Dict[str, BitArray] = {}
+        best_rep_energy: Dict[str, float] = {}
+
+        for step in range(self.burn_in + self.samples):
+            for _ in range(self.updates_per_sample):
+                i = int(rng.integers(0, basis.shape[0]))
+                indices = basis_indices[i]
+                delta = _basis_flip_delta(signed_lambdas, indices)
+                delta_one_minus_zero = delta if z[i] == 0 else -delta
+                probability_one = _pbit_probability_one(delta_one_minus_zero, self.beta)
+                next_bit = int(rng.random() < probability_one)
+                if next_bit != int(z[i]):
+                    e[indices] ^= 1
+                    signed_lambdas[indices] *= -1
+                    energy += delta
+                    z[i] = next_bit
+            if step < self.burn_in:
+                continue
+            key = _coset_key(code.logical(e))
+            counts[key] += 1
+            if key not in best_rep_energy or energy < best_rep_energy[key]:
+                best_rep_energy[key] = energy
+                best_rep_by_coset[key] = e.copy()
+
+        best_key = max(counts, key=lambda key: (counts[key], -best_rep_energy[key]))
+        correction = best_rep_by_coset[best_key]
+        logical = gf2.bit_tuple(code.logical(correction))
+        return DecodeResult(
+            correction=correction,
+            logical_class=logical,
+            valid=True,
+            energy=prior_energy(correction, lambdas),
+            runtime_s=time.perf_counter() - start,
+            valid_samples=sum(counts.values()),
+            total_samples=self.samples,
+            first_valid_sweep=0,
+            distinct_logicals=len(counts),
+            coset_counts=dict(counts),
+            metadata={
+                "nullity": int(basis.shape[0]),
+                "beta": self.beta,
+                "updates_per_sample": self.updates_per_sample,
+                "update": "gibbs",
+                "state_space": "affine_nullspace",
+                "initial_state": self.initial_state,
+            },
+        )
+
+
+@dataclass
 class NullspaceCosetSamplerDecoder:
     samples: int = 2000
     burn_in: int = 100
@@ -391,6 +504,10 @@ def _pbit_probability_one(delta_one_minus_zero: float, beta: float) -> float:
         z = np.exp(-x)
         return float(z / (1.0 + z))
     return float(1.0 / (1.0 + np.exp(x)))
+
+
+def _basis_flip_delta(signed_lambdas: np.ndarray, indices: np.ndarray) -> float:
+    return float(signed_lambdas[indices].sum())
 
 
 def _affine_seed_state(

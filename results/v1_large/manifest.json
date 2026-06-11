@@ -2,8 +2,8 @@
   "config_path": "experiments/configs/v1_large.json",
   "output_dir": "results/v1_large",
   "rows": {
-    "coset_distributions": 27207,
-    "summary": 180,
-    "trials": 14040
+    "coset_distributions": 36704,
+    "summary": 234,
+    "trials": 18000
   }
 }

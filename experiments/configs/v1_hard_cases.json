@@ -4,6 +4,7 @@
   "p_values": [0.06, 0.1, 0.14, 0.18],
   "recovery_decoders": [
     "pbit_coset_sampler",
+    "pbit_nullspace_sampler",
     "nullspace_coset_sampler",
     "pbit_annealed_optimizer"
   ],
@@ -25,6 +26,14 @@
       "burn_in": 80,
       "beta": 1.0,
       "max_nullity": 64
+    },
+    "pbit_nullspace_sampler": {
+      "samples": 400,
+      "burn_in": 80,
+      "updates_per_sample": 8,
+      "beta": 1.0,
+      "max_nullity": 64,
+      "initial_state": "random"
     },
     "pbit_annealed_optimizer": {
       "chains": 4,
