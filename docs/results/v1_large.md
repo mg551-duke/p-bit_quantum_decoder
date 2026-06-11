@@ -30,8 +30,8 @@ from `experiments/configs/v1_bb144_pbit.json`.
   `beta = 0.75` and `updates_per_sample = 4` for `pbit_nullspace_sampler`.
 - `figures/v1_hard_cases_precision/hard_case_recovery.png`: high-repeat hard-case recovery plot
   with interval bars.
-- `results/v1_mwpm_comparison/`: 29,000 topological decoder-trial rows, 70 grouped summary rows,
-  and 63,267 coset-distribution rows comparing exact, MWPM, nullspace, and nullspace-coordinate
+- `results/v1_mwpm_comparison/`: 32,000 topological decoder-trial rows, 70 grouped summary rows,
+  and 68,899 coset-distribution rows comparing exact, MWPM, nullspace, and nullspace-coordinate
   p-bit decoders.
 - `figures/v1_mwpm_comparison/`: five PNG figures for logical error, exact-coset agreement,
   valid-sampling, logical-class diversity, and coset entropy in the MWPM comparison.
@@ -101,28 +101,32 @@ not run for BB144 because the BB syndrome matrix is not graphlike.
 Mean logical error across configured topological groups:
 
 - `exact_coset`: 0.244, mean half-width 0.034
-- `mwpm`: 0.271, mean half-width 0.038
-- `nullspace_coset_sampler`: 0.336, mean half-width 0.042
-- `pbit_nullspace_sampler`: 0.364, mean half-width 0.045
+- `mwpm`: 0.270, mean half-width 0.035
+- `nullspace_coset_sampler`: 0.336, mean half-width 0.039
+- `pbit_nullspace_sampler`: 0.367, mean half-width 0.041
 
 Logical error by code family and size:
 
-- surface 3: exact 0.204, MWPM 0.226, nullspace 0.232, p-bit nullspace 0.219
-- surface 7: MWPM 0.240, nullspace 0.355, p-bit nullspace 0.368
-- toric 3: exact 0.284, MWPM 0.283, nullspace 0.314, p-bit nullspace 0.323
-- toric 5: MWPM 0.334, nullspace 0.441, p-bit nullspace 0.547
+- surface 3: exact 0.204, MWPM 0.226, nullspace 0.232, p-bit nullspace 0.216
+- surface 7: MWPM 0.241, nullspace 0.364, p-bit nullspace 0.369
+- toric 3: exact 0.284, MWPM 0.283, nullspace 0.314, p-bit nullspace 0.337
+- toric 5: MWPM 0.329, nullspace 0.432, p-bit nullspace 0.547
 
 Mean exact-coset agreement on exact-feasible small groups:
 
 - `exact_coset`: 1.000
 - `mwpm`: 0.910
-- `pbit_nullspace_sampler`: 0.891
+- `pbit_nullspace_sampler`: 0.884
 - `nullspace_coset_sampler`: 0.867
 
 This is a negative topological-code comparison for the current stochastic p-bit implementation:
 MWPM is faster and has lower logical error overall, especially on the medium toric and surface-code
 sectors. The p-bit nullspace sampler remains useful as a coset-mass diagnostic and is competitive
 only on the small surface-3 aggregate in this sweep.
+
+The medium topological rows now use 400 trials per physical error rate. The worst logical-error
+Wilson half-width in `results/v1_mwpm_comparison/summary.csv` is 0.0488, and every medium
+topological row reports zero additional trials needed for a 5% Wilson half-width target.
 
 ## BB144 P-bit Sweep
 

@@ -328,11 +328,11 @@
         </p>
 
         <div class="metrics">
-          <div class="metric"><strong>70,600</strong><span>decoder-trial rows across report artifacts</span></div>
+          <div class="metric"><strong>73,600</strong><span>decoder-trial rows across report artifacts</span></div>
           <div class="metric"><strong>18,200</strong><span>precision-focus trial rows</span></div>
-          <div class="metric"><strong>29,000</strong><span>topological MWPM comparison rows</span></div>
+          <div class="metric"><strong>32,000</strong><span>topological MWPM comparison rows</span></div>
           <div class="metric"><strong>5,400</strong><span>BB144 decoder-trial rows with BP-OSD</span></div>
-          <div class="metric"><strong>390,620</strong><span>coset-distribution rows across report artifacts</span></div>
+          <div class="metric"><strong>396,252</strong><span>coset-distribution rows across report artifacts</span></div>
           <div class="metric"><strong>59</strong><span>min-energy disagreement cases</span></div>
           <div class="metric"><strong>37,760</strong><span>precision hard-case attempts</span></div>
         </div>
@@ -344,15 +344,17 @@
           nullspace-coordinate p-bit sampler has comparable non-exact exact-coset agreement in the
           v1-large sweep and the best high-repeat hard-case recovery. The tuned hard-case run
           reduces overall Wilson half-width to about 0.010, so the hard-case ordering is much less
-          noisy than before. Topological-code comparisons show MWPM remains the best non-exact
-          decoder overall. The BB144 comparison now includes BP-OSD, which is dramatically stronger
-          than the p-bit and nullspace baselines. The chained-sweep p-bit sampler improves over the
-          plain nullspace sampler, but it is not competitive with BP-OSD on BB144.
+          noisy than before. The topological MWPM comparison now uses 400 trials for each medium
+          topological group, bringing the worst logical-error Wilson half-width below 0.049. MWPM
+          remains the best non-exact topological decoder overall. The BB144 comparison includes
+          BP-OSD, which is dramatically stronger than the p-bit and nullspace baselines. The
+          chained-sweep p-bit sampler improves over the plain nullspace sampler, but it is not
+          competitive with BP-OSD on BB144.
         </p>
 
         <div class="takeaway-grid" aria-label="headline result comparisons">
           <div class="takeaway">
-            <b>0.271</b>
+            <b>0.270</b>
             <span>mean topological logical error for MWPM in the comparison sweep</span>
           </div>
           <div class="takeaway">
@@ -378,10 +380,10 @@
         <table>
           <thead><tr><th>Decoder</th><th>Mean Logical Error</th><th>Exact-Coset Agreement</th><th>Mean Runtime</th></tr></thead>
           <tbody>
-            <tr><td>exact_coset</td><td class="value">0.244</td><td class="value">1.000</td><td class="value">44.9 ms</td></tr>
-            <tr><td>mwpm</td><td class="value">0.271</td><td class="value">0.910</td><td class="value">0.1 ms</td></tr>
-            <tr><td>pbit_nullspace_sampler</td><td class="value">0.364</td><td class="value">0.891</td><td class="value">11.9 ms</td></tr>
-            <tr><td>nullspace_coset_sampler</td><td class="value">0.336</td><td class="value">0.867</td><td class="value">6.2 ms</td></tr>
+            <tr><td>exact_coset</td><td class="value">0.244</td><td class="value">1.000</td><td class="value">47.9 ms</td></tr>
+            <tr><td>mwpm</td><td class="value">0.270</td><td class="value">0.910</td><td class="value">0.1 ms</td></tr>
+            <tr><td>pbit_nullspace_sampler</td><td class="value">0.367</td><td class="value">0.884</td><td class="value">12.5 ms</td></tr>
+            <tr><td>nullspace_coset_sampler</td><td class="value">0.336</td><td class="value">0.867</td><td class="value">6.5 ms</td></tr>
           </tbody>
         </table>
 
@@ -577,10 +579,10 @@
         <table>
           <thead><tr><th>Decoder</th><th>Mean Logical Error</th><th>Mean CI Half-Width</th><th>Mean Runtime</th></tr></thead>
           <tbody>
-            <tr><td>exact_coset</td><td class="value">0.244</td><td class="value">0.034</td><td class="value">44.9 ms</td></tr>
-            <tr><td>mwpm</td><td class="value">0.271</td><td class="value">0.038</td><td class="value">0.1 ms</td></tr>
-            <tr><td>nullspace_coset_sampler</td><td class="value">0.336</td><td class="value">0.042</td><td class="value">6.2 ms</td></tr>
-            <tr><td>pbit_nullspace_sampler</td><td class="value">0.364</td><td class="value">0.045</td><td class="value">11.9 ms</td></tr>
+            <tr><td>exact_coset</td><td class="value">0.244</td><td class="value">0.034</td><td class="value">47.9 ms</td></tr>
+            <tr><td>mwpm</td><td class="value">0.270</td><td class="value">0.035</td><td class="value">0.1 ms</td></tr>
+            <tr><td>nullspace_coset_sampler</td><td class="value">0.336</td><td class="value">0.039</td><td class="value">6.5 ms</td></tr>
+            <tr><td>pbit_nullspace_sampler</td><td class="value">0.367</td><td class="value">0.041</td><td class="value">12.5 ms</td></tr>
           </tbody>
         </table>
 
@@ -588,10 +590,10 @@
         <table>
           <thead><tr><th>Code</th><th>Exact</th><th>MWPM</th><th>Nullspace Sampler</th><th>P-bit Nullspace</th></tr></thead>
           <tbody>
-            <tr><td>surface 3</td><td class="value">0.204</td><td class="value">0.226</td><td class="value">0.232</td><td class="value">0.219</td></tr>
-            <tr><td>surface 7</td><td class="value">not run</td><td class="value">0.240</td><td class="value">0.355</td><td class="value">0.368</td></tr>
-            <tr><td>toric 3</td><td class="value">0.284</td><td class="value">0.283</td><td class="value">0.314</td><td class="value">0.323</td></tr>
-            <tr><td>toric 5</td><td class="value">not run</td><td class="value">0.334</td><td class="value">0.441</td><td class="value">0.547</td></tr>
+            <tr><td>surface 3</td><td class="value">0.204</td><td class="value">0.226</td><td class="value">0.232</td><td class="value">0.216</td></tr>
+            <tr><td>surface 7</td><td class="value">not run</td><td class="value">0.241</td><td class="value">0.364</td><td class="value">0.369</td></tr>
+            <tr><td>toric 3</td><td class="value">0.284</td><td class="value">0.283</td><td class="value">0.314</td><td class="value">0.337</td></tr>
+            <tr><td>toric 5</td><td class="value">not run</td><td class="value">0.329</td><td class="value">0.432</td><td class="value">0.547</td></tr>
           </tbody>
         </table>
 
@@ -601,7 +603,7 @@
           <tbody>
             <tr><td>exact_coset</td><td class="value">1.000</td><td class="value">0.004</td></tr>
             <tr><td>mwpm</td><td class="value">0.910</td><td class="value">0.023</td></tr>
-            <tr><td>pbit_nullspace_sampler</td><td class="value">0.891</td><td class="value">0.026</td></tr>
+            <tr><td>pbit_nullspace_sampler</td><td class="value">0.884</td><td class="value">0.026</td></tr>
             <tr><td>nullspace_coset_sampler</td><td class="value">0.867</td><td class="value">0.028</td></tr>
           </tbody>
         </table>

@@ -42,7 +42,9 @@ valid-sample rate, logical classes visited, empirical coset entropy, and runtime
 
 The `v1_mwpm_comparison` config compares exact decoding where feasible, PyMatching MWPM,
 hard-constrained nullspace sampling, and nullspace-coordinate p-bit sampling on toric and surface
-sectors. MWPM is the expected strong baseline on these graphlike topological checks.
+sectors. MWPM is the expected strong baseline on these graphlike topological checks. Medium
+topological groups use 400 trials per physical error rate in the committed precision artifact,
+which brings the worst logical-error Wilson half-width below 0.049.
 
 ## BB144 Code-Capacity Probe
 

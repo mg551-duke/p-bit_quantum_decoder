@@ -2,8 +2,8 @@
   "config_path": "experiments/configs/v1_mwpm_comparison.json",
   "output_dir": "results/v1_mwpm_comparison",
   "rows": {
-    "coset_distributions": 63267,
+    "coset_distributions": 68899,
     "summary": 70,
-    "trials": 29000
+    "trials": 32000
   }
 }

@@ -124,8 +124,9 @@ Topological MWPM comparison CSVs and figures live in `results/v1_mwpm_comparison
   0.432 [0.422, 0.442].
 - The tuned nullspace-coordinate p-bit setting is `beta = 0.75` with four updates per collected
   sample, selected from `results/v1_hard_cases_precision/pbit_nullspace_calibration.csv`.
-- The topological MWPM comparison adds 29,000 decoder-trial rows. MWPM has mean logical error
-  0.271, compared with 0.336 for `nullspace_coset_sampler` and 0.364 for
+- The topological MWPM comparison adds 32,000 decoder-trial rows. Medium toric/surface groups now
+  use 400 trials each, bringing the worst logical-error Wilson half-width below 0.049. MWPM has
+  mean logical error 0.270, compared with 0.336 for `nullspace_coset_sampler` and 0.367 for
   `pbit_nullspace_sampler`; on exact-feasible small cases, MWPM exact-coset agreement is 0.910.
 - The BB144 code-capacity sweep adds 5,400 decoder-trial rows on the [[144,12,12]] bivariate
   bicycle X-error sector. BP-OSD has mean logical error 0.143. The chained-sweep
