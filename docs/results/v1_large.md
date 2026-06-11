@@ -144,29 +144,32 @@ The BB144 artifact tests the X-error sector of the [[144,12,12]] bivariate-bicyc
 `l = 12`, `m = 6`, `A = x^3 + y + y^2`, and `B = y^3 + x + x^2`. It now includes LDPC BP-OSD as
 the strong qLDPC baseline. The p-bit sampler uses particular-solution initialization, `beta = 0.5`,
 `updates_per_sample = 78`, four chains, and a random-sweep schedule, matching one full randomized
-pass over the 78-dimensional affine nullspace per collected sample.
+pass over the 78-dimensional affine nullspace per collected sample. It samples at the tempered
+mixing beta but selects the decoded coset with importance-weighted scores targeting the physical
+posterior at `target_beta = 1`.
 
 BB144 logical error by physical error rate:
 
-- p=0.01: BP-OSD 0.000, nullspace 0.315, p-bit nullspace 0.113
-- p=0.02: BP-OSD 0.000, nullspace 0.528, p-bit nullspace 0.253
-- p=0.04: BP-OSD 0.005, nullspace 0.808, p-bit nullspace 0.493
-- p=0.06: BP-OSD 0.083, nullspace 0.898, p-bit nullspace 0.728
-- p=0.08: BP-OSD 0.273, nullspace 0.978, p-bit nullspace 0.918
-- p=0.10: BP-OSD 0.518, nullspace 0.995, p-bit nullspace 0.963
+- p=0.01: BP-OSD 0.000, nullspace 0.315, p-bit nullspace 0.085
+- p=0.02: BP-OSD 0.000, nullspace 0.528, p-bit nullspace 0.212
+- p=0.04: BP-OSD 0.005, nullspace 0.808, p-bit nullspace 0.458
+- p=0.06: BP-OSD 0.083, nullspace 0.898, p-bit nullspace 0.680
+- p=0.08: BP-OSD 0.273, nullspace 0.978, p-bit nullspace 0.900
+- p=0.10: BP-OSD 0.518, nullspace 0.995, p-bit nullspace 0.955
 
 Aggregate BB144 readout:
 
 - `bp_osd`: mean logical error 0.146, mean half-width 0.023, mean runtime 0.4 ms
-- `pbit_nullspace_sampler`: mean logical error 0.578, mean half-width 0.035, mean runtime 223 ms,
+- `pbit_nullspace_sampler`: mean logical error 0.548, mean half-width 0.035, mean runtime 236 ms,
   mean coset entropy 3.615 bits
 - `nullspace_coset_sampler`: mean logical error 0.753, mean half-width 0.031, mean runtime 13 ms,
   mean coset entropy 0.628 bits
 
 This is negative for p-bit competitiveness against a strong BB144 decoder: BP-OSD is much faster
-and lower-error. The p-bit mixing change is still useful because it improves the p-bit/nullspace
-comparison relative to the previous artifact and beats the plain nullspace sampler, but it is not a
-state-of-the-art BB144 decoder. Exact coset enumeration is not feasible in this artifact.
+and lower-error. The p-bit mixing and posterior-importance scoring changes are still useful because
+they improve the p-bit/nullspace comparison relative to the previous artifact and beat the plain
+nullspace sampler, but this is not a state-of-the-art BB144 decoder. Exact coset enumeration is not
+feasible in this artifact.
 
 The BB144 rows now use 400 trials per physical error rate. The worst logical-error Wilson
 half-width in `results/v1_bb144_pbit/summary.csv` is 0.0488, and every BB144 row reports zero

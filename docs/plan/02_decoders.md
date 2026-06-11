@@ -57,7 +57,9 @@ current artifact uses the same `beta = 0.75` but increases to `updates_per_sampl
 `update_schedule = "sweep"` so each recorded sample follows more local stochastic p-bit relaxation.
 The BB144 sweep uses a separate particular-start setting, `beta = 0.5`, `updates_per_sample = 78`,
 four chains, and random-sweep coordinate updates, because random single-chain starts mixed poorly in
-the 78-dimensional BB144 affine solution space.
+the 78-dimensional BB144 affine solution space. Since `beta = 0.5` samples a tempered distribution,
+BB144 coset selection uses importance-weighted scores targeting `target_beta = 1.0` instead of raw
+tempered sample counts.
 
 ## NullspaceCosetSamplerDecoder
 

@@ -64,4 +64,5 @@ particular-start chained-sweep nullspace-coordinate p-bits against the plain har
 nullspace sampler and LDPC BP-OSD. The goal is diagnostic: record whether p-bit coset sampling
 improves over a validity-only affine baseline, while also comparing against a strong qLDPC decoder.
 It uses 400 trials per physical error rate, which brings the worst BB144 logical-error Wilson
-half-width below 0.049.
+half-width below 0.049. The p-bit BB144 row samples at `beta = 0.5` for mixing but selects the
+reported coset with importance-weighted posterior scores targeting `target_beta = 1.0`.

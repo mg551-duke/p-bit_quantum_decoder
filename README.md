@@ -136,8 +136,8 @@ Topological MWPM comparison CSVs and figures live in `results/v1_mwpm_comparison
 - The BB144 code-capacity sweep adds 7,200 decoder-trial rows on the [[144,12,12]] bivariate
   bicycle X-error sector. Its worst logical-error Wilson half-width is now 0.0488, with zero
   additional trials requested for the 5% target. BP-OSD has mean logical error 0.146. The
-  chained-sweep `pbit_nullspace_sampler` improves over the plain nullspace sampler, 0.578 versus
-  0.753, but it is not competitive with BP-OSD.
+  importance-scored chained-sweep `pbit_nullspace_sampler` improves over the plain nullspace
+  sampler, 0.548 versus 0.753, but it is not competitive with BP-OSD.
 
 ## Interpretation Rules
 

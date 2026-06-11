@@ -443,10 +443,12 @@ class PBitNullspaceCosetSamplerDecoder:
     burn_in: int = 100
     updates_per_sample: int = 1
     beta: float = 1.0
+    target_beta: float = 1.0
     chains: int = 1
     max_nullity: int = 64
     initial_state: str = "random"
     update_schedule: str = "random"
+    selection: str = "counts"
     name: str = "pbit_nullspace_sampler"
 
     def decode(
@@ -469,8 +471,12 @@ class PBitNullspaceCosetSamplerDecoder:
             raise ValueError("updates_per_sample must be positive")
         if self.chains <= 0:
             raise ValueError("chains must be positive")
+        if self.beta <= 0.0 or self.target_beta <= 0.0:
+            raise ValueError("beta and target_beta must be positive")
         if self.update_schedule not in {"random", "sweep"}:
             raise ValueError(f"unknown nullspace p-bit update_schedule {self.update_schedule!r}")
+        if self.selection not in {"counts", "importance"}:
+            raise ValueError(f"unknown nullspace p-bit selection {self.selection!r}")
         if basis.shape[0] == 0:
             logical = gf2.bit_tuple(code.logical(x0))
             key = _coset_key(logical)
@@ -488,8 +494,10 @@ class PBitNullspaceCosetSamplerDecoder:
                 metadata={
                     "nullity": 0,
                     "beta": self.beta,
+                    "target_beta": self.target_beta,
                     "chains": self.chains,
                     "updates_per_sample": self.updates_per_sample,
+                    "selection": self.selection,
                     "update": "gibbs",
                     "update_schedule": self.update_schedule,
                     "state_space": "affine_nullspace",
@@ -500,6 +508,7 @@ class PBitNullspaceCosetSamplerDecoder:
         basis_indices = [np.flatnonzero(row).astype(np.int64) for row in basis]
 
         counts: Dict[str, int] = defaultdict(int)
+        log_scores: Dict[str, float] = {}
         best_rep_by_coset: Dict[str, BitArray] = {}
         best_rep_energy: Dict[str, float] = {}
 
@@ -538,13 +547,24 @@ class PBitNullspaceCosetSamplerDecoder:
                     continue
                 key = _coset_key(code.logical(e))
                 counts[key] += 1
+                if self.selection == "importance":
+                    log_weight = -(self.target_beta - self.beta) * energy
+                    log_scores[key] = (
+                        log_weight
+                        if key not in log_scores
+                        else float(np.logaddexp(log_scores[key], log_weight))
+                    )
                 if key not in best_rep_energy or energy < best_rep_energy[key]:
                     best_rep_energy[key] = energy
                     best_rep_by_coset[key] = e.copy()
 
-        best_key = max(counts, key=lambda key: (counts[key], -best_rep_energy[key]))
+        if self.selection == "counts":
+            best_key = max(counts, key=lambda key: (counts[key], -best_rep_energy[key]))
+        else:
+            best_key = max(log_scores, key=lambda key: (log_scores[key], -best_rep_energy[key]))
         correction = best_rep_by_coset[best_key]
         logical = gf2.bit_tuple(code.logical(correction))
+        score_log_weight = log_scores.get(best_key)
         return DecodeResult(
             correction=correction,
             logical_class=logical,
@@ -559,12 +579,15 @@ class PBitNullspaceCosetSamplerDecoder:
             metadata={
                 "nullity": int(basis.shape[0]),
                 "beta": self.beta,
+                "target_beta": self.target_beta,
                 "chains": self.chains,
                 "updates_per_sample": self.updates_per_sample,
+                "selection": self.selection,
                 "update": "gibbs",
                 "update_schedule": self.update_schedule,
                 "state_space": "affine_nullspace",
                 "initial_state": self.initial_state,
+                "selected_log_importance_score": score_log_weight,
             },
         )
 

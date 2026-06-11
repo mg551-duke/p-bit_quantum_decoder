@@ -25,7 +25,9 @@
       "chains": 4,
       "max_nullity": 96,
       "initial_state": "particular",
-      "update_schedule": "sweep"
+      "update_schedule": "sweep",
+      "target_beta": 1.0,
+      "selection": "importance"
     },
     "nullspace_coset_sampler": {
       "samples": 1200,
