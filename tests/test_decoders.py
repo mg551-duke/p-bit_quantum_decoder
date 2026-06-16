@@ -1,9 +1,11 @@
 import numpy as np
 import pytest
 
+from pbit_qec import gf2
 from pbit_qec.analysis import analyze_cosets
 from pbit_qec.codes import make_bb144_code, make_toric_code
 from pbit_qec.decoders import (
+    BPDecoder,
     BPOSDDecoder,
     ExactCosetDecoder,
     MWPMDecoder,
@@ -11,8 +13,13 @@ from pbit_qec.decoders import (
     PBitCosetSamplerDecoder,
     PBitNullspaceCosetSamplerDecoder,
     PBitSyndromeDecoder,
+    _annealing_schedule,
+    _apply_weight_reduction,
     _pbit_probability_one,
+    _reduce_weight,
+    _stabilizer_rows,
 )
+from pbit_qec.decoders_common import default_rho, prior_energy, prior_lambdas
 from pbit_qec.simulation import run_trial
 from pbit_qec.types import CSSCode
 
@@ -232,6 +239,25 @@ def test_pbit_syndrome_decoder_rejects_unknown_selection() -> None:
         decoder.decode(code, syndrome, 0.08, np.random.default_rng(20))
 
 
+def test_pbit_syndrome_rejects_stop_on_first_valid_with_aggregation_selection() -> None:
+    # stop_on_first_valid returns the first valid sample in chain order, silently
+    # defeating any selection rule that must aggregate over the full ensemble
+    # (min_weight/counts/ml_coset). Guard against the misconfiguration explicitly.
+    code = make_toric_code(3)
+    syndrome = np.zeros(code.m, dtype=np.uint8)
+    for selection in ("min_weight", "counts", "ml_coset"):
+        decoder = PBitSyndromeDecoder(selection=selection, stop_on_first_valid=True)
+        with pytest.raises(ValueError, match="stop_on_first_valid"):
+            decoder.decode(code, syndrome, 0.08, np.random.default_rng(0))
+
+    # best_energy is the only selection compatible with first-valid early stopping.
+    ok = PBitSyndromeDecoder(
+        chains=2, sweeps=10, selection="best_energy", stop_on_first_valid=True
+    )
+    result = ok.decode(code, syndrome, 0.08, np.random.default_rng(0))
+    assert result.metadata["selection"] == "best_energy"
+
+
 def test_invalid_pbit_syndrome_output_counts_as_logical_failure() -> None:
     code = make_toric_code(3)
     decoder = PBitSyndromeDecoder(chains=1, sweeps=0, initial_probability=0.0)
@@ -375,6 +401,18 @@ def test_mwpm_decoder_returns_valid_topological_correction() -> None:
     assert result.metadata["backend"] == "pymatching"
 
 
+def test_bp_decoder_reports_plain_bp_backend() -> None:
+    pytest.importorskip("ldpc")
+    code = make_toric_code(3)
+    syndrome = np.zeros(code.m, dtype=np.uint8)
+
+    result = BPDecoder(max_iter=30).decode(code, syndrome, 0.05, np.random.default_rng(7))
+
+    assert result.metadata["backend"] == "ldpc.BpDecoder"
+    assert result.metadata["uses_osd"] is False
+    assert result.valid
+
+
 def test_bposd_decoder_returns_valid_bb144_correction() -> None:
     pytest.importorskip("ldpc")
     code = make_bb144_code()
@@ -392,3 +430,349 @@ def test_bposd_decoder_returns_valid_bb144_correction() -> None:
     assert result.valid
     assert result.metadata["backend"] == "ldpc.BpOsdDecoder"
     assert result.metadata["osd_method"] == "OSD_CS"
+
+
+def test_stabilizer_rows_use_low_weight_generators_for_bb144() -> None:
+    code = make_bb144_code()
+    stabs = _stabilizer_rows(code)
+
+    assert stabs.ndim == 2
+    assert stabs.shape[1] == code.n
+    assert stabs.shape[0] > 0
+    # Every generator preserves both syndrome and logical coset.
+    assert np.all(code.H @ stabs.T % 2 == 0)
+    assert np.all(code.A @ stabs.T % 2 == 0)
+    # BB144 exposes the weight-6 complementary CSS checks.
+    assert int(stabs.sum(axis=1).max()) == 6
+
+
+def test_reduce_weight_preserves_syndrome_and_coset() -> None:
+    code = make_bb144_code()
+    stabs = _stabilizer_rows(code)
+    error = np.zeros(code.n, dtype=np.uint8)
+    error[[0, 17, 91]] = 1
+
+    inflated = error.copy()
+    rng = np.random.default_rng(3)
+    for idx in rng.choice(stabs.shape[0], size=5, replace=False):
+        inflated = (inflated ^ stabs[idx]).astype(np.uint8)
+
+    reduced = _reduce_weight(inflated, stabs)
+
+    assert np.array_equal(code.syndrome(reduced), code.syndrome(inflated))
+    assert np.array_equal(code.logical(reduced), code.logical(inflated))
+    assert int(reduced.sum()) < int(inflated.sum())
+
+
+def test_reduce_weight_is_noop_without_generators() -> None:
+    error = np.array([1, 0, 1, 1, 0], dtype=np.uint8)
+    empty = np.zeros((0, error.shape[0]), dtype=np.uint8)
+
+    reduced = _reduce_weight(error, empty)
+
+    assert np.array_equal(reduced, error)
+
+
+def test_min_weight_reduction_never_regresses_below_best_valid() -> None:
+    # Guards against returning a heavier correction than plain min_weight when the
+    # only sampled coset representative reduces to a high weight but a lighter
+    # global best_valid exists in a different coset.
+    code = make_bb144_code()
+    stabs = _stabilizer_rows(code)
+    lambdas = prior_lambdas(0.05, code.n)
+
+    light = np.zeros(code.n, dtype=np.uint8)
+    light[[0, 50, 120]] = 1
+    light_key = gf2.bit_string(code.logical(light))
+
+    # A representative in a *different* logical coset (XOR a logical operator row)
+    # cannot be reduced below the code distance by stabilizers.
+    heavy = None
+    for row in code.A:
+        cand = (light ^ row).astype(np.uint8)
+        if gf2.bit_string(code.logical(cand)) != light_key:
+            heavy = cand
+            break
+    assert heavy is not None
+    assert int(heavy.sum()) > int(light.sum())
+
+    def fresh_state():
+        key = gf2.bit_string(code.logical(heavy))
+        energy = prior_energy(heavy, lambdas)
+        return {key: heavy.copy()}, {key: energy}, {key: -energy}
+
+    brc, bre, logz = fresh_state()
+    stuck = _apply_weight_reduction("min_weight", brc, bre, logz, stabs, lambdas)
+    brc, bre, logz = fresh_state()
+    fixed = _apply_weight_reduction(
+        "min_weight", brc, bre, logz, stabs, lambdas, best_valid=light
+    )
+
+    # Without best_valid the result is stuck at the heavy coset's weight; folding
+    # best_valid in guarantees the result is never heavier than best_valid.
+    assert int(stuck.sum()) > int(light.sum())
+    assert int(fixed.sum()) <= int(light.sum())
+    assert int(fixed.sum()) < int(stuck.sum())
+
+
+def test_pbit_syndrome_resolve_rho_precedence() -> None:
+    lambdas = np.array([2.0, 3.0, 1.5])  # max = 3.0
+
+    # Explicit rho always wins.
+    assert PBitSyndromeDecoder(rho=7.0, rho_scale=2.0)._resolve_rho(lambdas) == 7.0
+    # p-adaptive rho_scale -> rho_scale * max(lambda).
+    assert PBitSyndromeDecoder(rho_scale=1.0)._resolve_rho(lambdas) == 3.0
+    assert PBitSyndromeDecoder(rho_scale=2.0)._resolve_rho(lambdas) == 6.0
+    # Falls back to the shared heuristic when neither is set.
+    assert PBitSyndromeDecoder()._resolve_rho(lambdas) == default_rho(lambdas)
+    with pytest.raises(ValueError):
+        PBitSyndromeDecoder(rho_scale=0.0)._resolve_rho(lambdas)
+
+
+def test_pbit_syndrome_rho_scale_is_reported_in_metadata() -> None:
+    code = make_toric_code(3)
+    error = np.zeros(code.n, dtype=np.uint8)
+    error[[0, 4, 11]] = 1
+    syndrome = code.syndrome(error)
+    decoder = PBitSyndromeDecoder(
+        chains=4, sweeps=30, beta_start=0.3, beta_stop=3.0, rho_scale=1.0
+    )
+    result = decoder.decode(code, syndrome, 0.08, np.random.default_rng(0))
+    expected_rho = float(np.max(prior_lambdas(0.08, code.n)))
+    assert result.metadata["rho_scale"] == 1.0
+    assert result.metadata["rho"] == pytest.approx(expected_rho)
+
+
+def test_pbit_anneal_prior_defaults_true_and_does_not_change_legacy_path() -> None:
+    code = make_toric_code(3)
+    error = np.zeros(code.n, dtype=np.uint8)
+    error[[0, 4, 11]] = 1
+    syndrome = code.syndrome(error)
+    common = dict(
+        chains=4, sweeps=20, beta_start=0.3, beta_stop=2.0,
+        selection="min_weight", stop_on_first_valid=False, collect_valid_samples=True,
+    )
+    assert PBitSyndromeDecoder().anneal_prior is True
+    default = PBitSyndromeDecoder(**common).decode(code, syndrome, 0.08, np.random.default_rng(7))
+    explicit = PBitSyndromeDecoder(anneal_prior=True, **common).decode(
+        code, syndrome, 0.08, np.random.default_rng(7)
+    )
+    # Opting into the (default) annealed prior must reproduce the legacy trajectory
+    # bit-for-bit, so the new flag cannot regress existing behaviour.
+    assert np.array_equal(default.correction, explicit.correction)
+    assert default.coset_counts == explicit.coset_counts
+    assert default.metadata["anneal_prior"] is True
+
+
+def test_pbit_calibrated_prior_keeps_channel_posterior_unannealed() -> None:
+    # Calibrated mode (anneal_prior=False) evaluates the logistic at beta=1 on the
+    # field  lambda + (beta*rho)*m, vs the annealed  beta*(lambda + rho*m).  For a
+    # bit whose incident checks are balanced (syndrome term m=0) this isolates the
+    # channel prior: calibrated P(set) stays at the physical p for every beta,
+    # while the annealed one collapses to 1/2 as the system gets hot (beta -> 0).
+    p = 0.08
+    lam = float(prior_lambdas(p, 1)[0])
+    rho, m = 4.0, 0
+    for beta in (0.02, 0.1, 0.5):
+        calibrated_set = _pbit_probability_one(lam + (beta * rho) * m, beta=1.0)
+        annealed_set = _pbit_probability_one(lam + rho * m, beta=beta)
+        assert calibrated_set == pytest.approx(p, abs=1e-9)
+        assert annealed_set == pytest.approx(1.0 / (1.0 + np.exp(beta * lam)))
+    assert _pbit_probability_one(lam, beta=1e-6) == pytest.approx(0.5, abs=1e-3)
+
+
+def test_pbit_calibrated_prior_is_valid_deterministic_and_differs_from_annealed() -> None:
+    code = make_toric_code(3)
+    error = np.zeros(code.n, dtype=np.uint8)
+    error[[0, 4, 11]] = 1
+    syndrome = code.syndrome(error)
+    common = dict(
+        chains=8, sweeps=60, beta_start=0.3, beta_stop=3.0,
+        selection="min_weight", stop_on_first_valid=False, collect_valid_samples=True,
+    )
+    for vectorized in (False, True):
+        first = PBitSyndromeDecoder(anneal_prior=False, vectorized=vectorized, **common).decode(
+            code, syndrome, 0.08, np.random.default_rng(5)
+        )
+        second = PBitSyndromeDecoder(anneal_prior=False, vectorized=vectorized, **common).decode(
+            code, syndrome, 0.08, np.random.default_rng(5)
+        )
+        assert first.valid
+        assert first.metadata["anneal_prior"] is False
+        assert np.array_equal(first.correction, second.correction)
+        assert first.coset_counts == second.coset_counts
+    annealed = PBitSyndromeDecoder(anneal_prior=True, vectorized=False, **common).decode(
+        code, syndrome, 0.08, np.random.default_rng(2)
+    )
+    calibrated = PBitSyndromeDecoder(anneal_prior=False, vectorized=False, **common).decode(
+        code, syndrome, 0.08, np.random.default_rng(2)
+    )
+    # The flag must actually change the sampled trajectory.
+    assert (
+        not np.array_equal(annealed.correction, calibrated.correction)
+        or annealed.coset_counts != calibrated.coset_counts
+        or annealed.total_samples != calibrated.total_samples
+    )
+
+
+def test_pbit_prior_scale_sharpens_far_bit_far_below_p() -> None:
+    # prior_scale (gamma) multiplies the channel prior in the calibrated flip
+    # field, so a balanced far bit (syndrome term m=0) sets with probability
+    # sigmoid(-gamma*lambda): gamma=1 recovers the physical p, gamma>1 pushes it
+    # FAR below p (MAP-leaning) so stable bits stop injecting spurious flips.
+    p = 0.08
+    lam = float(prior_lambdas(p, 1)[0])
+    for gamma in (1.0, 1.5, 2.0, 3.0):
+        far_set = _pbit_probability_one(gamma * lam, beta=1.0)
+        assert far_set == pytest.approx(1.0 / (1.0 + np.exp(gamma * lam)))
+    assert _pbit_probability_one(1.0 * lam, beta=1.0) == pytest.approx(p, abs=1e-9)
+    assert _pbit_probability_one(2.0 * lam, beta=1.0) < p / 5.0
+
+
+def test_pbit_prior_scale_defaults_to_one_and_is_reported() -> None:
+    code = make_toric_code(3)
+    error = np.zeros(code.n, dtype=np.uint8)
+    error[[0, 4, 11]] = 1
+    syndrome = code.syndrome(error)
+    common = dict(
+        chains=4, sweeps=20, beta_start=0.3, beta_stop=2.0,
+        selection="min_weight", stop_on_first_valid=False, collect_valid_samples=True,
+    )
+    assert PBitSyndromeDecoder().prior_scale == 1.0
+    base = PBitSyndromeDecoder(anneal_prior=False, **common).decode(
+        code, syndrome, 0.08, np.random.default_rng(3)
+    )
+    same = PBitSyndromeDecoder(anneal_prior=False, prior_scale=1.0, **common).decode(
+        code, syndrome, 0.08, np.random.default_rng(3)
+    )
+    # prior_scale=1.0 must leave calibrated mode bit-for-bit unchanged.
+    assert np.array_equal(base.correction, same.correction)
+    assert base.coset_counts == same.coset_counts
+    assert base.metadata["prior_scale"] == 1.0
+    sharp = PBitSyndromeDecoder(anneal_prior=False, prior_scale=2.5, **common).decode(
+        code, syndrome, 0.08, np.random.default_rng(3)
+    )
+    assert sharp.metadata["prior_scale"] == 2.5
+    with pytest.raises(ValueError):
+        PBitSyndromeDecoder(prior_scale=0.0).decode(code, syndrome, 0.08, np.random.default_rng(0))
+
+
+def test_pbit_syndrome_weight_reduction_keeps_valid_and_not_heavier() -> None:
+    code = make_toric_code(3)
+    error = np.zeros(code.n, dtype=np.uint8)
+    error[[0, 4, 11]] = 1
+    syndrome = code.syndrome(error)
+    common = dict(
+        chains=4,
+        sweeps=30,
+        beta_start=0.2,
+        beta_stop=2.0,
+        selection="min_weight",
+        collect_valid_samples=True,
+        stop_on_first_valid=False,
+    )
+
+    base = PBitSyndromeDecoder(**common).decode(code, syndrome, 0.08, np.random.default_rng(5))
+    reduced = PBitSyndromeDecoder(weight_reduction=True, **common).decode(
+        code, syndrome, 0.08, np.random.default_rng(5)
+    )
+
+    assert base.valid
+    assert reduced.valid
+    # The decoder must actually explore (not early-stop), so reduction can run.
+    assert reduced.metadata["distinct_valid_solutions"] > 1
+    assert int((code.syndrome(reduced.correction) ^ syndrome).sum()) == 0
+    assert int(reduced.correction.sum()) <= int(base.correction.sum())
+
+
+def test_pbit_syndrome_weight_reduction_is_seed_deterministic_both_paths() -> None:
+    code = make_toric_code(3)
+    error = np.zeros(code.n, dtype=np.uint8)
+    error[[1, 5, 12]] = 1
+    syndrome = code.syndrome(error)
+
+    for vectorized in (False, True):
+        decoder = PBitSyndromeDecoder(
+            chains=3,
+            sweeps=20,
+            beta_start=0.3,
+            beta_stop=2.0,
+            selection="min_weight",
+            collect_valid_samples=True,
+            stop_on_first_valid=False,
+            weight_reduction=True,
+            vectorized=vectorized,
+        )
+        first = decoder.decode(code, syndrome, 0.08, np.random.default_rng(21))
+        second = decoder.decode(code, syndrome, 0.08, np.random.default_rng(21))
+
+        assert first.valid
+        assert np.array_equal(first.correction, second.correction)
+        assert int((code.syndrome(first.correction) ^ syndrome).sum()) == 0
+
+
+@pytest.mark.parametrize("shape", ["geometric", "linear", "sigmoid"])
+def test_annealing_schedule_endpoints_length_and_monotonic(shape: str) -> None:
+    start, stop, steps = 0.3, 5.0, 64
+    schedule = _annealing_schedule(start, stop, steps, shape)
+    assert schedule.shape == (steps,)
+    assert schedule[0] == pytest.approx(start)
+    assert schedule[-1] == pytest.approx(stop)
+    # Annealing must be a non-decreasing ramp from cold to hot for every shape.
+    assert np.all(np.diff(schedule) >= -1e-12)
+
+
+def test_annealing_schedule_geometric_matches_geomspace_default() -> None:
+    # The default shape must reproduce the previous np.geomspace behavior exactly.
+    expected = np.geomspace(0.2, 4.0, 50)
+    np.testing.assert_allclose(_annealing_schedule(0.2, 4.0, 50, "geometric"), expected)
+
+
+def test_annealing_schedule_shapes_differ_off_center() -> None:
+    start, stop, steps = 0.2, 4.0, 101
+    geo = _annealing_schedule(start, stop, steps, "geometric")
+    lin = _annealing_schedule(start, stop, steps, "linear")
+    sig = _annealing_schedule(start, stop, steps, "sigmoid")
+    # Identical endpoints, but distinct interior trajectories overall. (Geometric
+    # and sigmoid coincide exactly at the center by symmetry, so compare globally.)
+    assert not np.allclose(geo, lin)
+    assert not np.allclose(geo, sig)
+    assert not np.allclose(lin, sig)
+    # Sigmoid dwells colder than geometric through the first half (slow start).
+    q = steps // 4
+    assert sig[q] < geo[q]
+
+
+def test_annealing_schedule_unknown_shape_raises() -> None:
+    with pytest.raises(ValueError, match="unknown beta_schedule_shape"):
+        _annealing_schedule(0.2, 4.0, 16, "exponential")
+
+
+def test_pbit_syndrome_schedule_shape_recorded_and_used() -> None:
+    code = make_toric_code(3)
+    error = np.zeros(code.n, dtype=np.uint8)
+    error[[0, 4, 11]] = 1
+    syndrome = code.syndrome(error)
+    decoder = PBitSyndromeDecoder(
+        chains=4,
+        sweeps=40,
+        beta_start=0.3,
+        beta_stop=3.0,
+        beta_schedule_shape="sigmoid",
+        rho_scale=1.0,
+        selection="min_weight",
+        collect_valid_samples=True,
+        stop_on_first_valid=False,
+    )
+    result = decoder.decode(code, syndrome, 0.08, np.random.default_rng(0))
+    assert result.metadata["beta_schedule_shape"] == "sigmoid"
+    assert result.valid
+    expected = _annealing_schedule(0.3, 3.0, 40, "sigmoid")
+    np.testing.assert_allclose(decoder._beta_schedule(), expected)
+
+
+def test_pbit_syndrome_default_schedule_shape_is_geometric() -> None:
+    decoder = PBitSyndromeDecoder(sweeps=32, beta_start=0.3, beta_stop=4.0)
+    np.testing.assert_allclose(
+        decoder._beta_schedule(), np.geomspace(0.3, 4.0, 32)
+    )

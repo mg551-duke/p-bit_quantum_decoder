@@ -5,7 +5,7 @@ from __future__ import annotations
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Dict, Optional, Sequence, Union
+from typing import Dict, List, Optional, Sequence, Union
 
 import numpy as np
 
@@ -58,6 +58,90 @@ def _prior_probabilities(p: Union[float, Sequence[float]], n: int) -> np.ndarray
     if np.any(probs <= 0.0) or np.any(probs >= 0.5):
         raise ValueError("p must be in the open interval (0, 0.5)")
     return probs
+
+
+def _stabilizer_rows(code: CSSCode) -> np.ndarray:
+    """Return stabilizer generators: rows v with H v = 0 and A v = 0 over GF(2).
+
+    Such vectors preserve both the syndrome and the logical coset, so XORing any
+    combination into a valid correction keeps it valid and in the same coset.
+    Prefers the low-weight complementary CSS checks (``metadata['h_x']``) when
+    available; otherwise falls back to a computed nullspace basis of ``[H; A]``.
+    """
+    hx = code.metadata.get("h_x")
+    if hx is not None:
+        rows = np.asarray(hx, dtype=np.uint8) % 2
+        if rows.ndim == 2 and rows.shape[1] == code.n:
+            rows = rows[rows.any(axis=1)]
+            if rows.size:
+                return np.unique(rows, axis=0)
+    basis = gf2.nullspace(np.vstack([code.H, code.A]).astype(np.uint8))
+    return basis.astype(np.uint8)
+
+
+def _reduce_weight(error: BitArray, stabs: np.ndarray, max_passes: int = 1000) -> BitArray:
+    """Greedily XOR stabilizers into ``error`` to lower its Hamming weight.
+
+    Each pass applies the single generator that decreases the weight most and
+    stops at a local minimum where no generator helps. XORing stabilizer ``s``
+    changes the weight by ``|s| - 2 * <s, e>``.
+    """
+    e = np.asarray(error, dtype=np.uint8).copy()
+    if stabs.size == 0:
+        return e
+    stab_int = stabs.astype(np.int64)
+    stab_weight = stabs.sum(axis=1).astype(np.int64)
+    for _ in range(max_passes):
+        delta = stab_weight - 2 * (stab_int @ e.astype(np.int64))
+        j = int(np.argmin(delta))
+        if delta[j] >= 0:
+            break
+        e = (e ^ stabs[j]).astype(np.uint8)
+    return e
+
+
+def _apply_weight_reduction(
+    selection: str,
+    best_rep_by_coset: Dict[str, BitArray],
+    best_rep_energy: Dict[str, float],
+    coset_logz: Dict[str, float],
+    stabs: np.ndarray,
+    lambdas: np.ndarray,
+    best_valid: Optional[BitArray] = None,
+) -> Optional[BitArray]:
+    """Reduce coset representatives to low weight and refresh derived stats.
+
+    Updates ``best_rep_by_coset``/``best_rep_energy`` in place and folds each newly
+    discovered lower-energy representative into the ``coset_logz`` free-energy
+    estimate (benefitting ``ml_coset`` selection).
+
+    Returns the best global correction for the active ``selection`` rule:
+    lowest Hamming weight (``min_weight``, energy tie-break) or lowest prior energy
+    (otherwise). The incoming ``best_valid`` and its own reduction are always
+    included among the candidates, so the result can never regress below the
+    correction that plain selection would have returned.
+    """
+    for ckey in list(best_rep_by_coset):
+        reduced = _reduce_weight(best_rep_by_coset[ckey], stabs)
+        reduced_energy = prior_energy(reduced, lambdas)
+        if reduced_energy < best_rep_energy[ckey]:
+            best_rep_by_coset[ckey] = reduced
+            best_rep_energy[ckey] = reduced_energy
+            previous = coset_logz.get(ckey)
+            coset_logz[ckey] = (
+                -reduced_energy
+                if previous is None
+                else float(np.logaddexp(previous, -reduced_energy))
+            )
+    candidates: List[BitArray] = list(best_rep_by_coset.values())
+    if best_valid is not None:
+        candidates.append(np.asarray(best_valid, dtype=np.uint8))
+        candidates.append(_reduce_weight(best_valid, stabs))
+    if not candidates:
+        return None
+    if selection == "min_weight":
+        return min(candidates, key=lambda v: (int(v.sum()), prior_energy(v, lambdas)))
+    return min(candidates, key=lambda v: prior_energy(v, lambdas))
 
 
 @dataclass
@@ -209,6 +293,35 @@ class PBitCosetSamplerDecoder:
         )
 
 
+def _annealing_schedule(start: float, stop: float, steps: int, shape: str) -> np.ndarray:
+    """Inverse-temperature (beta) annealing schedule of length ``steps``.
+
+    Every shape ramps beta from ``start`` to ``stop``; only the spacing differs:
+
+    - ``geometric``: constant multiplicative steps (default; equal spacing in
+      log-beta). Spends most sweeps cold, then climbs quickly.
+    - ``linear``: constant additive steps in beta.
+    - ``sigmoid``: logistic ramp in log-beta space that dwells longer at the cold
+      (exploration) and hot (commitment) ends and crosses the middle quickly.
+
+    ``geometric`` and ``linear`` reproduce ``np.geomspace``/``np.linspace`` exactly,
+    so the default keeps prior behavior unchanged.
+    """
+    steps = max(int(steps), 1)
+    if shape == "geometric":
+        return np.geomspace(start, stop, steps)
+    if shape == "linear":
+        return np.linspace(start, stop, steps)
+    if shape == "sigmoid":
+        if steps == 1:
+            return np.array([start], dtype=float)
+        x = np.linspace(-6.0, 6.0, steps)
+        s = 1.0 / (1.0 + np.exp(-x))
+        s = (s - s[0]) / (s[-1] - s[0])
+        return np.exp(np.log(start) + s * (np.log(stop) - np.log(start)))
+    raise ValueError(f"unknown beta_schedule_shape {shape!r}")
+
+
 @dataclass
 class PBitSyndromeDecoder:
     chains: int = 8
@@ -216,13 +329,21 @@ class PBitSyndromeDecoder:
     beta: float = 0.6
     beta_start: Optional[float] = None
     beta_stop: Optional[float] = None
+    beta_schedule_shape: str = "geometric"
+    anneal_prior: bool = True
+    prior_scale: float = 1.0
     rho: Optional[float] = None
+    rho_scale: Optional[float] = None
     update: str = "gibbs"
     initial_probability: Optional[float] = None
     stop_on_first_valid: bool = True
     collect_valid_samples: bool = False
     selection: str = "best_energy"
     target_valid_solutions: int = 0
+    vectorized: bool = True
+    measure_sweeps: int = 0
+    beta_measure: float = 1.0
+    weight_reduction: bool = False
     name: str = "pbit_syndrome"
 
     def decode(
@@ -235,17 +356,53 @@ class PBitSyndromeDecoder:
         start = time.perf_counter()
         lambdas = prior_lambdas(p, code.n)
         probabilities = _prior_probabilities(p, code.n)
-        rho = default_rho(lambdas) if self.rho is None else self.rho
+        rho = self._resolve_rho(lambdas)
         target = np.asarray(syndrome, dtype=np.uint8) % 2
         col_checks = [np.flatnonzero(code.H[:, j]).astype(np.int64) for j in range(code.n)]
         beta_schedule = self._beta_schedule()
         initial_probability = self._initial_probability(probabilities)
-        if self.selection not in {"best_energy", "counts", "min_weight"}:
+        if self.selection not in {"best_energy", "counts", "min_weight", "ml_coset"}:
             raise ValueError(f"unknown p-bit syndrome selection {self.selection!r}")
+        if self.stop_on_first_valid and self.selection != "best_energy":
+            raise ValueError(
+                "stop_on_first_valid=True returns the first valid sample in chain order, "
+                f"which defeats selection={self.selection!r} (it aggregates over the full "
+                "ensemble). Set stop_on_first_valid=False, or use target_valid_solutions to "
+                "cap exploration while still selecting across the collected samples."
+            )
         if self.target_valid_solutions < 0:
             raise ValueError("target_valid_solutions must be nonnegative")
+        if self.measure_sweeps < 0:
+            raise ValueError("measure_sweeps must be nonnegative")
+        if self.beta_measure <= 0.0:
+            raise ValueError("beta_measure must be positive")
+        if self.prior_scale <= 0.0:
+            raise ValueError("prior_scale must be positive")
+        measure_start: Optional[int] = None
+        if self.measure_sweeps > 0:
+            measure_start = int(beta_schedule.shape[0])
+            beta_schedule = np.concatenate(
+                [beta_schedule, np.full(self.measure_sweeps, float(self.beta_measure))]
+            )
+        stab_rows = _stabilizer_rows(code) if self.weight_reduction else None
+
+        if self.vectorized:
+            return self._decode_batched(
+                code=code,
+                target=target,
+                lambdas=lambdas,
+                rho=rho,
+                col_checks=col_checks,
+                beta_schedule=beta_schedule,
+                initial_probability=initial_probability,
+                start=start,
+                rng=rng,
+                measure_start=measure_start,
+                stab_rows=stab_rows,
+            )
 
         counts: Dict[str, int] = defaultdict(int)
+        coset_logz: Dict[str, float] = {}
         best_rep_by_coset: Dict[str, BitArray] = {}
         best_rep_energy: Dict[str, float] = {}
         best_valid: Optional[BitArray] = None
@@ -260,7 +417,9 @@ class PBitSyndromeDecoder:
         first_valid_chain: Optional[int] = None
         valid_hits = 0
         total_samples = 0
+        measure_valid = 0
         initial_residual_weight: Optional[int] = None
+        total_sweeps = self.sweeps if measure_start is None else int(beta_schedule.shape[0])
 
         for chain in range(self.chains):
             e = (rng.random(code.n) < initial_probability).astype(np.uint8)
@@ -270,7 +429,7 @@ class PBitSyndromeDecoder:
                 initial_residual_weight = invalid
             energy = prior_energy(e, lambdas) + rho * invalid
 
-            for sweep in range(self.sweeps + 1):
+            for sweep in range(total_sweeps + 1):
                 total_samples += 1
                 final_residual_weight = invalid
                 if invalid < best_residual_weight or (
@@ -288,11 +447,20 @@ class PBitSyndromeDecoder:
                     logical_key = _coset_key(code.logical(e))
                     if self.collect_valid_samples or self.stop_on_first_valid:
                         counts[logical_key] += 1
+                    if measure_start is not None and sweep > measure_start:
+                        measure_valid += 1
                     if logical_key not in best_rep_energy or e_prior < best_rep_energy[logical_key]:
                         best_rep_energy[logical_key] = e_prior
                         best_rep_by_coset[logical_key] = e.copy()
                     solution_key = gf2.bit_string(e)
-                    valid_solution_keys.add(solution_key)
+                    if solution_key not in valid_solution_keys:
+                        valid_solution_keys.add(solution_key)
+                        prev_logz = coset_logz.get(logical_key)
+                        coset_logz[logical_key] = (
+                            -e_prior
+                            if prev_logz is None
+                            else float(np.logaddexp(prev_logz, -e_prior))
+                        )
                     e_weight = int(e.sum())
                     is_better_valid = (
                         self.selection == "min_weight"
@@ -329,21 +497,53 @@ class PBitSyndromeDecoder:
                             initial_probability=initial_probability,
                             distinct_valid_solutions=len(valid_solution_keys),
                         )
-                if sweep == self.sweeps:
+                if sweep == total_sweeps:
                     break
                 beta = float(beta_schedule[sweep])
+                # Calibrated mode (anneal_prior=False): keep the channel prior at
+                # full scale and anneal only the syndrome penalty via kappa = beta*rho,
+                # so the per-sweep marginal stays the physical posterior (a bit far
+                # from the syndrome sets with probability ~p, not ~0.5, when hot).
+                # prior_scale (gamma) > 1 additionally sharpens the prior so a far bit
+                # sets with probability ~sigmoid(-gamma*lambda) << p, biasing the
+                # search toward lighter (MAP-leaning) corrections. It scales only the
+                # flip field; ``energy``/weight bookkeeping stays the physical value.
+                flip_beta = beta if self.anneal_prior else 1.0
+                syn_coeff = rho if self.anneal_prior else beta * rho
                 for j in rng.permutation(code.n):
                     checks = col_checks[int(j)]
                     before = int(residual[checks].sum())
                     after = int(len(checks) - before)
-                    delta = (1 - 2 * int(e[j])) * lambdas[j] + rho * (after - before)
-                    if _should_flip(delta, int(e[j]), beta, rng, self.update):
+                    bit = int(e[j])
+                    delta = (1 - 2 * bit) * lambdas[j] + rho * (after - before)
+                    field = (
+                        delta
+                        if self.anneal_prior
+                        else self.prior_scale * (1 - 2 * bit) * lambdas[j]
+                        + syn_coeff * (after - before)
+                    )
+                    if _should_flip(field, bit, flip_beta, rng, self.update):
                         e[j] ^= 1
                         residual[checks] ^= 1
                         invalid += after - before
                         energy += delta
 
-        if self.collect_valid_samples and counts and self.selection == "counts":
+        if self.weight_reduction and stab_rows is not None and stab_rows.size:
+            reduced_best = _apply_weight_reduction(
+                self.selection,
+                best_rep_by_coset,
+                best_rep_energy,
+                coset_logz,
+                stab_rows,
+                lambdas,
+                best_valid=best_valid,
+            )
+            if reduced_best is not None:
+                best_valid = reduced_best
+        if self.selection == "ml_coset" and coset_logz:
+            best_key = max(coset_logz, key=lambda key: (coset_logz[key], -best_rep_energy[key]))
+            correction = best_rep_by_coset[best_key]
+        elif self.collect_valid_samples and counts and self.selection == "counts":
             best_key = max(counts, key=lambda key: (counts[key], -best_rep_energy[key]))
             correction = best_rep_by_coset[best_key]
         elif best_valid is not None:
@@ -370,7 +570,255 @@ class PBitSyndromeDecoder:
             best_residual_weight=best_residual_weight,
             initial_probability=initial_probability,
             distinct_valid_solutions=len(valid_solution_keys),
+            coset_logz=dict(coset_logz),
+            measure_valid=measure_valid,
         )
+
+    def _decode_batched(
+        self,
+        code: CSSCode,
+        target: BitArray,
+        lambdas: np.ndarray,
+        rho: float,
+        col_checks: list[np.ndarray],
+        beta_schedule: np.ndarray,
+        initial_probability: Union[float, np.ndarray],
+        start: float,
+        rng: np.random.Generator,
+        measure_start: Optional[int] = None,
+        stab_rows: Optional[np.ndarray] = None,
+    ) -> DecodeResult:
+        """Chain-parallel reimplementation of the scalar p-bit sweep.
+
+        The independent chains are advanced together as rows of an (chains, n) state
+        matrix. Within a sweep, bits are still updated sequentially (asynchronous
+        Gibbs/Metropolis) so the per-chain dynamics match the scalar path; only the
+        per-bit work is vectorized across chains. Results are deterministic given the
+        seed but use a different random stream than the scalar implementation.
+        """
+        n = code.n
+        chains = self.chains
+        lam = np.asarray(lambdas, dtype=float)
+        h_transpose = code.H.T.astype(np.uint8)
+        a_transpose = code.A.T.astype(np.int64)
+        max_deg = max((checks.size for checks in col_checks), default=0)
+        col_pad = np.zeros((n, max_deg), dtype=np.int64)
+        deg_mask = np.zeros((n, max_deg), dtype=bool)
+        col_deg = np.empty(n, dtype=np.int64)
+        for j, checks in enumerate(col_checks):
+            col_deg[j] = checks.size
+            if checks.size:
+                col_pad[j, : checks.size] = checks
+                deg_mask[j, : checks.size] = True
+        chain_rows = np.arange(chains)
+
+        counts: Dict[str, int] = defaultdict(int)
+        coset_logz: Dict[str, float] = {}
+        best_rep_by_coset: Dict[str, BitArray] = {}
+        best_rep_energy: Dict[str, float] = {}
+        best_valid: Optional[BitArray] = None
+        best_valid_energy = float("inf")
+        best_valid_weight: Optional[int] = None
+        best_any: Optional[BitArray] = None
+        best_any_energy = float("inf")
+        valid_solution_keys: set[str] = set()
+        best_residual_weight = code.m + 1
+        first_valid_sweep: Optional[int] = None
+        first_valid_chain: Optional[int] = None
+        valid_hits = 0
+        total_samples = 0
+        measure_valid = 0
+
+        if isinstance(initial_probability, np.ndarray):
+            states = (rng.random((chains, n)) < initial_probability[None, :]).astype(np.uint8)
+        else:
+            states = (rng.random((chains, n)) < float(initial_probability)).astype(np.uint8)
+        residual = ((states @ h_transpose) & 1).astype(np.uint8) ^ target[None, :]
+        invalid = residual.sum(axis=1).astype(np.int64)
+        energy = states @ lam + rho * invalid
+        initial_residual_weight = int(invalid[0]) if chains else 0
+
+        sweeps = self.sweeps if measure_start is None else int(beta_schedule.shape[0])
+        for sweep in range(sweeps + 1):
+            logical_mat = (states.astype(np.int64) @ a_transpose) & 1
+            priors = states @ lam
+            weights = states.sum(axis=1)
+            for chain in range(chains):
+                total_samples += 1
+                invalid_c = int(invalid[chain])
+                if invalid_c < best_residual_weight or (
+                    invalid_c == best_residual_weight and energy[chain] < best_any_energy
+                ):
+                    best_residual_weight = invalid_c
+                    best_any_energy = float(energy[chain])
+                    best_any = states[chain].copy()
+                if invalid_c == 0:
+                    valid_hits += 1
+                    e_vec = states[chain]
+                    e_prior = float(priors[chain])
+                    if first_valid_sweep is None:
+                        first_valid_sweep = sweep
+                        first_valid_chain = chain
+                    logical_key = _coset_key(logical_mat[chain])
+                    if self.collect_valid_samples or self.stop_on_first_valid:
+                        counts[logical_key] += 1
+                    if measure_start is not None and sweep > measure_start:
+                        measure_valid += 1
+                    if (
+                        logical_key not in best_rep_energy
+                        or e_prior < best_rep_energy[logical_key]
+                    ):
+                        best_rep_energy[logical_key] = e_prior
+                        best_rep_by_coset[logical_key] = e_vec.copy()
+                    config_key = e_vec.tobytes()
+                    if config_key not in valid_solution_keys:
+                        valid_solution_keys.add(config_key)
+                        prev_logz = coset_logz.get(logical_key)
+                        coset_logz[logical_key] = (
+                            -e_prior
+                            if prev_logz is None
+                            else float(np.logaddexp(prev_logz, -e_prior))
+                        )
+                    e_weight = int(weights[chain])
+                    is_better_valid = (
+                        self.selection == "min_weight"
+                        and (
+                            best_valid_weight is None
+                            or e_weight < best_valid_weight
+                            or (e_weight == best_valid_weight and e_prior < best_valid_energy)
+                        )
+                    ) or (self.selection != "min_weight" and e_prior < best_valid_energy)
+                    if is_better_valid:
+                        best_valid_weight = e_weight
+                        best_valid_energy = e_prior
+                        best_valid = e_vec.copy()
+                    if self.stop_on_first_valid or (
+                        self.target_valid_solutions
+                        and len(valid_solution_keys) >= self.target_valid_solutions
+                    ):
+                        correction = best_valid if best_valid is not None else e_vec.copy()
+                        return self._result(
+                            code=code,
+                            correction=correction,
+                            syndrome=target,
+                            lambdas=lambdas,
+                            rho=rho,
+                            start=start,
+                            valid_hits=valid_hits,
+                            total_samples=total_samples,
+                            first_valid_sweep=first_valid_sweep,
+                            first_valid_chain=first_valid_chain,
+                            counts=dict(counts),
+                            initial_residual_weight=initial_residual_weight,
+                            final_residual_weight=0,
+                            best_residual_weight=0,
+                            initial_probability=initial_probability,
+                            distinct_valid_solutions=len(valid_solution_keys),
+                        )
+            if sweep == sweeps:
+                break
+            beta = float(beta_schedule[sweep])
+            flip_beta = beta if self.anneal_prior else 1.0
+            syn_coeff = rho if self.anneal_prior else beta * rho
+            order = np.argsort(rng.random((chains, n)), axis=1)
+            uniforms = rng.random((chains, n))
+            lam_order = lam[order]
+            deg_order = col_deg[order]
+            if max_deg:
+                cp_order = col_pad[order]
+                vm_order = deg_mask[order]
+            for step in range(n):
+                j = order[:, step]
+                if max_deg:
+                    cp = cp_order[:, step]
+                    vm = vm_order[:, step]
+                    res_vals = residual[chain_rows[:, None], cp]
+                    before = (res_vals * vm).sum(axis=1).astype(np.int64)
+                else:
+                    before = np.zeros(chains, dtype=np.int64)
+                after = deg_order[:, step] - before
+                bits = states[chain_rows, j].astype(np.int64)
+                delta = (1 - 2 * bits) * lam_order[:, step] + rho * (after - before)
+                field = (
+                    delta
+                    if self.anneal_prior
+                    else self.prior_scale * (1 - 2 * bits) * lam_order[:, step]
+                    + syn_coeff * (after - before)
+                )
+                flip = _should_flip_batch(field, bits, flip_beta, uniforms[:, step], self.update)
+                flipped = np.flatnonzero(flip)
+                if flipped.size:
+                    states[flipped, j[flipped]] ^= 1
+                    if max_deg:
+                        sel = vm[flipped].reshape(-1)
+                        rows_idx = np.repeat(flipped, max_deg)[sel]
+                        cols_idx = cp[flipped].reshape(-1)[sel]
+                        residual[rows_idx, cols_idx] ^= 1
+                    invalid[flipped] += (after - before)[flipped]
+                    energy[flipped] += delta[flipped]
+
+        if self.weight_reduction and stab_rows is not None and stab_rows.size:
+            reduced_best = _apply_weight_reduction(
+                self.selection,
+                best_rep_by_coset,
+                best_rep_energy,
+                coset_logz,
+                stab_rows,
+                lambdas,
+                best_valid=best_valid,
+            )
+            if reduced_best is not None:
+                best_valid = reduced_best
+        if self.selection == "ml_coset" and coset_logz:
+            best_key = max(coset_logz, key=lambda key: (coset_logz[key], -best_rep_energy[key]))
+            correction = best_rep_by_coset[best_key]
+        elif self.collect_valid_samples and counts and self.selection == "counts":
+            best_key = max(counts, key=lambda key: (counts[key], -best_rep_energy[key]))
+            correction = best_rep_by_coset[best_key]
+        elif best_valid is not None:
+            correction = best_valid
+        elif best_any is not None:
+            correction = best_any
+        else:
+            correction = np.zeros(code.n, dtype=np.uint8)
+        final_residual_weight = int((code.syndrome(correction) ^ target).sum())
+        return self._result(
+            code=code,
+            correction=correction,
+            syndrome=target,
+            lambdas=lambdas,
+            rho=rho,
+            start=start,
+            valid_hits=valid_hits,
+            total_samples=total_samples,
+            first_valid_sweep=first_valid_sweep,
+            first_valid_chain=first_valid_chain,
+            counts=dict(counts),
+            initial_residual_weight=initial_residual_weight,
+            final_residual_weight=final_residual_weight,
+            best_residual_weight=best_residual_weight,
+            initial_probability=initial_probability,
+            distinct_valid_solutions=len(valid_solution_keys),
+            coset_logz=dict(coset_logz),
+            measure_valid=measure_valid,
+        )
+
+    def _resolve_rho(self, lambdas: np.ndarray) -> float:
+        """Resolve the syndrome-penalty weight ``rho``.
+
+        Precedence: an explicit ``rho`` wins; otherwise a p-adaptive
+        ``rho_scale * max(lambda)`` is used when ``rho_scale`` is set; otherwise the
+        shared ``default_rho`` heuristic. Empirically ``rho_scale`` near 1.0 (i.e.
+        rho ~ the per-qubit log-likelihood) greatly improves coverage of the true
+        low-weight coset versus the much larger ``default_rho``.
+        """
+        if self.rho is not None:
+            return float(self.rho)
+        if self.rho_scale is not None:
+            if self.rho_scale <= 0.0:
+                raise ValueError("rho_scale must be positive")
+            return float(self.rho_scale) * float(np.max(lambdas))
+        return default_rho(lambdas)
 
     def _beta_schedule(self) -> np.ndarray:
         if self.chains <= 0:
@@ -385,7 +833,12 @@ class PBitSyndromeDecoder:
             raise ValueError("beta_start and beta_stop must be provided together")
         if self.beta_start <= 0.0 or self.beta_stop <= 0.0:
             raise ValueError("beta_start and beta_stop must be positive")
-        return np.geomspace(float(self.beta_start), float(self.beta_stop), max(self.sweeps, 1))
+        return _annealing_schedule(
+            float(self.beta_start),
+            float(self.beta_stop),
+            max(self.sweeps, 1),
+            self.beta_schedule_shape,
+        )
 
     def _initial_probability(self, probabilities: np.ndarray) -> Union[float, np.ndarray]:
         if self.initial_probability is None:
@@ -412,6 +865,8 @@ class PBitSyndromeDecoder:
         best_residual_weight: int,
         initial_probability: Union[float, np.ndarray],
         distinct_valid_solutions: int,
+        coset_logz: Optional[Dict[str, float]] = None,
+        measure_valid: int = 0,
     ) -> DecodeResult:
         valid = code.is_valid_correction(correction, syndrome)
         logical = gf2.bit_tuple(code.logical(correction))
@@ -447,6 +902,9 @@ class PBitSyndromeDecoder:
             coset_counts=counts,
             metadata={
                 **beta_metadata,
+                "beta_schedule_shape": self.beta_schedule_shape,
+                "anneal_prior": self.anneal_prior,
+                "prior_scale": float(self.prior_scale),
                 "rho": rho,
                 "update": self.update,
                 "chains": self.chains,
@@ -458,8 +916,16 @@ class PBitSyndromeDecoder:
                 "first_valid_chain": first_valid_chain,
                 "valid_hits": valid_hits,
                 "distinct_valid_solutions": distinct_valid_solutions,
+                "measure_sweeps": self.measure_sweeps,
+                "measure_samples": int(measure_valid),
+                "ml_coset_logz": (
+                    {key: round(value, 4) for key, value in coset_logz.items()}
+                    if coset_logz
+                    else {}
+                ),
                 "selected_weight": int(correction.sum()),
                 "best_residual_weight": best_residual_weight,
+                "rho_scale": self.rho_scale,
                 "stop_on_first_valid": self.stop_on_first_valid,
                 "collect_valid_samples": self.collect_valid_samples,
                 "selection": self.selection,
@@ -694,6 +1160,93 @@ class BPOSDDecoder:
                 schedule=self.schedule,
                 osd_method=self.osd_method,
                 osd_order=self.osd_order,
+                omp_thread_count=self.omp_thread_count,
+                **channel_kwargs,
+            )
+        return self._decoder_cache[cache_key]
+
+
+@dataclass
+class BPDecoder:
+    max_iter: int = 100
+    bp_method: str = "minimum_sum"
+    ms_scaling_factor: float = 0.625
+    schedule: str = "parallel"
+    omp_thread_count: int = 1
+    name: str = "bp"
+    _decoder_cache: Dict[bytes, object] = field(default_factory=dict, init=False, repr=False)
+
+    def decode(
+        self,
+        code: CSSCode,
+        syndrome: Sequence[int],
+        p: Union[float, Sequence[float]],
+        rng: np.random.Generator,
+    ) -> DecodeResult:
+        del rng
+        start = time.perf_counter()
+        lambdas = prior_lambdas(p, code.n)
+        target = np.asarray(syndrome, dtype=np.uint8) % 2
+        decoder = self._cached_decoder(code, p)
+        correction = np.asarray(decoder.decode(target), dtype=np.uint8) % 2
+        valid = code.is_valid_correction(correction, target)
+        logical = gf2.bit_tuple(code.logical(correction))
+        key = _coset_key(logical)
+        return DecodeResult(
+            correction=correction,
+            logical_class=logical,
+            valid=valid,
+            energy=prior_energy(correction, lambdas),
+            runtime_s=time.perf_counter() - start,
+            valid_samples=int(valid),
+            total_samples=1,
+            first_valid_sweep=0 if valid else None,
+            distinct_logicals=1 if valid else 0,
+            coset_counts={key: 1} if valid else {},
+            metadata={
+                "backend": "ldpc.BpDecoder",
+                "uses_osd": False,
+                "max_iter": self.max_iter,
+                "bp_method": self.bp_method,
+                "ms_scaling_factor": self.ms_scaling_factor,
+                "schedule": self.schedule,
+                "converge": bool(getattr(decoder, "converge", False)),
+                "iterations": int(getattr(decoder, "iter", 0)),
+            },
+        )
+
+    def _cached_decoder(self, code: CSSCode, p: Union[float, Sequence[float]]) -> object:
+        probabilities = _prior_probabilities(p, code.n)
+        cache_key = b"|".join(
+            [
+                code.H.shape[0].to_bytes(4, "little"),
+                code.H.shape[1].to_bytes(4, "little"),
+                code.H.tobytes(),
+                probabilities.tobytes(),
+                repr(
+                    (
+                        self.max_iter,
+                        self.bp_method,
+                        self.ms_scaling_factor,
+                        self.schedule,
+                        self.omp_thread_count,
+                    )
+                ).encode("utf-8"),
+            ]
+        )
+        if cache_key not in self._decoder_cache:
+            from ldpc import BpDecoder as LdpcBpDecoder
+
+            if np.all(probabilities == probabilities[0]):
+                channel_kwargs = {"error_rate": float(probabilities[0])}
+            else:
+                channel_kwargs = {"error_channel": probabilities.astype(float).tolist()}
+            self._decoder_cache[cache_key] = LdpcBpDecoder(
+                code.H,
+                max_iter=self.max_iter,
+                bp_method=self.bp_method,
+                ms_scaling_factor=self.ms_scaling_factor,
+                schedule=self.schedule,
                 omp_thread_count=self.omp_thread_count,
                 **channel_kwargs,
             )
@@ -1056,6 +1609,42 @@ def _pbit_probability_one(delta_one_minus_zero: float, beta: float) -> float:
         z = np.exp(-x)
         return float(z / (1.0 + z))
     return float(1.0 / (1.0 + np.exp(x)))
+
+
+def _pbit_probability_one_batch(delta_one_minus_zero: np.ndarray, beta: float) -> np.ndarray:
+    """Vectorized, numerically stable counterpart of ``_pbit_probability_one``."""
+
+    x = beta * np.asarray(delta_one_minus_zero, dtype=float)
+    out = np.empty_like(x)
+    pos = x >= 0
+    z_pos = np.exp(-x[pos])
+    out[pos] = z_pos / (1.0 + z_pos)
+    out[~pos] = 1.0 / (1.0 + np.exp(x[~pos]))
+    return out
+
+
+def _should_flip_batch(
+    flip_delta: np.ndarray,
+    bits: np.ndarray,
+    beta: float,
+    uniforms: np.ndarray,
+    update: str,
+) -> np.ndarray:
+    """Vectorized flip decision matching ``_should_flip`` for a batch of chains."""
+
+    delta = np.asarray(flip_delta, dtype=float)
+    bits_int = np.asarray(bits, dtype=np.int64)
+    if update == "metropolis":
+        accept = delta <= 0.0
+        with np.errstate(over="ignore"):
+            threshold = np.exp(-beta * delta)
+        return accept | (uniforms < threshold)
+    if update != "gibbs":
+        raise ValueError(f"unknown p-bit update rule {update!r}")
+    delta_one_minus_zero = delta * (1 - 2 * bits_int)
+    probability_one = _pbit_probability_one_batch(delta_one_minus_zero, beta)
+    next_bit = (uniforms < probability_one).astype(np.int64)
+    return next_bit != bits_int
 
 
 def _basis_flip_delta(signed_lambdas: np.ndarray, indices: np.ndarray) -> float:
