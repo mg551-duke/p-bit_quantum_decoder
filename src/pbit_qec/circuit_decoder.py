@@ -274,8 +274,8 @@ class ColoredBlockGibbsDecoder:
             raise ValueError(f"unknown beta_schedule_shape {beta_schedule_shape!r}")
         if gamma <= 0.0:
             raise ValueError("gamma must be positive")
-        if not (0.0 < idle_update_rate <= 1.0):
-            raise ValueError("idle_update_rate must be in (0, 1]")
+        if not (0.0 <= idle_update_rate <= 1.0):
+            raise ValueError("idle_update_rate must be in [0, 1] (0 = hard gating: freeze idle bits)")
         if gamma_active is not None and gamma_active <= 0.0:
             raise ValueError("gamma_active must be positive")
         if gamma_far is not None and gamma_far <= 0.0:
@@ -321,10 +321,12 @@ class ColoredBlockGibbsDecoder:
         self.gamma = float(gamma)
         # Active-region knobs (no-op at defaults): a mechanism is "active" iff it
         # is currently set (e_j=1) or touches a violated detector (v_j>0). Idle
-        # bits (e_j=0, v_j=0) are resampled only with probability idle_update_rate
-        # (soft gating), and the prior sharpness can differ by region -- gamma_active
-        # near the syndrome vs gamma_far in quiet regions. Defaults
-        # (rate=1, gammas=gamma) reproduce the uniform sweep exactly.
+        # bits (e_j=0, v_j=0) are resampled only with probability idle_update_rate:
+        # rate=1 no gating (default), rate in (0,1) SOFT gating, rate=0 HARD gating
+        # (idle bits are frozen until a neighbour violates one of their detectors).
+        # The prior sharpness can also differ by region -- gamma_active near the
+        # syndrome vs gamma_far in quiet regions. Defaults (rate=1, gammas=gamma)
+        # reproduce the uniform sweep exactly.
         self.idle_update_rate = float(idle_update_rate)
         self.gamma_active = self.gamma if gamma_active is None else float(gamma_active)
         self.gamma_far = self.gamma if gamma_far is None else float(gamma_far)

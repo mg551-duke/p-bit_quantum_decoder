@@ -227,7 +227,7 @@ def test_active_region_defaults_are_noop() -> None:
 @pytest.mark.parametrize(
     "kwargs",
     [
-        {"idle_update_rate": 0.0},
+        {"idle_update_rate": -0.1},
         {"idle_update_rate": 1.5},
         {"gamma_active": 0.0},
         {"gamma_far": -1.0},
@@ -237,6 +237,17 @@ def test_active_region_param_validation(kwargs) -> None:
     _, mats = _rep_matrices()
     with pytest.raises(ValueError):
         ColoredBlockGibbsDecoder(mats, chains=2, sweeps=1, seed=0, **kwargs)
+
+
+def test_hard_gating_rate_zero_is_accepted() -> None:
+    # rate=0.0 is HARD gating (idle bits frozen), a valid boundary value that
+    # still enables the active-region gate path.
+    _, mats = _rep_matrices()
+    eng = ColoredBlockGibbsDecoder(
+        mats, chains=2, sweeps=1, idle_update_rate=0.0, seed=0
+    )
+    assert eng.idle_update_rate == 0.0
+    assert eng._idle_gate is True
 
 
 def test_active_region_noop_matches_baseline_cpu() -> None:
@@ -259,14 +270,16 @@ def test_active_region_noop_matches_baseline_cpu() -> None:
     assert base_stats.mean_selected_weight == noop_stats.mean_selected_weight
 
 
-def test_active_region_residual_invariant_holds_across_sweeps() -> None:
+@pytest.mark.parametrize("idle_rate", [0.0, 0.05])
+def test_active_region_residual_invariant_holds_across_sweeps(idle_rate) -> None:
     # The incremental residual/invalid bookkeeping in _sweep must stay exact even
-    # with soft idle gating and active/far prior scaling engaged (states, residual
-    # and invalid are all driven by the same post-gate flip mask).
+    # with idle gating (hard rate=0.0 or soft rate=0.05) and active/far prior
+    # scaling engaged (states, residual and invalid are all driven by the same
+    # post-gate flip mask).
     _, mats = _rep_matrices()
     eng = ColoredBlockGibbsDecoder(
         mats, chains=8, sweeps=20, beta_start=0.5, beta_stop=3.0,
-        idle_update_rate=0.05, gamma_active=0.5, gamma_far=1.5, seed=1,
+        idle_update_rate=idle_rate, gamma_active=0.5, gamma_far=1.5, seed=1,
     )
     assert eng._idle_gate is True
     assert eng._active_on is True
@@ -303,7 +316,8 @@ def test_active_region_decode_is_valid_and_low_ler() -> None:
 
 
 @pytest.mark.skipif(not _cuda_available(), reason="requires cupy + a CUDA device")
-def test_fused_gpu_sweep_matches_reference_with_active_region() -> None:
+@pytest.mark.parametrize("idle_rate", [0.0, 0.05])
+def test_fused_gpu_sweep_matches_reference_with_active_region(idle_rate) -> None:
     import cupy as cp
 
     circuit, mats = _rep_matrices(p=0.05)
@@ -314,7 +328,7 @@ def test_fused_gpu_sweep_matches_reference_with_active_region() -> None:
     common = dict(
         chains=16, sweeps=30, beta_start=0.5, beta_stop=3.0,
         rho_scale=0.6, selection="min_weight", device="cuda", seed=1,
-        idle_update_rate=0.05, gamma_active=0.5, gamma_far=1.5,
+        idle_update_rate=idle_rate, gamma_active=0.5, gamma_far=1.5,
     )
     fused = ColoredBlockGibbsDecoder(mats, **common)
     ref = ColoredBlockGibbsDecoder(mats, **common)
