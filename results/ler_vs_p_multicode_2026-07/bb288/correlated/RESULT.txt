@@ -4,3 +4,10 @@ p=0.005 tv=2  LER=4.583e-03 +-9.8e-04  ul95=6.19e-03  errors=22/4800  invalid=13
 p=0.005 tv=3  LER=4.583e-03 +-9.8e-04  ul95=6.19e-03  errors=22/4800  invalid=139
 p=0.005 tv=4  LER=4.583e-03 +-9.8e-04  ul95=6.19e-03  errors=22/4800  invalid=139
 p=0.005 tv=5  LER=4.583e-03 +-9.8e-04  ul95=6.19e-03  errors=22/4800  invalid=139
+--- p=0.004 FINAL N=108000 @ Thu Jul  2 01:28:43 PM PDT 2026 ---
+p=0.004 tv=1  LER=4.630e-05 +-2.1e-05  ul95=8.03e-05  errors=5/108000  invalid=78
+p=0.004 tv=2  LER=4.630e-05 +-2.1e-05  ul95=8.03e-05  errors=5/108000  invalid=78
+p=0.004 tv=3  LER=4.630e-05 +-2.1e-05  ul95=8.03e-05  errors=5/108000  invalid=78
+p=0.004 tv=4  LER=4.630e-05 +-2.1e-05  ul95=8.03e-05  errors=5/108000  invalid=78
+p=0.004 tv=5  LER=4.630e-05 +-2.1e-05  ul95=8.03e-05  errors=5/108000  invalid=78
+ALLDONE @ Thu Jul  2 01:28:43 PM PDT 2026

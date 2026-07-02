@@ -2,3 +2,8 @@
 # detectors=5184 mechanisms=206352 observables=12 basis_filter=None
 # shots=1500 procs=80 batch=4 chains=128 sweeps=1000 beta=0.5->6.0 update=gibbs selection=min_weight device=cuda gamma=1.0 capture=sweep max_legs=24 target_valid=None
 # mean detector weight/shot=704.1
+pbit-cuda rho_scale=0.3 tv=1 LER=0.0000+-0.0000 (0/1500)  valid=1.000 invalid=0  meanW=208.7  2980.60 ms/shot (wall 4471s)  legs=1.22 sw_exec=1215.4  legs_max=24 legs_p99=6  sw_max=24000 sw_p99=5685
+pbit-cuda rho_scale=0.3 tv=2 LER=0.0000+-0.0000 (0/1500)  valid=1.000 invalid=0  meanW=208.7  2980.60 ms/shot (wall 4471s)  legs=1.22 sw_exec=1215.4  legs_max=24 legs_p99=6  sw_max=24000 sw_p99=5685
+pbit-cuda rho_scale=0.3 tv=3 LER=0.0000+-0.0000 (0/1500)  valid=1.000 invalid=0  meanW=208.7  2980.60 ms/shot (wall 4471s)  legs=1.22 sw_exec=1215.4  legs_max=24 legs_p99=6  sw_max=24000 sw_p99=5685
+pbit-cuda rho_scale=0.3 tv=4 LER=0.0000+-0.0000 (0/1500)  valid=1.000 invalid=0  meanW=208.7  2980.60 ms/shot (wall 4471s)  legs=1.22 sw_exec=1215.4  legs_max=24 legs_p99=6  sw_max=24000 sw_p99=5685
+pbit-cuda rho_scale=0.3 tv=5 LER=0.0000+-0.0000 (0/1500)  valid=1.000 invalid=0  meanW=208.7  2980.60 ms/shot (wall 4471s)  legs=1.22 sw_exec=1215.4  legs_max=24 legs_p99=6  sw_max=24000 sw_p99=5685
