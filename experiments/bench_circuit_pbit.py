@@ -333,6 +333,15 @@ def main() -> None:
     ap.add_argument("--selection", default="min_weight", choices=["best_energy", "min_weight"])
     ap.add_argument("--device", default="cpu", help="cpu (process pool) or cuda (single in-process engine)")
     ap.add_argument("--gamma", type=float, default=1.0, help="prior scale, decoupled from kappa")
+    ap.add_argument("--idle-update-rate", type=float, default=1.0,
+                    help="active-region soft gating: idle bits (e_j=0, v_j=0) are resampled "
+                         "only with this probability; 1.0 = no gating (default).")
+    ap.add_argument("--gamma-active", type=float, default=None,
+                    help="active-region prior scale for near-syndrome bits (e_j=0, v_j>0); "
+                         "default = gamma.")
+    ap.add_argument("--gamma-far", type=float, default=None,
+                    help="active-region prior scale for far/idle bits (e_j=0, v_j=0); "
+                         "default = gamma.")
     ap.add_argument("--capture", default="sweep", choices=["sweep", "block"])
     ap.add_argument("--max-legs", type=int, default=1,
                     help="adaptive-legs: max waves of fresh chains per shot")
@@ -390,6 +399,9 @@ def main() -> None:
             beta_stop=args.beta_stop,
             rho_scale=rs,
             gamma=args.gamma,
+            idle_update_rate=args.idle_update_rate,
+            gamma_active=args.gamma_active,
+            gamma_far=args.gamma_far,
             update=args.update,
             selection=args.selection,
             capture=args.capture,

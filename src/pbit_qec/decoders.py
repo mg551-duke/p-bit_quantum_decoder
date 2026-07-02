@@ -655,11 +655,13 @@ class PBitSyndromeDecoder:
                     checks = col_checks[int(j)]
                     before = int(residual[checks].sum())
                     after = int(len(checks) - before)
-                    if idle_gate and before == 0 and rng.random() >= idle_rate:
-                        continue
                     bit = int(e[j])
+                    # Active iff set (bit==1) or touching a violated check (before>0);
+                    # only idle bits (bit==0 and before==0) are soft-gated.
+                    if idle_gate and bit == 0 and before == 0 and rng.random() >= idle_rate:
+                        continue
                     delta = (1 - 2 * bit) * lambdas[j] + rho * (after - before)
-                    gamma = g_active if before > 0 else g_far
+                    gamma = self.prior_scale if bit == 1 else (g_active if before > 0 else g_far)
                     field = (
                         delta
                         if self.anneal_prior
@@ -952,7 +954,9 @@ class PBitSyndromeDecoder:
                     field = delta
                 else:
                     prior_coeff = (
-                        np.where(before > 0, g_active, g_far) if active_on else self.prior_scale
+                        np.where(bits == 1, self.prior_scale, np.where(before > 0, g_active, g_far))
+                        if active_on
+                        else self.prior_scale
                     )
                     field = prior_coeff * sign * lam[None, :] + syn_coeff * syn_term
                 flip = _should_flip_batch(
@@ -967,7 +971,7 @@ class PBitSyndromeDecoder:
                     # BP-like relaxation.
                     flip = flip & (rng.random((chains, n)) < sync_damping)
                 if idle_gate:
-                    flip = flip & ((before > 0) | (rng.random((chains, n)) < idle_rate))
+                    flip = flip & ((bits == 1) | (before > 0) | (rng.random((chains, n)) < idle_rate))
                 if not flip.any():
                     continue
                 states ^= flip.astype(np.uint8)
@@ -994,7 +998,7 @@ class PBitSyndromeDecoder:
                         field = delta
                     else:
                         prior_coeff = (
-                            np.where(before > 0, g_active, g_far)
+                            np.where(bits == 1, self.prior_scale, np.where(before > 0, g_active, g_far))
                             if active_on
                             else self.prior_scale
                         )
@@ -1003,7 +1007,7 @@ class PBitSyndromeDecoder:
                         field, bits, flip_beta, rng.random((chains, k)), self.update
                     )
                     if idle_gate:
-                        flip = flip & ((before > 0) | (rng.random((chains, k)) < idle_rate))
+                        flip = flip & ((bits == 1) | (before > 0) | (rng.random((chains, k)) < idle_rate))
                     if not flip.any():
                         continue
                     flip_u8 = flip.astype(np.uint8)
@@ -1049,7 +1053,9 @@ class PBitSyndromeDecoder:
                     field = delta
                 else:
                     prior_coeff = (
-                        np.where(before > 0, g_active, g_far) if active_on else self.prior_scale
+                        np.where(bits == 1, self.prior_scale, np.where(before > 0, g_active, g_far))
+                        if active_on
+                        else self.prior_scale
                     )
                     field = (
                         prior_coeff * (1 - 2 * bits) * lam_order[:, step]
@@ -1057,7 +1063,7 @@ class PBitSyndromeDecoder:
                     )
                 flip = _should_flip_batch(field, bits, flip_beta, uniforms[:, step], self.update)
                 if idle_gate:
-                    flip = flip & ((before > 0) | (idle_uniforms[:, step] < idle_rate))
+                    flip = flip & ((bits == 1) | (before > 0) | (idle_uniforms[:, step] < idle_rate))
                 flipped = np.flatnonzero(flip)
                 if flipped.size:
                     states[flipped, j[flipped]] ^= 1

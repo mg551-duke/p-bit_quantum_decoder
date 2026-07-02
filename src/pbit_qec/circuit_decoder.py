@@ -152,8 +152,10 @@ void fused_color_sweep(
     const float* __restrict__ degree,
     const long long* __restrict__ col_det_indptr,
     const long long* __restrict__ col_det_indices,
+    const float* __restrict__ uniforms_idle,
     const int k, const int rows,
-    const float gamma, const float kappa, const int metropolis)
+    const float gamma, const float gamma_active, const float gamma_far,
+    const float idle_rate, const float kappa, const int metropolis)
 {
     const long long total = (long long)k * (long long)rows;
     const long long stride = (long long)gridDim.x * blockDim.x;
@@ -170,7 +172,12 @@ void fused_color_sweep(
         const unsigned char bit = states[sidx];
         const float sign = 1.0f - 2.0f * (float)bit;
         const float syn_delta = degree[i] - 2.0f * bef;
-        const float flip_delta = gamma * sign * lam[i] + kappa * syn_delta;
+        // Active-region rule: a mechanism is active iff it is set (bit==1) or
+        // touches a violated detector (bef>0). Idle bits use gamma_far and are
+        // gated below; active bits use gamma (set) or gamma_active (near syndrome).
+        const bool active = (bit != 0) || (bef > 0.0f);
+        const float g = (bit != 0) ? gamma : (bef > 0.0f ? gamma_active : gamma_far);
+        const float flip_delta = g * sign * lam[i] + kappa * syn_delta;
         const float u = uniforms[t];
         bool flip;
         if (metropolis) {
@@ -178,6 +185,12 @@ void fused_color_sweep(
         } else {
             const float p1 = 0.5f * (1.0f - tanhf(0.5f * flip_delta * sign));
             flip = (u < p1) ^ (bit != 0);
+        }
+        // Soft idle gating: idle bits (bit==0 && bef==0) flip only with prob
+        // idle_rate. Prior/energy bookkeeping below stays physical (uses lam[i],
+        // syn_delta), so only the flip decision is biased.
+        if (flip && !active && idle_rate < 1.0f && !(uniforms_idle[t] < idle_rate)) {
+            flip = false;
         }
         if (flip) {
             states[sidx] = bit ^ (unsigned char)1;
@@ -231,6 +244,9 @@ class ColoredBlockGibbsDecoder:
         rho: Optional[float] = None,
         rho_scale: Optional[float] = 1.0,
         gamma: float = 1.0,
+        idle_update_rate: float = 1.0,
+        gamma_active: Optional[float] = None,
+        gamma_far: Optional[float] = None,
         update: str = "gibbs",
         selection: str = "best_energy",
         capture: str = "sweep",
@@ -258,6 +274,12 @@ class ColoredBlockGibbsDecoder:
             raise ValueError(f"unknown beta_schedule_shape {beta_schedule_shape!r}")
         if gamma <= 0.0:
             raise ValueError("gamma must be positive")
+        if not (0.0 < idle_update_rate <= 1.0):
+            raise ValueError("idle_update_rate must be in (0, 1]")
+        if gamma_active is not None and gamma_active <= 0.0:
+            raise ValueError("gamma_active must be positive")
+        if gamma_far is not None and gamma_far <= 0.0:
+            raise ValueError("gamma_far must be positive")
         if max_legs < 1:
             raise ValueError("max_legs must be >= 1")
         if target_valid is not None and target_valid < 1:
@@ -297,6 +319,17 @@ class ColoredBlockGibbsDecoder:
         self.beta_stop = beta_stop
         self.beta_schedule_shape = str(beta_schedule_shape)
         self.gamma = float(gamma)
+        # Active-region knobs (no-op at defaults): a mechanism is "active" iff it
+        # is currently set (e_j=1) or touches a violated detector (v_j>0). Idle
+        # bits (e_j=0, v_j=0) are resampled only with probability idle_update_rate
+        # (soft gating), and the prior sharpness can differ by region -- gamma_active
+        # near the syndrome vs gamma_far in quiet regions. Defaults
+        # (rate=1, gammas=gamma) reproduce the uniform sweep exactly.
+        self.idle_update_rate = float(idle_update_rate)
+        self.gamma_active = self.gamma if gamma_active is None else float(gamma_active)
+        self.gamma_far = self.gamma if gamma_far is None else float(gamma_far)
+        self._idle_gate = self.idle_update_rate < 1.0
+        self._active_on = (self.gamma_active != self.gamma) or (self.gamma_far != self.gamma)
         self.update = update
         self.selection = selection
         self.capture = capture
@@ -981,6 +1014,13 @@ class ColoredBlockGibbsDecoder:
         metropolis = self.update == "metropolis"
         rows = states.shape[1]
         kappa_sweep = self.rho * beta
+        active_on = self._active_on
+        idle_gate = self._idle_gate
+        idle_rate_f = self.dtype(self.idle_update_rate)
+        if active_on:
+            g_e1 = self.dtype(self.gamma)
+            g_active = self.dtype(self.gamma_active)
+            g_far = self.dtype(self.gamma_far)
         for block in self._colors:
             cols = block.cols
             lam = block.lam
@@ -988,7 +1028,15 @@ class ColoredBlockGibbsDecoder:
             bits = states[cols]  # (k, rows) uint8
             sign = 1.0 - 2.0 * bits.astype(self.dtype)
             syn_delta = block.degree[:, None] - 2.0 * before
-            flip_delta = self.gamma * sign * lam[:, None] + kappa_sweep * syn_delta
+            if active_on:
+                prior_coeff = xp.where(
+                    bits != 0,
+                    g_e1,
+                    xp.where(before > 0, g_active, g_far),
+                )
+                flip_delta = prior_coeff * sign * lam[:, None] + kappa_sweep * syn_delta
+            else:
+                flip_delta = self.gamma * sign * lam[:, None] + kappa_sweep * syn_delta
             uniforms = rng.random((cols.size, rows), dtype=self.dtype)
             if metropolis:
                 with np.errstate(over="ignore"):
@@ -998,6 +1046,12 @@ class ColoredBlockGibbsDecoder:
                 delta_one_minus_zero = flip_delta * sign
                 probability_one = 0.5 * (1.0 - xp.tanh(0.5 * delta_one_minus_zero))
                 flip = (uniforms < probability_one) ^ bits.astype(bool)
+            if idle_gate:
+                # Match the fused kernel: draw the idle-gate uniforms right after
+                # the flip uniforms so both paths share one RNG stream.
+                active = (bits != 0) | (before > 0)
+                idle_uniforms = rng.random((cols.size, rows), dtype=self.dtype)
+                flip = flip & (active | (idle_uniforms < idle_rate_f))
             if not self._on_gpu and not flip.any():
                 # CPU-only fast path: skip the scatter when nothing toggled (invalid
                 # is unchanged). On GPU this guard would force a device->host sync
@@ -1041,6 +1095,10 @@ class ColoredBlockGibbsDecoder:
         xp = self.xp
         rows = int(states.shape[1])
         gamma = np.float32(self.gamma)
+        gamma_active = np.float32(self.gamma_active)
+        gamma_far = np.float32(self.gamma_far)
+        idle_rate = np.float32(self.idle_update_rate)
+        idle_gate = self._idle_gate
         kappa = np.float32(self.rho * beta)
         metro = np.int32(1 if self.update == "metropolis" else 0)
         rows32 = np.int32(rows)
@@ -1050,6 +1108,11 @@ class ColoredBlockGibbsDecoder:
             if k == 0:
                 continue
             uniforms = rng.random((k, rows), dtype=xp.float32)
+            # Draw the idle-gate uniforms in the same per-color order as the
+            # reference _sweep so the streams match. Only when gating is active,
+            # so defaults stay bit-for-bit identical to the pre-gate kernel; when
+            # off, the kernel never dereferences the placeholder (idle_rate>=1).
+            idle_uniforms = rng.random((k, rows), dtype=xp.float32) if idle_gate else uniforms
             total = k * rows
             blocks = min((total + threads - 1) // threads, 65535)
             self._fused_kernel(
@@ -1066,9 +1129,13 @@ class ColoredBlockGibbsDecoder:
                     block.degree,
                     block.col_det_indptr,
                     block.det_idx,
+                    idle_uniforms,
                     np.int32(k),
                     rows32,
                     gamma,
+                    gamma_active,
+                    gamma_far,
+                    idle_rate,
                     kappa,
                     metro,
                 ),
