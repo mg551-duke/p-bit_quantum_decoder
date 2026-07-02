@@ -1,0 +1,6 @@
+[2026-06-24 13:32:00] L1/L2 p=0.04 sharpen START gpus=[3 4 5] target=10
+[2026-06-24 13:35:00] L1 done; starting L2
+[2026-06-24 13:37:25] L2 p=0.05 watcher up (pid 2396647): waiting for 'sharpen ALL DONE' marker
+[2026-06-24 13:37:26] sharpen finished; settling 15s then launching L2 p=0.05
+[2026-06-24 14:00:41] L2 p=0.05 sharpen DONE
+[2026-06-24 15:32:01] L1/L2 p=0.04 sharpen ALL DONE

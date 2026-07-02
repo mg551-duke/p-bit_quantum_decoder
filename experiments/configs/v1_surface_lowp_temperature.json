@@ -1,0 +1,82 @@
+{
+  "seed": 20260618,
+  "output_dir": "results/v1_surface_lowp_temperature",
+  "p_values": [0.01, 0.02, 0.03, 0.05],
+  "decoders": ["exact_coset", "mwpm", "bp"],
+  "decoder_settings": {
+    "exact_coset": { "max_nullity": 24 },
+    "mwpm": {},
+    "bp": {
+      "max_iter": 100,
+      "bp_method": "minimum_sum",
+      "ms_scaling_factor": 0.625,
+      "schedule": "parallel",
+      "omp_thread_count": 1
+    },
+    "pbit_syndrome_warm": {
+      "chains": 10,
+      "sweeps": 180,
+      "beta_start": 0.5,
+      "beta_stop": 1.2,
+      "rho_scale": 1.5,
+      "update": "gibbs",
+      "stop_on_first_valid": false,
+      "collect_valid_samples": true,
+      "selection": "min_weight",
+      "target_valid_solutions": 0
+    },
+    "pbit_syndrome_mid": {
+      "chains": 10,
+      "sweeps": 180,
+      "beta_start": 0.6,
+      "beta_stop": 2.0,
+      "rho_scale": 1.5,
+      "update": "gibbs",
+      "stop_on_first_valid": false,
+      "collect_valid_samples": true,
+      "selection": "min_weight",
+      "target_valid_solutions": 0
+    },
+    "pbit_syndrome_cold": {
+      "chains": 10,
+      "sweeps": 180,
+      "beta_start": 0.8,
+      "beta_stop": 3.5,
+      "rho_scale": 1.5,
+      "update": "gibbs",
+      "stop_on_first_valid": false,
+      "collect_valid_samples": true,
+      "selection": "min_weight",
+      "target_valid_solutions": 0
+    }
+  },
+  "sweeps": [
+    {
+      "family": "surface",
+      "size": 3,
+      "trials": 80,
+      "exact": true,
+      "decoders": [
+        "exact_coset",
+        "mwpm",
+        "bp",
+        "pbit_syndrome_warm",
+        "pbit_syndrome_mid",
+        "pbit_syndrome_cold"
+      ]
+    },
+    {
+      "family": "surface",
+      "size": 5,
+      "trials": 40,
+      "exact": false,
+      "decoders": [
+        "mwpm",
+        "bp",
+        "pbit_syndrome_warm",
+        "pbit_syndrome_mid",
+        "pbit_syndrome_cold"
+      ]
+    }
+  ]
+}

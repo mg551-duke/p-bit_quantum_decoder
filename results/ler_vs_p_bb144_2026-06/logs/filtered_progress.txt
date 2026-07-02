@@ -1,0 +1,20 @@
+FILTERED campaign (memory_Z basis Z) sweeps=750 rho=0.20 chains=128 gpus='0 1 2 3 4 5 6 7' start Mon Jun 22 08:41:31 PM PDT 2026
+=== p=0.005 target(tv5)=200 chunk=400 maxn=200000 @ Mon Jun 22 08:41:31 PM PDT 2026 ===
+p=0.005 round=1 N=3200  tv1=138 tv2=127 tv3=123 tv4=116 tv5=112  inv5=10  Mon Jun 22 08:44:32 PM PDT 2026
+p=0.005 round=2 N=6400  tv1=274 tv2=245 tv3=225 tv4=216 tv5=206  inv5=16  Mon Jun 22 08:49:26 PM PDT 2026
+=== p=0.004 target(tv5)=150 chunk=4000 maxn=2000000 @ Mon Jun 22 08:49:26 PM PDT 2026 ===
+p=0.004 round=1 N=32000  tv1=200 tv2=171 tv3=157 tv4=149 tv5=136  inv5=1  Mon Jun 22 09:05:30 PM PDT 2026
+p=0.004 round=2 N=64000  tv1=409 tv2=351 tv3=330 tv4=320 tv5=299  inv5=6  Mon Jun 22 09:22:41 PM PDT 2026
+=== p=0.003 target(tv5)=100 chunk=16000 maxn=4000000 @ Mon Jun 22 09:22:41 PM PDT 2026 ===
+p=0.003 round=1 N=128000  tv1=56 tv2=46 tv3=42 tv4=40 tv5=38  inv5=4  Mon Jun 22 09:52:36 PM PDT 2026
+p=0.003 round=2 N=256000  tv1=119 tv2=102 tv3=94 tv4=89 tv5=78  inv5=5  Mon Jun 22 10:10:39 PM PDT 2026
+p=0.003 round=3 N=384000  tv1=182 tv2=150 tv3=139 tv4=135 tv5=123  inv5=8  Mon Jun 22 10:20:08 PM PDT 2026
+=== p=0.002 target(tv5)=50 chunk=32000 maxn=2000000 @ Mon Jun 22 10:20:08 PM PDT 2026 ===
+p=0.002 round=1 N=256000  tv1=4 tv2=2 tv3=2 tv4=1 tv5=1  inv5=0  Mon Jun 22 10:33:32 PM PDT 2026
+p=0.002 round=2 N=512000  tv1=9 tv2=7 tv3=7 tv4=5 tv5=6  inv5=3  Mon Jun 22 10:46:54 PM PDT 2026
+p=0.002 round=3 N=768000  tv1=12 tv2=10 tv3=10 tv4=8 tv5=8  inv5=3  Mon Jun 22 11:00:24 PM PDT 2026
+p=0.002 round=4 N=1024000  tv1=17 tv2=15 tv3=13 tv4=11 tv5=9  inv5=4  Mon Jun 22 11:14:09 PM PDT 2026
+p=0.002 round=5 N=1280000  tv1=24 tv2=20 tv3=17 tv4=15 tv5=13  inv5=4  Mon Jun 22 11:27:54 PM PDT 2026
+p=0.002 round=6 N=1536000  tv1=30 tv2=27 tv3=24 tv4=21 tv5=17  inv5=6  Mon Jun 22 11:40:21 PM PDT 2026
+p=0.002 round=7 N=1792000  tv1=33 tv2=30 tv3=27 tv4=23 tv5=18  inv5=8  Mon Jun 22 11:53:22 PM PDT 2026
+p=0.002 round=8 N=2048000  tv1=37 tv2=34 tv3=31 tv4=27 tv5=23  inv5=9  Tue Jun 23 12:06:45 AM PDT 2026

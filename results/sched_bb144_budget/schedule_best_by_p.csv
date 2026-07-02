@@ -1,0 +1,3 @@
+p,config,rho_scale,beta_start,beta_stop,shape,chains,sweeps,trials,logical_failures,ler,ler_ci_low,ler_ci_high,ler_ci_halfwidth,valid_rate,never_valid_rate,rho,fvs_mean,fvs_median,fvs_p95,fvs_max,selected_weight_mean,secs_per_decode
+0.04,rs1_b0.5-5_geometric_256x40,1.0,0.5,5.0,geometric,256,40,150,0,0.0,0.0,0.0249702443680766,0.0124851221840383,1.0,0.0,3.1780538303479458,2.66,2.0,6.549999999999983,10.0,5.68,0.7823751937722166
+0.06,rs1_b0.5-5_geometric_256x40,1.0,0.5,5.0,geometric,256,40,150,9,0.06,0.03188404420920532,0.11008977083470209,0.039102863312748384,1.0,0.0,2.751535313041949,7.066666666666666,7.0,13.0,18.0,8.36,0.8927212251971165

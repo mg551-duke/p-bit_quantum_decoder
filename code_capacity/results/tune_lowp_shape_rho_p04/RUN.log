@@ -1,0 +1,2 @@
+nohup: ignoring input
+tuning: 1 codes x 1 p x 6 configs x 4000 trials = 6 points / 3000 chunks (24000 decodes), workers=48

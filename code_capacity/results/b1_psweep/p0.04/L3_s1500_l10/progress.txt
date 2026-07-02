@@ -1,0 +1,16 @@
+[11:14:37] START name=b1_p0.04_L3_s1500_l10 codes=['B1_HxHzLxLz.npz'] p=[0.04] target=40 metric=legacy workers=64 decoder={'chains': 256, 'sweeps': 1500, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 0.35, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[11:14:38] CONFIG[gpu] B1 p=0.04: chains=256 sweeps=1500 beta=0.5->5.0 rho_scale=0.35 sel=min_weight max_legs=10 target_valid=8 colors=10
+[11:15:11] B1 p=0.04 [gpu] runs=5000 valid_correct=5000 valid_incorrect=0 invalid_correct=0 invalid_incorrect=0 valid=1.00000 legs<=1 LERlegacy=0.000e+00 LERcontent=0.000e+00 legacy=0/40
+[11:15:37] B1 p=0.04 [gpu] runs=10000 valid_correct=10000 valid_incorrect=0 invalid_correct=0 invalid_incorrect=0 valid=1.00000 legs<=1 LERlegacy=0.000e+00 LERcontent=0.000e+00 legacy=0/40
+[11:16:21] B1 p=0.04 [gpu] runs=15000 valid_correct=15000 valid_incorrect=0 invalid_correct=0 invalid_incorrect=0 valid=1.00000 legs<=2 LERlegacy=0.000e+00 LERcontent=0.000e+00 legacy=0/40
+[11:16:51] B1 p=0.04 [gpu] runs=20000 valid_correct=20000 valid_incorrect=0 invalid_correct=0 invalid_incorrect=0 valid=1.00000 legs<=2 LERlegacy=0.000e+00 LERcontent=0.000e+00 legacy=0/40
+[11:17:20] B1 p=0.04 [gpu] runs=25000 valid_correct=25000 valid_incorrect=0 invalid_correct=0 invalid_incorrect=0 valid=1.00000 legs<=2 LERlegacy=0.000e+00 LERcontent=0.000e+00 legacy=0/40
+[11:17:52] B1 p=0.04 [gpu] runs=30000 valid_correct=30000 valid_incorrect=0 invalid_correct=0 invalid_incorrect=0 valid=1.00000 legs<=2 LERlegacy=0.000e+00 LERcontent=0.000e+00 legacy=0/40
+[11:18:47] B1 p=0.04 [gpu] runs=35000 valid_correct=35000 valid_incorrect=0 invalid_correct=0 invalid_incorrect=0 valid=1.00000 legs<=7 LERlegacy=0.000e+00 LERcontent=0.000e+00 legacy=0/40
+[11:19:19] B1 p=0.04 [gpu] runs=40000 valid_correct=40000 valid_incorrect=0 invalid_correct=0 invalid_incorrect=0 valid=1.00000 legs<=7 LERlegacy=0.000e+00 LERcontent=0.000e+00 legacy=0/40
+[11:19:49] B1 p=0.04 [gpu] runs=45000 valid_correct=45000 valid_incorrect=0 invalid_correct=0 invalid_incorrect=0 valid=1.00000 legs<=7 LERlegacy=0.000e+00 LERcontent=0.000e+00 legacy=0/40
+[11:20:35] B1 p=0.04 [gpu] runs=50000 valid_correct=50000 valid_incorrect=0 invalid_correct=0 invalid_incorrect=0 valid=1.00000 legs<=7 LERlegacy=0.000e+00 LERcontent=0.000e+00 legacy=0/40
+[11:21:07] B1 p=0.04 [gpu] runs=55000 valid_correct=55000 valid_incorrect=0 invalid_correct=0 invalid_incorrect=0 valid=1.00000 legs<=7 LERlegacy=0.000e+00 LERcontent=0.000e+00 legacy=0/40
+[11:22:02] B1 p=0.04 [gpu] runs=60000 valid_correct=60000 valid_incorrect=0 invalid_correct=0 invalid_incorrect=0 valid=1.00000 legs<=7 LERlegacy=0.000e+00 LERcontent=0.000e+00 legacy=0/40
+[11:22:02] DONE B1 p=0.04: LER(legacy)=0.000e+00 LER(content)=0.000e+00 runs=60000
+[11:22:02] ALLDONE -> /home/mert/p-bit_quantum_decoder/code_capacity/results/b1_psweep/p0.04/L3_s1500_l10/summary.csv

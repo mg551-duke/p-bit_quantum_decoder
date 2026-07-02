@@ -1,0 +1,9 @@
+{
+  "config_path": "experiments/configs/v1_large_codes.json",
+  "output_dir": "results/v1_large_codes",
+  "rows": {
+    "coset_distributions": 202,
+    "summary": 12,
+    "trials": 132
+  }
+}

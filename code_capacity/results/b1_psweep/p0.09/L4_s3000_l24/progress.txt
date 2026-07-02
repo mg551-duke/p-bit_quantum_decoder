@@ -1,0 +1,7 @@
+[11:46:29] START name=b1_p0.09_L4_s3000_l24 codes=['B1_HxHzLxLz.npz'] p=[0.09] target=40 metric=legacy workers=64 decoder={'chains': 256, 'sweeps': 3000, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 0.35, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[11:46:29] CONFIG[gpu] B1 p=0.09: chains=256 sweeps=3000 beta=0.5->5.0 rho_scale=0.35 sel=min_weight max_legs=24 target_valid=8 colors=10
+[11:49:41] START name=b1_p0.09_L4_s3000_l24 codes=['B1_HxHzLxLz.npz'] p=[0.09] target=40 metric=legacy workers=64 decoder={'chains': 256, 'sweeps': 3000, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 0.35, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[11:49:42] CONFIG[gpu] B1 p=0.09: chains=256 sweeps=3000 beta=0.5->5.0 rho_scale=0.35 sel=min_weight max_legs=24 target_valid=8 colors=10
+[12:06:58] B1 p=0.09 [gpu] runs=5000 valid_correct=3869 valid_incorrect=452 invalid_correct=7 invalid_incorrect=672 valid=0.86420 legs<=24 LERlegacy=2.262e-01 LERcontent=2.248e-01 legacy=1131/40
+[12:06:58] DONE B1 p=0.09: LER(legacy)=2.262e-01 LER(content)=2.248e-01 runs=5000
+[12:06:58] ALLDONE -> /home/mert/p-bit_quantum_decoder/code_capacity/results/b1_psweep/p0.09/L4_s3000_l24/summary.csv

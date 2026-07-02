@@ -1,0 +1,7 @@
+### c64_sw400_tv1
+# circuit=circuit=bicycle_bivariate_144_12_12_memory_X,distance=12,rounds=12,error_rate=0.003,noise_model=uniform_circuit,basis=CX,A=x^3+y+y^2,B=y^3+x+x^2.stim
+# detectors=1728 mechanisms=67824 observables=12
+# shots=5000 procs=80 batch=15 chains=64 sweeps=400 beta=0.5->8.0 update=gibbs selection=min_weight device=cuda gamma=1.0 capture=sweep max_legs=12 target_valid=1
+# mean detector weight/shot=181.6
+pbit-cuda rho_scale=0.3    LER=0.0002+-0.0002 (1/5000)  valid=1.000  meanW=50.7  77.82 ms/shot (wall 389s)  legs=1.01 sw_exec=356.4
+DONE

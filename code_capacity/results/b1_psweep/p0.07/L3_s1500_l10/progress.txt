@@ -1,0 +1,6 @@
+[11:04:08] START name=b1_p0.07_L3_s1500_l10 codes=['B1_HxHzLxLz.npz'] p=[0.07] target=40 metric=legacy workers=64 decoder={'chains': 256, 'sweeps': 1500, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 0.35, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[11:04:08] CONFIG[gpu] B1 p=0.07: chains=256 sweeps=1500 beta=0.5->5.0 rho_scale=0.35 sel=min_weight max_legs=10 target_valid=8 colors=10
+[11:05:25] B1 p=0.07 [gpu] runs=5000 valid_correct=4967 valid_incorrect=1 invalid_correct=2 invalid_incorrect=30 valid=0.99360 legs<=10 LERlegacy=6.600e-03 LERcontent=6.200e-03 legacy=33/40
+[11:06:41] B1 p=0.07 [gpu] runs=10000 valid_correct=9937 valid_incorrect=3 invalid_correct=3 invalid_incorrect=57 valid=0.99400 legs<=10 LERlegacy=6.300e-03 LERcontent=6.000e-03 legacy=63/40
+[11:06:41] DONE B1 p=0.07: LER(legacy)=6.300e-03 LER(content)=6.000e-03 runs=10000
+[11:06:41] ALLDONE -> /home/mert/p-bit_quantum_decoder/code_capacity/results/b1_psweep/p0.07/L3_s1500_l10/summary.csv

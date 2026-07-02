@@ -1,0 +1,21 @@
+SURFACE d=7 CORRELATED(full-DEM basis='none') campaign rho=0.30 beta=0.5->6 sweeps=1000 chains=128 legs=24 tgt=10 ps='0.005 0.004 0.003 0.002 0.001' gpus='0 1 2 3 4 5' start Wed Jul  1 09:48:44 AM PDT 2026
+=== p=0.005 target(tv5)=10 chunk=2000 maxn=100000 @ Wed Jul  1 09:48:44 AM PDT 2026 ===
+p=0.005 round=1 N=12000  tv1=51 tv2=47 tv3=48 tv4=46 tv5=47  inv5=0  Wed Jul  1 09:49:02 AM PDT 2026
+=== p=0.004 target(tv5)=10 chunk=4000 maxn=400000 @ Wed Jul  1 09:49:02 AM PDT 2026 ===
+p=0.004 round=1 N=24000  tv1=40 tv2=37 tv3=35 tv4=34 tv5=34  inv5=0  Wed Jul  1 09:49:40 AM PDT 2026
+=== p=0.003 target(tv5)=10 chunk=6000 maxn=1500000 @ Wed Jul  1 09:49:40 AM PDT 2026 ===
+p=0.003 round=1 N=36000  tv1=31 tv2=30 tv3=29 tv4=29 tv5=29  inv5=0  Wed Jul  1 09:50:20 AM PDT 2026
+=== p=0.002 target(tv5)=10 chunk=12000 maxn=4000000 @ Wed Jul  1 09:50:20 AM PDT 2026 ===
+p=0.002 round=1 N=72000  tv1=7 tv2=7 tv3=7 tv4=7 tv5=7  inv5=0  Wed Jul  1 09:51:55 AM PDT 2026
+p=0.002 round=2 N=144000  tv1=18 tv2=16 tv3=15 tv4=15 tv5=14  inv5=0  Wed Jul  1 09:53:10 AM PDT 2026
+=== p=0.001 target(tv5)=10 chunk=30000 maxn=9000000 @ Wed Jul  1 09:53:11 AM PDT 2026 ===
+p=0.001 round=1 N=180000  tv1=2 tv2=1 tv3=1 tv4=1 tv5=1  inv5=0  Wed Jul  1 09:55:30 AM PDT 2026
+p=0.001 round=2 N=360000  tv1=6 tv2=4 tv3=4 tv4=4 tv5=4  inv5=0  Wed Jul  1 09:57:10 AM PDT 2026
+p=0.001 round=3 N=540000  tv1=6 tv2=4 tv3=4 tv4=4 tv5=4  inv5=0  Wed Jul  1 09:59:07 AM PDT 2026
+p=0.001 round=4 N=720000  tv1=7 tv2=5 tv3=5 tv4=5 tv5=5  inv5=0  Wed Jul  1 10:01:18 AM PDT 2026
+p=0.001 round=5 N=900000  tv1=9 tv2=7 tv3=7 tv4=6 tv5=6  inv5=0  Wed Jul  1 10:03:44 AM PDT 2026
+p=0.001 round=6 N=1080000  tv1=9 tv2=7 tv3=7 tv4=6 tv5=6  inv5=0  Wed Jul  1 10:05:22 AM PDT 2026
+p=0.001 round=7 N=1260000  tv1=11 tv2=8 tv3=8 tv4=6 tv5=6  inv5=0  Wed Jul  1 10:06:58 AM PDT 2026
+p=0.001 round=8 N=1440000  tv1=12 tv2=8 tv3=8 tv4=6 tv5=6  inv5=0  Wed Jul  1 10:09:38 AM PDT 2026
+p=0.001 round=9 N=1620000  tv1=14 tv2=10 tv3=10 tv4=8 tv5=8  inv5=0  Wed Jul  1 10:11:43 AM PDT 2026
+p=0.001 round=10 N=1800000  tv1=16 tv2=12 tv3=12 tv4=10 tv5=10  inv5=0  Wed Jul  1 10:13:55 AM PDT 2026

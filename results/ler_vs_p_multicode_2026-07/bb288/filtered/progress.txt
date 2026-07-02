@@ -1,0 +1,48 @@
+FILTERED 288 campaign (memory_Z basis Z) sweeps=1000 rho=0.30 chains=128 beta=0.5->6 gpus='0 1 2 3 4 5' start Fri Jun 26 01:38:04 PM PDT 2026
+=== p=0.005 target(tv5)=10 chunk=500 maxn=300000 @ Fri Jun 26 01:38:04 PM PDT 2026 ===
+p=0.005 round=1 N=3000  tv1=69 tv2=68 tv3=69 tv4=69 tv5=69  inv5=77  Fri Jun 26 01:41:42 PM PDT 2026
+=== p=0.004 target(tv5)=10 chunk=2000 maxn=5000000 @ Fri Jun 26 01:41:42 PM PDT 2026 ===
+p=0.004 round=1 N=12000  tv1=4 tv2=4 tv3=4 tv4=4 tv5=4  inv5=4  Fri Jun 26 01:48:09 PM PDT 2026
+p=0.004 round=2 N=24000  tv1=10 tv2=10 tv3=10 tv4=10 tv5=10  inv5=15  Fri Jun 26 01:55:00 PM PDT 2026
+=== p=0.003 target(tv5)=10 chunk=8000 maxn=20000000 @ Fri Jun 26 01:55:00 PM PDT 2026 ===
+p=0.003 round=1 N=48000  tv1=0 tv2=0 tv3=0 tv4=0 tv5=0  inv5=1  Fri Jun 26 02:06:48 PM PDT 2026
+p=0.003 round=2 N=96000  tv1=0 tv2=0 tv3=0 tv4=0 tv5=0  inv5=2  Fri Jun 26 02:17:56 PM PDT 2026
+p=0.003 round=3 N=144000  tv1=2 tv2=2 tv3=2 tv4=2 tv5=2  inv5=4  Fri Jun 26 02:28:16 PM PDT 2026
+p=0.003 round=4 N=192000  tv1=4 tv2=4 tv3=4 tv4=4 tv5=4  inv5=8  Fri Jun 26 02:39:14 PM PDT 2026
+p=0.003 round=5 N=240000  tv1=7 tv2=7 tv3=7 tv4=7 tv5=7  inv5=11  Fri Jun 26 02:51:42 PM PDT 2026
+p=0.003 round=6 N=288000  tv1=7 tv2=7 tv3=7 tv4=7 tv5=7  inv5=11  Fri Jun 26 03:04:02 PM PDT 2026
+p=0.003 round=7 N=336000  tv1=9 tv2=9 tv3=9 tv4=9 tv5=9  inv5=13  Fri Jun 26 03:15:37 PM PDT 2026
+p=0.003 round=8 N=384000  tv1=9 tv2=9 tv3=9 tv4=9 tv5=9  inv5=13  Fri Jun 26 03:26:31 PM PDT 2026
+p=0.003 round=9 N=432000  tv1=10 tv2=10 tv3=10 tv4=10 tv5=10  inv5=14  Fri Jun 26 03:38:18 PM PDT 2026
+=== p=0.002 target(tv5)=10 chunk=40000 maxn=50000000 @ Fri Jun 26 03:38:18 PM PDT 2026 ===
+p=0.002 round=1 N=240000  tv1=0 tv2=0 tv3=0 tv4=0 tv5=0  inv5=1  Fri Jun 26 04:11:22 PM PDT 2026
+p=0.002 round=2 N=480000  tv1=0 tv2=0 tv3=0 tv4=0 tv5=0  inv5=2  Fri Jun 26 04:45:26 PM PDT 2026
+p=0.002 round=3 N=720000  tv1=0 tv2=0 tv3=0 tv4=0 tv5=0  inv5=3  Fri Jun 26 05:20:06 PM PDT 2026
+p=0.002 round=4 N=960000  tv1=0 tv2=0 tv3=0 tv4=0 tv5=0  inv5=3  Fri Jun 26 05:56:10 PM PDT 2026
+p=0.002 round=5 N=1200000  tv1=0 tv2=0 tv3=0 tv4=0 tv5=0  inv5=3  Fri Jun 26 06:31:12 PM PDT 2026
+p=0.002 round=6 N=1440000  tv1=1 tv2=1 tv3=1 tv4=1 tv5=1  inv5=4  Fri Jun 26 07:06:45 PM PDT 2026
+p=0.002 round=7 N=1680000  tv1=1 tv2=1 tv3=1 tv4=1 tv5=1  inv5=4  Fri Jun 26 07:42:36 PM PDT 2026
+p=0.002 round=8 N=1920000  tv1=1 tv2=1 tv3=1 tv4=1 tv5=1  inv5=4  Fri Jun 26 08:18:09 PM PDT 2026
+p=0.002 round=9 N=2160000  tv1=1 tv2=1 tv3=1 tv4=1 tv5=1  inv5=4  Fri Jun 26 08:51:14 PM PDT 2026
+p=0.002 round=10 N=2400000  tv1=1 tv2=1 tv3=1 tv4=1 tv5=1  inv5=4  Fri Jun 26 09:25:33 PM PDT 2026
+p=0.002 round=11 N=2640000  tv1=1 tv2=1 tv3=1 tv4=1 tv5=1  inv5=5  Fri Jun 26 09:59:46 PM PDT 2026
+p=0.002 round=12 N=2880000  tv1=1 tv2=1 tv3=1 tv4=1 tv5=1  inv5=7  Fri Jun 26 10:34:08 PM PDT 2026
+p=0.002 round=13 N=3120000  tv1=2 tv2=2 tv3=2 tv4=2 tv5=2  inv5=8  Fri Jun 26 11:09:12 PM PDT 2026
+p=0.002 round=14 N=3360000  tv1=3 tv2=3 tv3=3 tv4=3 tv5=3  inv5=9  Fri Jun 26 11:44:37 PM PDT 2026
+p=0.002 round=15 N=3600000  tv1=3 tv2=3 tv3=3 tv4=3 tv5=3  inv5=9  Sat Jun 27 12:18:15 AM PDT 2026
+p=0.002 round=16 N=3840000  tv1=4 tv2=4 tv3=4 tv4=4 tv5=4  inv5=11  Sat Jun 27 12:51:45 AM PDT 2026
+p=0.002 round=17 N=4080000  tv1=4 tv2=4 tv3=4 tv4=4 tv5=4  inv5=12  Sat Jun 27 01:25:13 AM PDT 2026
+p=0.002 round=18 N=4320000  tv1=4 tv2=4 tv3=4 tv4=4 tv5=4  inv5=14  Sat Jun 27 02:01:08 AM PDT 2026
+p=0.002 round=19 N=4560000  tv1=4 tv2=4 tv3=4 tv4=4 tv5=4  inv5=15  Sat Jun 27 02:37:22 AM PDT 2026
+p=0.002 round=20 N=4800000  tv1=4 tv2=4 tv3=4 tv4=4 tv5=4  inv5=17  Sat Jun 27 03:11:02 AM PDT 2026
+p=0.002 round=21 N=5040000  tv1=5 tv2=5 tv3=5 tv4=5 tv5=5  inv5=19  Sat Jun 27 03:45:02 AM PDT 2026
+p=0.002 round=22 N=5280000  tv1=6 tv2=6 tv3=6 tv4=6 tv5=6  inv5=22  Sat Jun 27 04:20:04 AM PDT 2026
+p=0.002 round=23 N=5520000  tv1=6 tv2=6 tv3=6 tv4=6 tv5=6  inv5=22  Sat Jun 27 04:55:15 AM PDT 2026
+p=0.002 round=24 N=5760000  tv1=6 tv2=6 tv3=6 tv4=6 tv5=6  inv5=23  Sat Jun 27 05:31:36 AM PDT 2026
+p=0.002 round=25 N=6000000  tv1=8 tv2=8 tv3=8 tv4=8 tv5=8  inv5=26  Sat Jun 27 06:05:14 AM PDT 2026
+p=0.002 round=26 N=6240000  tv1=8 tv2=8 tv3=8 tv4=8 tv5=8  inv5=26  Sat Jun 27 06:39:08 AM PDT 2026
+p=0.002 round=27 N=6480000  tv1=8 tv2=8 tv3=8 tv4=8 tv5=8  inv5=26  Sat Jun 27 07:12:20 AM PDT 2026
+p=0.002 round=28 N=6720000  tv1=9 tv2=9 tv3=9 tv4=9 tv5=9  inv5=27  Sat Jun 27 07:45:08 AM PDT 2026
+p=0.002 round=29 N=6960000  tv1=9 tv2=9 tv3=9 tv4=9 tv5=9  inv5=27  Sat Jun 27 08:19:12 AM PDT 2026
+p=0.002 round=30 N=7200000  tv1=9 tv2=9 tv3=9 tv4=9 tv5=9  inv5=27  Sat Jun 27 08:53:59 AM PDT 2026
+p=0.002 round=31 N=7440000  tv1=10 tv2=10 tv3=10 tv4=10 tv5=10  inv5=28  Sat Jun 27 09:27:21 AM PDT 2026

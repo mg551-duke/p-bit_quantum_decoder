@@ -1,0 +1,9 @@
+{
+  "config_path": "experiments/configs/v1_surface_lowp_temperature.json",
+  "output_dir": "results/v1_surface_lowp_temperature",
+  "rows": {
+    "coset_distributions": 3768,
+    "summary": 44,
+    "trials": 2720
+  }
+}

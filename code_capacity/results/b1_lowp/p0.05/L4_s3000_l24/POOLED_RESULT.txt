@@ -1,0 +1,5 @@
+=== B1 p=0.05 POOLED L4_s3000_l24 (gpus=[3, 4, 5]) ===
+  runs=2754000  valid_correct=2753989 valid_incorrect=3 invalid_correct=1 invalid_incorrect=7  valid_frac=1.00000
+  content errors (true logical = logic+nonconv_logic) = 10
+  LER(content) = 3.631e-06 +- 1.1e-06
+  LER(legacy)  = 3.994e-06

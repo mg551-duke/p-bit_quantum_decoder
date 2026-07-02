@@ -34,6 +34,8 @@ pbit-qec-run = "pbit_qec.experiments:main"
 pbit-qec-hard-cases = "pbit_qec.hard_cases:main"
 pbit-qec-plots = "pbit_qec.plotting:main"
 pbit-qec-tune-pbit-nullspace = "pbit_qec.calibration:main"
+pbit-qec-tune-schedule = "pbit_qec.schedule_tuning:main"
+pbit-qec-plot-schedule = "pbit_qec.schedule_plots:main"
 
 [build-system]
 requires = ["hatchling"]

@@ -330,21 +330,112 @@ class PBitSyndromeDecoder:
     beta_start: Optional[float] = None
     beta_stop: Optional[float] = None
     beta_schedule_shape: str = "geometric"
-    anneal_prior: bool = True
+    anneal_prior: bool = False
     prior_scale: float = 1.0
+    gamma_active: Optional[float] = None
+    gamma_far: Optional[float] = None
+    idle_update_rate: float = 1.0
     rho: Optional[float] = None
     rho_scale: Optional[float] = None
     update: str = "gibbs"
-    initial_probability: Optional[float] = None
-    stop_on_first_valid: bool = True
-    collect_valid_samples: bool = False
-    selection: str = "best_energy"
-    target_valid_solutions: int = 0
+    initial_probability: Optional[float] = 0.0
+    stop_on_first_valid: bool = False
+    collect_valid_samples: bool = True
+    selection: str = "min_weight"
+    target_valid_solutions: int = 10
     vectorized: bool = True
     measure_sweeps: int = 0
     beta_measure: float = 1.0
-    weight_reduction: bool = False
+    weight_reduction: bool = True
+    coloring: bool = False
+    simultaneous: bool = False
+    sync_damping: float = 1.0
     name: str = "pbit_syndrome"
+
+    def _resolve_gammas(self) -> tuple[float, float]:
+        """Resolve the active/far prior-sharpening factors for the active-region
+        search. Each defaults to ``prior_scale`` when unset, so the knobs are a
+        no-op (identical flip field) unless explicitly tuned."""
+        base = float(self.prior_scale)
+        g_active = base if self.gamma_active is None else float(self.gamma_active)
+        g_far = base if self.gamma_far is None else float(self.gamma_far)
+        return g_active, g_far
+
+    def _color_layout(
+        self,
+        code: CSSCode,
+        col_pad: np.ndarray,
+        deg_mask: np.ndarray,
+        col_deg: np.ndarray,
+    ) -> list[tuple]:
+        """Greedy-color ``code.H`` columns into check-disjoint blocks for block Gibbs.
+
+        Reuses :func:`pbit_qec.circuit_decoder.greedy_coloring` (lazily imported so
+        the core decoder import stays free of the circuit/DEM/scipy stack). Columns
+        in a color share no check, hence are conditionally independent and can be
+        resampled together. Only the ``p``-independent structure is returned (and
+        cached per ``H`` identity); the per-block ``lambda`` slice is rebuilt by the
+        caller each decode so a reused instance stays correct across error rates.
+
+        Returns a list of ``(cols, deg_c, cp_c, vm_c, fchk_c, flcol_c)`` per color:
+            cols    -- global column indices in the color, ``(k,)``
+            deg_c   -- per-column check degree, ``(k,)``
+            cp_c    -- padded incident-check indices ``col_pad[cols]``, ``(k, max_deg)``
+            vm_c    -- validity mask ``deg_mask[cols]``, ``(k, max_deg)``
+            fchk_c  -- flat incident-check indices (unique within color), ``(L,)``
+            flcol_c -- local column (0..k-1) owning each ``fchk_c`` entry, ``(L,)``
+        """
+        cache = getattr(self, "_color_cache", None)
+        key = id(code.H)
+        if cache is not None and cache[0] == key:
+            return cache[1]
+        from scipy import sparse  # lazy: keep scipy/circuit deps off the import path
+
+        from pbit_qec.circuit_decoder import greedy_coloring
+
+        colors = greedy_coloring(sparse.csc_matrix(np.asarray(code.H, dtype=np.uint8)))
+        struct: list[tuple] = []
+        for cols in colors:
+            cols = np.asarray(cols, dtype=np.int64)
+            k = int(cols.size)
+            deg_c = col_deg[cols]
+            cp_c = col_pad[cols]
+            vm_c = deg_mask[cols]
+            # cp_c[vm_c] flattens row-major -> incident checks grouped by column,
+            # matching np.repeat(arange(k), deg_c). Checks are unique within a color
+            # (greedy_coloring guarantees check-disjointness) so the residual scatter
+            # XOR cannot alias.
+            fchk_c = cp_c[vm_c].astype(np.int64)
+            flcol_c = np.repeat(np.arange(k), deg_c).astype(np.int64)
+            struct.append((cols, deg_c, cp_c, vm_c, fchk_c, flcol_c))
+        self._color_cache = (key, struct)
+        return struct
+
+    def _row_layout(self, code: CSSCode) -> tuple[np.ndarray, np.ndarray]:
+        """Per-check incident-bit index pad for the synchronous (Jacobi) update.
+
+        Returns ``(row_pad, row_mask)`` where ``row_pad[i, :]`` lists the error bits
+        incident to check ``i`` (zero-padded, ``row_mask`` marks the valid entries). A
+        simultaneous sweep flips every chain from one state snapshot, so each check
+        toggles by the *parity* of how many of its incident bits flipped -- one padded
+        gather over checks, no scatter. Cached on ``id(code.H)`` (``p``-independent).
+        """
+        cache = getattr(self, "_row_cache", None)
+        key = id(code.H)
+        if cache is not None and cache[0] == key:
+            return cache[1]
+        hz = np.asarray(code.H, dtype=np.uint8)
+        row_deg = hz.sum(axis=1).astype(np.int64)
+        max_row = int(row_deg.max()) if hz.size else 0
+        row_pad = np.zeros((code.m, max_row), dtype=np.int64)
+        row_mask = np.zeros((code.m, max_row), dtype=bool)
+        for i in range(code.m):
+            bits = np.flatnonzero(hz[i])
+            row_pad[i, : bits.size] = bits
+            row_mask[i, : bits.size] = True
+        layout = (row_pad, row_mask)
+        self._row_cache = (key, layout)
+        return layout
 
     def decode(
         self,
@@ -378,6 +469,20 @@ class PBitSyndromeDecoder:
             raise ValueError("beta_measure must be positive")
         if self.prior_scale <= 0.0:
             raise ValueError("prior_scale must be positive")
+        if self.gamma_active is not None and self.gamma_active <= 0.0:
+            raise ValueError("gamma_active must be positive")
+        if self.gamma_far is not None and self.gamma_far <= 0.0:
+            raise ValueError("gamma_far must be positive")
+        if not 0.0 <= self.idle_update_rate <= 1.0:
+            raise ValueError("idle_update_rate must be in [0, 1]")
+        if self.coloring and not self.vectorized:
+            raise ValueError("coloring requires vectorized=True (chromatic block Gibbs)")
+        if self.simultaneous and not self.vectorized:
+            raise ValueError("simultaneous requires vectorized=True (synchronous Jacobi sweep)")
+        if self.simultaneous and self.coloring:
+            raise ValueError("coloring and simultaneous are mutually exclusive update schedules")
+        if not 0.0 < self.sync_damping <= 1.0:
+            raise ValueError("sync_damping must be in (0, 1]")
         measure_start: Optional[int] = None
         if self.measure_sweeps > 0:
             measure_start = int(beta_schedule.shape[0])
@@ -420,6 +525,55 @@ class PBitSyndromeDecoder:
         measure_valid = 0
         initial_residual_weight: Optional[int] = None
         total_sweeps = self.sweeps if measure_start is None else int(beta_schedule.shape[0])
+        # Active-region knobs (no-op when unset): bits adjacent to a firing check use
+        # gamma_active, far/idle bits (no firing incident check) use gamma_far, and
+        # idle bits are attempted only with probability idle_rate (idle_gate draws
+        # are taken only when idle_rate < 1 so the default RNG stream is unchanged).
+        g_active, g_far = self._resolve_gammas()
+        idle_rate = float(self.idle_update_rate)
+        idle_gate = idle_rate < 1.0
+
+        def record_valid(e_vec, logical_vec, e_prior, e_weight, sweep, chain):
+            """Fold a syndrome-satisfying state into the candidate pool.
+
+            Updates the best correction (per ``selection``), the distinct-solution
+            set, the per-coset representative, and its free-energy estimate. Called
+            both at sweep boundaries and immediately after any accepted flip that
+            lands the chain on the target syndrome, so a valid correction reached
+            inside a sweep is never lost. Consumes no randomness, so the trajectory
+            is identical to before. Returns the coset key for sampling counts.
+            """
+            nonlocal best_valid, best_valid_energy, best_valid_weight
+            nonlocal first_valid_sweep, first_valid_chain
+            if first_valid_sweep is None:
+                first_valid_sweep = sweep
+                first_valid_chain = chain
+            logical_key = _coset_key(logical_vec)
+            if logical_key not in best_rep_energy or e_prior < best_rep_energy[logical_key]:
+                best_rep_energy[logical_key] = e_prior
+                best_rep_by_coset[logical_key] = e_vec.copy()
+            config_key = e_vec.tobytes()
+            if config_key not in valid_solution_keys:
+                valid_solution_keys.add(config_key)
+                prev_logz = coset_logz.get(logical_key)
+                coset_logz[logical_key] = (
+                    -e_prior
+                    if prev_logz is None
+                    else float(np.logaddexp(prev_logz, -e_prior))
+                )
+            is_better_valid = (
+                self.selection == "min_weight"
+                and (
+                    best_valid_weight is None
+                    or e_weight < best_valid_weight
+                    or (e_weight == best_valid_weight and e_prior < best_valid_energy)
+                )
+            ) or (self.selection != "min_weight" and e_prior < best_valid_energy)
+            if is_better_valid:
+                best_valid_weight = e_weight
+                best_valid_energy = e_prior
+                best_valid = e_vec.copy()
+            return logical_key
 
         for chain in range(self.chains):
             e = (rng.random(code.n) < initial_probability).astype(np.uint8)
@@ -440,44 +594,29 @@ class PBitSyndromeDecoder:
                     best_any = e.copy()
                 if invalid == 0:
                     valid_hits += 1
-                    e_prior = prior_energy(e, lambdas)
-                    if first_valid_sweep is None:
-                        first_valid_sweep = sweep
-                        first_valid_chain = chain
-                    logical_key = _coset_key(code.logical(e))
+                    logical_key = record_valid(
+                        e, code.logical(e), prior_energy(e, lambdas), int(e.sum()), sweep, chain
+                    )
                     if self.collect_valid_samples or self.stop_on_first_valid:
                         counts[logical_key] += 1
                     if measure_start is not None and sweep > measure_start:
                         measure_valid += 1
-                    if logical_key not in best_rep_energy or e_prior < best_rep_energy[logical_key]:
-                        best_rep_energy[logical_key] = e_prior
-                        best_rep_by_coset[logical_key] = e.copy()
-                    solution_key = gf2.bit_string(e)
-                    if solution_key not in valid_solution_keys:
-                        valid_solution_keys.add(solution_key)
-                        prev_logz = coset_logz.get(logical_key)
-                        coset_logz[logical_key] = (
-                            -e_prior
-                            if prev_logz is None
-                            else float(np.logaddexp(prev_logz, -e_prior))
-                        )
-                    e_weight = int(e.sum())
-                    is_better_valid = (
-                        self.selection == "min_weight"
-                        and (
-                            best_valid_weight is None
-                            or e_weight < best_valid_weight
-                            or (e_weight == best_valid_weight and e_prior < best_valid_energy)
-                        )
-                    ) or (self.selection != "min_weight" and e_prior < best_valid_energy)
-                    if is_better_valid:
-                        best_valid_weight = e_weight
-                        best_valid_energy = e_prior
-                        best_valid = e.copy()
                     if self.stop_on_first_valid or (
                         self.target_valid_solutions
                         and len(valid_solution_keys) >= self.target_valid_solutions
                     ):
+                        if self.weight_reduction and stab_rows is not None and stab_rows.size:
+                            reduced_best = _apply_weight_reduction(
+                                self.selection,
+                                best_rep_by_coset,
+                                best_rep_energy,
+                                coset_logz,
+                                stab_rows,
+                                lambdas,
+                                best_valid=best_valid,
+                            )
+                            if reduced_best is not None:
+                                best_valid = reduced_best
                         correction = best_valid if best_valid is not None else e.copy()
                         return self._result(
                             code=code,
@@ -496,6 +635,8 @@ class PBitSyndromeDecoder:
                             best_residual_weight=0,
                             initial_probability=initial_probability,
                             distinct_valid_solutions=len(valid_solution_keys),
+                            coset_logz=dict(coset_logz),
+                            measure_valid=measure_valid,
                         )
                 if sweep == total_sweeps:
                     break
@@ -514,12 +655,15 @@ class PBitSyndromeDecoder:
                     checks = col_checks[int(j)]
                     before = int(residual[checks].sum())
                     after = int(len(checks) - before)
+                    if idle_gate and before == 0 and rng.random() >= idle_rate:
+                        continue
                     bit = int(e[j])
                     delta = (1 - 2 * bit) * lambdas[j] + rho * (after - before)
+                    gamma = g_active if before > 0 else g_far
                     field = (
                         delta
                         if self.anneal_prior
-                        else self.prior_scale * (1 - 2 * bit) * lambdas[j]
+                        else gamma * (1 - 2 * bit) * lambdas[j]
                         + syn_coeff * (after - before)
                     )
                     if _should_flip(field, bit, flip_beta, rng, self.update):
@@ -527,6 +671,15 @@ class PBitSyndromeDecoder:
                         residual[checks] ^= 1
                         invalid += after - before
                         energy += delta
+                        if invalid == 0:
+                            record_valid(
+                                e,
+                                code.logical(e),
+                                prior_energy(e, lambdas),
+                                int(e.sum()),
+                                sweep,
+                                chain,
+                            )
 
         if self.weight_reduction and stab_rows is not None and stab_rows.size:
             reduced_best = _apply_weight_reduction(
@@ -598,6 +751,10 @@ class PBitSyndromeDecoder:
         """
         n = code.n
         chains = self.chains
+        g_active, g_far = self._resolve_gammas()
+        active_on = (g_active != self.prior_scale) or (g_far != self.prior_scale)
+        idle_rate = float(self.idle_update_rate)
+        idle_gate = idle_rate < 1.0
         lam = np.asarray(lambdas, dtype=float)
         h_transpose = code.H.T.astype(np.uint8)
         a_transpose = code.A.T.astype(np.int64)
@@ -611,6 +768,20 @@ class PBitSyndromeDecoder:
                 col_pad[j, : checks.size] = checks
                 deg_mask[j, : checks.size] = True
         chain_rows = np.arange(chains)
+        if self.coloring and max_deg:
+            color_blocks = [
+                (cols, lam[cols], deg_c, cp_c, vm_c, fchk_c, flcol_c)
+                for (cols, deg_c, cp_c, vm_c, fchk_c, flcol_c) in self._color_layout(
+                    code, col_pad, deg_mask, col_deg
+                )
+            ]
+        else:
+            color_blocks = None
+        if self.simultaneous and max_deg:
+            sync_row_pad, sync_row_mask = self._row_layout(code)
+            sync_damping = float(self.sync_damping)
+        else:
+            sync_row_pad = sync_row_mask = None
 
         counts: Dict[str, int] = defaultdict(int)
         coset_logz: Dict[str, float] = {}
@@ -638,64 +809,104 @@ class PBitSyndromeDecoder:
         energy = states @ lam + rho * invalid
         initial_residual_weight = int(invalid[0]) if chains else 0
 
+        def record_valid(e_vec, logical_vec, e_prior, e_weight, sweep, chain):
+            """Fold a syndrome-satisfying state into the candidate pool.
+
+            Mirror of the scalar helper: called at sweep boundaries and immediately
+            after any accepted flip that lands a chain on the target syndrome, so a
+            transient valid correction is never lost. Consumes no randomness.
+            Returns the coset key for sampling counts.
+            """
+            nonlocal best_valid, best_valid_energy, best_valid_weight
+            nonlocal first_valid_sweep, first_valid_chain
+            if first_valid_sweep is None:
+                first_valid_sweep = sweep
+                first_valid_chain = chain
+            logical_key = _coset_key(logical_vec)
+            if logical_key not in best_rep_energy or e_prior < best_rep_energy[logical_key]:
+                best_rep_energy[logical_key] = e_prior
+                best_rep_by_coset[logical_key] = e_vec.copy()
+            config_key = e_vec.tobytes()
+            if config_key not in valid_solution_keys:
+                valid_solution_keys.add(config_key)
+                prev_logz = coset_logz.get(logical_key)
+                coset_logz[logical_key] = (
+                    -e_prior
+                    if prev_logz is None
+                    else float(np.logaddexp(prev_logz, -e_prior))
+                )
+            is_better_valid = (
+                self.selection == "min_weight"
+                and (
+                    best_valid_weight is None
+                    or e_weight < best_valid_weight
+                    or (e_weight == best_valid_weight and e_prior < best_valid_energy)
+                )
+            ) or (self.selection != "min_weight" and e_prior < best_valid_energy)
+            if is_better_valid:
+                best_valid_weight = e_weight
+                best_valid_energy = e_prior
+                best_valid = e_vec.copy()
+            return logical_key
+
         sweeps = self.sweeps if measure_start is None else int(beta_schedule.shape[0])
         for sweep in range(sweeps + 1):
-            logical_mat = (states.astype(np.int64) @ a_transpose) & 1
-            priors = states @ lam
-            weights = states.sum(axis=1)
-            for chain in range(chains):
-                total_samples += 1
-                invalid_c = int(invalid[chain])
-                if invalid_c < best_residual_weight or (
-                    invalid_c == best_residual_weight and energy[chain] < best_any_energy
-                ):
-                    best_residual_weight = invalid_c
-                    best_any_energy = float(energy[chain])
-                    best_any = states[chain].copy()
-                if invalid_c == 0:
+            # Boundary scan: fold every chain's current state into the candidate pool.
+            # best_any (lowest residual, then energy) is tracked with a vectorized argmin
+            # and the expensive per-chain bookkeeping (coset matmul + record_valid) is
+            # restricted to syndrome-satisfying chains -- so a sweep with no valid chain
+            # costs an argmin instead of a (chains x A^T) int matmul plus a Python loop
+            # over every chain. Consumes no randomness, so results are unchanged.
+            total_samples += chains
+            best_i = int(invalid.min())
+            if best_i <= best_residual_weight:
+                cand = np.flatnonzero(invalid == best_i)
+                k = int(cand[np.argmin(energy[cand])])
+                ek = float(energy[k])
+                if best_i < best_residual_weight or ek < best_any_energy:
+                    best_residual_weight = best_i
+                    best_any_energy = ek
+                    best_any = states[k].copy()
+            valid_idx = np.flatnonzero(invalid == 0)
+            if valid_idx.size:
+                logical_valid = (states[valid_idx].astype(np.int64) @ a_transpose) & 1
+                priors_valid = states[valid_idx] @ lam
+                weights_valid = states[valid_idx].sum(axis=1)
+                for vi in range(valid_idx.size):
+                    chain = int(valid_idx[vi])
                     valid_hits += 1
                     e_vec = states[chain]
-                    e_prior = float(priors[chain])
-                    if first_valid_sweep is None:
-                        first_valid_sweep = sweep
-                        first_valid_chain = chain
-                    logical_key = _coset_key(logical_mat[chain])
+                    logical_key = record_valid(
+                        e_vec,
+                        logical_valid[vi],
+                        float(priors_valid[vi]),
+                        int(weights_valid[vi]),
+                        sweep,
+                        chain,
+                    )
                     if self.collect_valid_samples or self.stop_on_first_valid:
                         counts[logical_key] += 1
                     if measure_start is not None and sweep > measure_start:
                         measure_valid += 1
-                    if (
-                        logical_key not in best_rep_energy
-                        or e_prior < best_rep_energy[logical_key]
-                    ):
-                        best_rep_energy[logical_key] = e_prior
-                        best_rep_by_coset[logical_key] = e_vec.copy()
-                    config_key = e_vec.tobytes()
-                    if config_key not in valid_solution_keys:
-                        valid_solution_keys.add(config_key)
-                        prev_logz = coset_logz.get(logical_key)
-                        coset_logz[logical_key] = (
-                            -e_prior
-                            if prev_logz is None
-                            else float(np.logaddexp(prev_logz, -e_prior))
-                        )
-                    e_weight = int(weights[chain])
-                    is_better_valid = (
-                        self.selection == "min_weight"
-                        and (
-                            best_valid_weight is None
-                            or e_weight < best_valid_weight
-                            or (e_weight == best_valid_weight and e_prior < best_valid_energy)
-                        )
-                    ) or (self.selection != "min_weight" and e_prior < best_valid_energy)
-                    if is_better_valid:
-                        best_valid_weight = e_weight
-                        best_valid_energy = e_prior
-                        best_valid = e_vec.copy()
                     if self.stop_on_first_valid or (
                         self.target_valid_solutions
                         and len(valid_solution_keys) >= self.target_valid_solutions
                     ):
+                        # Match the scalar loop's sample count: it would have visited only
+                        # chains 0..chain before returning, not the whole ensemble.
+                        total_samples -= chains - chain - 1
+                        if self.weight_reduction and stab_rows is not None and stab_rows.size:
+                            reduced_best = _apply_weight_reduction(
+                                self.selection,
+                                best_rep_by_coset,
+                                best_rep_energy,
+                                coset_logz,
+                                stab_rows,
+                                lambdas,
+                                best_valid=best_valid,
+                            )
+                            if reduced_best is not None:
+                                best_valid = reduced_best
                         correction = best_valid if best_valid is not None else e_vec.copy()
                         return self._result(
                             code=code,
@@ -714,14 +925,109 @@ class PBitSyndromeDecoder:
                             best_residual_weight=0,
                             initial_probability=initial_probability,
                             distinct_valid_solutions=len(valid_solution_keys),
+                            coset_logz=dict(coset_logz),
+                            measure_valid=measure_valid,
                         )
             if sweep == sweeps:
                 break
             beta = float(beta_schedule[sweep])
             flip_beta = beta if self.anneal_prior else 1.0
             syn_coeff = rho if self.anneal_prior else beta * rho
+            if sync_row_pad is not None:
+                # Synchronous (Jacobi) sweep: every bit computes its field from the
+                # SAME state snapshot, then all chains flip at once. This is not
+                # detailed-balance Gibbs -- it is a BP-like parallel relaxation -- but as
+                # an annealed optimizer the freezing schedule keeps check-sharing bits
+                # from flipping together once flip probabilities drop. One vectorized
+                # pass over all n bits + one parity gather over all m checks per sweep.
+                # Valid states are captured by the next iteration's boundary scan (a
+                # single update per sweep leaves no transient state to lose).
+                before = (residual[:, col_pad] * deg_mask[None]).sum(axis=2).astype(np.int64)
+                after = col_deg[None, :] - before
+                bits = states.astype(np.int64)
+                sign = 1 - 2 * bits
+                syn_term = after - before
+                delta = sign * lam[None, :] + rho * syn_term
+                if self.anneal_prior:
+                    field = delta
+                else:
+                    prior_coeff = (
+                        np.where(before > 0, g_active, g_far) if active_on else self.prior_scale
+                    )
+                    field = prior_coeff * sign * lam[None, :] + syn_coeff * syn_term
+                flip = _should_flip_batch(
+                    field, bits, flip_beta, rng.random((chains, n)), self.update
+                )
+                if sync_damping < 1.0:
+                    # Stochastic damping: each bit is eligible to flip with prob q per
+                    # sweep, so the expected number of incident bits that flip on an
+                    # unsatisfied check is ~deg*q*p_flip. Tuned to ~1 it makes parallel
+                    # flips resolve checks one-at-a-time (like async) while staying fully
+                    # vectorized -- the knob that turns the Jacobi sweep into a stable,
+                    # BP-like relaxation.
+                    flip = flip & (rng.random((chains, n)) < sync_damping)
+                if idle_gate:
+                    flip = flip & ((before > 0) | (rng.random((chains, n)) < idle_rate))
+                if not flip.any():
+                    continue
+                states ^= flip.astype(np.uint8)
+                toggled = (flip[:, sync_row_pad] & sync_row_mask[None]).sum(axis=2) & 1
+                residual ^= toggled.astype(np.uint8)
+                invalid = residual.sum(axis=1).astype(np.int64)
+                energy = states @ lam + rho * invalid
+                continue
+            if color_blocks is not None:
+                # Chromatic block Gibbs: resample whole check-disjoint color classes
+                # at once. Identical per-bit field/energy math as the sequential scan,
+                # but ~n/#colors fewer Python steps per sweep (~80x for B1/B2). Columns
+                # in a color share no check, so their simultaneous flips are independent
+                # and the residual toggle is collision-free.
+                for cols, lam_c, deg_c, cp_c, vm_c, fchk_c, flcol_c in color_blocks:
+                    k = cols.size
+                    before = (residual[:, cp_c] * vm_c[None]).sum(axis=2).astype(np.int64)
+                    after = deg_c[None, :] - before
+                    bits = states[:, cols].astype(np.int64)
+                    sign = 1 - 2 * bits
+                    syn_term = after - before
+                    delta = sign * lam_c[None, :] + rho * syn_term
+                    if self.anneal_prior:
+                        field = delta
+                    else:
+                        prior_coeff = (
+                            np.where(before > 0, g_active, g_far)
+                            if active_on
+                            else self.prior_scale
+                        )
+                        field = prior_coeff * sign * lam_c[None, :] + syn_coeff * syn_term
+                    flip = _should_flip_batch(
+                        field, bits, flip_beta, rng.random((chains, k)), self.update
+                    )
+                    if idle_gate:
+                        flip = flip & ((before > 0) | (rng.random((chains, k)) < idle_rate))
+                    if not flip.any():
+                        continue
+                    flip_u8 = flip.astype(np.uint8)
+                    states[:, cols] ^= flip_u8
+                    residual[:, fchk_c] ^= flip_u8[:, flcol_c]
+                    invalid += (syn_term * flip).sum(axis=1)
+                    energy += (delta * flip).sum(axis=1)
+                    chains_flipped = np.flatnonzero(flip.any(axis=1))
+                    newly_valid = chains_flipped[invalid[chains_flipped] == 0]
+                    for c in newly_valid:
+                        c = int(c)
+                        e_vec = states[c]
+                        record_valid(
+                            e_vec,
+                            (e_vec.astype(np.int64) @ a_transpose) & 1,
+                            float(e_vec @ lam),
+                            int(e_vec.sum()),
+                            sweep,
+                            c,
+                        )
+                continue
             order = np.argsort(rng.random((chains, n)), axis=1)
             uniforms = rng.random((chains, n))
+            idle_uniforms = rng.random((chains, n)) if idle_gate else None
             lam_order = lam[order]
             deg_order = col_deg[order]
             if max_deg:
@@ -739,13 +1045,19 @@ class PBitSyndromeDecoder:
                 after = deg_order[:, step] - before
                 bits = states[chain_rows, j].astype(np.int64)
                 delta = (1 - 2 * bits) * lam_order[:, step] + rho * (after - before)
-                field = (
-                    delta
-                    if self.anneal_prior
-                    else self.prior_scale * (1 - 2 * bits) * lam_order[:, step]
-                    + syn_coeff * (after - before)
-                )
+                if self.anneal_prior:
+                    field = delta
+                else:
+                    prior_coeff = (
+                        np.where(before > 0, g_active, g_far) if active_on else self.prior_scale
+                    )
+                    field = (
+                        prior_coeff * (1 - 2 * bits) * lam_order[:, step]
+                        + syn_coeff * (after - before)
+                    )
                 flip = _should_flip_batch(field, bits, flip_beta, uniforms[:, step], self.update)
+                if idle_gate:
+                    flip = flip & ((before > 0) | (idle_uniforms[:, step] < idle_rate))
                 flipped = np.flatnonzero(flip)
                 if flipped.size:
                     states[flipped, j[flipped]] ^= 1
@@ -756,6 +1068,18 @@ class PBitSyndromeDecoder:
                         residual[rows_idx, cols_idx] ^= 1
                     invalid[flipped] += (after - before)[flipped]
                     energy[flipped] += delta[flipped]
+                    newly_valid = flipped[invalid[flipped] == 0]
+                    for c in newly_valid:
+                        c = int(c)
+                        e_vec = states[c]
+                        record_valid(
+                            e_vec,
+                            (e_vec.astype(np.int64) @ a_transpose) & 1,
+                            float(e_vec @ lam),
+                            int(e_vec.sum()),
+                            sweep,
+                            c,
+                        )
 
         if self.weight_reduction and stab_rows is not None and stab_rows.size:
             reduced_best = _apply_weight_reduction(
@@ -905,6 +1229,9 @@ class PBitSyndromeDecoder:
                 "beta_schedule_shape": self.beta_schedule_shape,
                 "anneal_prior": self.anneal_prior,
                 "prior_scale": float(self.prior_scale),
+                "gamma_active": (None if self.gamma_active is None else float(self.gamma_active)),
+                "gamma_far": (None if self.gamma_far is None else float(self.gamma_far)),
+                "idle_update_rate": float(self.idle_update_rate),
                 "rho": rho,
                 "update": self.update,
                 "chains": self.chains,

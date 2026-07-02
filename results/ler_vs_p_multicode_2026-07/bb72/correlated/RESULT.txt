@@ -1,0 +1,31 @@
+--- p=0.005 FINAL N=6000 ms_shot=40.32 @ Wed Jul  1 10:41:25 AM PDT 2026 ---
+p=0.005 tv=1  LER=3.733e-02 +-2.5e-03  ul95=4.14e-02  errors=224/6000  invalid=0
+p=0.005 tv=2  LER=3.567e-02 +-2.4e-03  ul95=3.97e-02  errors=214/6000  invalid=0
+p=0.005 tv=3  LER=3.483e-02 +-2.4e-03  ul95=3.88e-02  errors=209/6000  invalid=0
+p=0.005 tv=4  LER=3.500e-02 +-2.4e-03  ul95=3.90e-02  errors=210/6000  invalid=0
+p=0.005 tv=5  LER=3.483e-02 +-2.4e-03  ul95=3.88e-02  errors=209/6000  invalid=0
+--- p=0.004 FINAL N=12000 ms_shot=26.72 @ Wed Jul  1 10:42:26 AM PDT 2026 ---
+p=0.004 tv=1  LER=1.075e-02 +-9.5e-04  ul95=1.23e-02  errors=129/12000  invalid=0
+p=0.004 tv=2  LER=9.583e-03 +-8.9e-04  ul95=1.10e-02  errors=115/12000  invalid=0
+p=0.004 tv=3  LER=9.333e-03 +-8.8e-04  ul95=1.08e-02  errors=112/12000  invalid=0
+p=0.004 tv=4  LER=9.167e-03 +-8.7e-04  ul95=1.06e-02  errors=110/12000  invalid=0
+p=0.004 tv=5  LER=9.000e-03 +-8.7e-04  ul95=1.04e-02  errors=108/12000  invalid=0
+--- p=0.003 FINAL N=30000 ms_shot=23.55 @ Wed Jul  1 10:44:45 AM PDT 2026 ---
+p=0.003 tv=1  LER=2.533e-03 +-2.9e-04  ul95=3.01e-03  errors=76/30000  invalid=0
+p=0.003 tv=2  LER=2.333e-03 +-2.8e-04  ul95=2.79e-03  errors=70/30000  invalid=0
+p=0.003 tv=3  LER=2.033e-03 +-2.6e-04  ul95=2.46e-03  errors=61/30000  invalid=0
+p=0.003 tv=4  LER=2.033e-03 +-2.6e-04  ul95=2.46e-03  errors=61/30000  invalid=0
+p=0.003 tv=5  LER=2.133e-03 +-2.7e-04  ul95=2.57e-03  errors=64/30000  invalid=0
+--- p=0.002 FINAL N=90000 ms_shot=21.29 @ Wed Jul  1 10:50:10 AM PDT 2026 ---
+p=0.002 tv=1  LER=2.444e-04 +-5.2e-05  ul95=3.30e-04  errors=22/90000  invalid=0
+p=0.002 tv=2  LER=2.222e-04 +-5.0e-05  ul95=3.04e-04  errors=20/90000  invalid=0
+p=0.002 tv=3  LER=2.222e-04 +-5.0e-05  ul95=3.04e-04  errors=20/90000  invalid=0
+p=0.002 tv=4  LER=2.222e-04 +-5.0e-05  ul95=3.04e-04  errors=20/90000  invalid=0
+p=0.002 tv=5  LER=2.222e-04 +-5.0e-05  ul95=3.04e-04  errors=20/90000  invalid=0
+--- p=0.001 FINAL N=1200000 ms_shot=12.34 @ Wed Jul  1 11:37:48 AM PDT 2026 ---
+p=0.001 tv=1  LER=1.167e-05 +-3.1e-06  ul95=1.68e-05  errors=14/1200000  invalid=0
+p=0.001 tv=2  LER=1.250e-05 +-3.2e-06  ul95=1.78e-05  errors=15/1200000  invalid=0
+p=0.001 tv=3  LER=1.250e-05 +-3.2e-06  ul95=1.78e-05  errors=15/1200000  invalid=0
+p=0.001 tv=4  LER=1.250e-05 +-3.2e-06  ul95=1.78e-05  errors=15/1200000  invalid=0
+p=0.001 tv=5  LER=1.250e-05 +-3.2e-06  ul95=1.78e-05  errors=15/1200000  invalid=0
+ALLDONE @ Wed Jul  1 11:37:48 AM PDT 2026

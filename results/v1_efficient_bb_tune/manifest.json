@@ -1,0 +1,9 @@
+{
+  "config_path": "experiments/configs/v1_efficient_bb_tune.json",
+  "output_dir": "results/v1_efficient_bb_tune",
+  "rows": {
+    "coset_distributions": 880,
+    "summary": 3,
+    "trials": 201
+  }
+}

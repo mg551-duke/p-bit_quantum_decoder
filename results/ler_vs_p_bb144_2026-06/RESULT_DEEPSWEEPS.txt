@@ -1,0 +1,21 @@
+# auto_deep_sweeps RESULT  Mon Jun 22 10:13:14 PM PDT 2026
+# circuit=memory_Z bb144 [[144,12]] d=12  p=0.004  basis=Z(filtered)
+# decoder: pbit-cuda chains=128 rho_scale=0.20 gamma=1.0 legs<=24 selection=min_weight
+# paired seed=7000  shots/point=16000  plateau judged on tv=5
+# stop rule: extend while deepest LER drop > max(0.03 rel, 1.0sigma); cap=24000
+
+# deep-sweep LER curve: /tmp/ftune/autodeep  (sorted by sweeps; decision tv=5)
+ sweeps status     shots   tv1_LER (err)   tv2_LER (err)   tv3_LER (err)   tv4_LER (err)   tv5_LER (err)
+   1000 done       16000  5.44e-03 ( 87)  4.87e-03 ( 78)  4.94e-03 ( 79)  4.75e-03 ( 76)  4.56e-03 ( 73)
+   1500 done       16000  5.00e-03 ( 80)  4.87e-03 ( 78)  4.62e-03 ( 74)  4.31e-03 ( 69)  4.06e-03 ( 65)
+   2000 done       16000  4.81e-03 ( 77)  4.19e-03 ( 67)  4.06e-03 ( 65)  3.81e-03 ( 61)  3.69e-03 ( 59)
+   3000 done       16000  3.75e-03 ( 60)  3.56e-03 ( 57)  3.56e-03 ( 57)  3.44e-03 ( 55)  3.56e-03 ( 57)
+   4000 done       16000  4.50e-03 ( 72)  4.06e-03 ( 65)  4.06e-03 ( 65)  3.94e-03 ( 63)  3.63e-03 ( 58)
+   6000 done       16000  4.31e-03 ( 69)  4.13e-03 ( 66)  3.56e-03 ( 57)  3.19e-03 ( 51)  3.25e-03 ( 52)
+   8000 done       16000  4.31e-03 ( 69)  3.94e-03 ( 63)  3.50e-03 ( 56)  3.25e-03 ( 52)  3.00e-03 ( 48)
+  12000 done       16000  4.00e-03 ( 64)  3.50e-03 ( 56)  3.25e-03 ( 52)  3.37e-03 ( 54)  3.50e-03 ( 56)
+# best tv5: sweeps=8000 LER=3.000e-03 (48/16000)
+# deepest pair s8000->s12000: dLER=-5.00e-04 rel=-16.7% se=6.37e-04 significant=False
+DECISION PLATEAU 8000 3.000e-03
+
+FINAL DECISION PLATEAU 8000 3.000e-03

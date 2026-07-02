@@ -12,6 +12,7 @@ import pandas as pd
 import pbit_qec.gf2 as gf2
 from pbit_qec.codes import make_code
 from pbit_qec.decoders import (
+    BPDecoder,
     BPOSDDecoder,
     ExactCosetDecoder,
     MWPMDecoder,
@@ -36,12 +37,14 @@ def build_decoder(name: str, settings: Mapping[str, object]) -> Decoder:
         return ExactCosetDecoder(**kwargs)
     if name == "mwpm":
         return MWPMDecoder(**kwargs)
+    if name == "bp":
+        return BPDecoder(**kwargs)
     if name == "bp_osd":
         return BPOSDDecoder(**kwargs)
     if name == "pbit_coset_sampler":
         return PBitCosetSamplerDecoder(**kwargs)
-    if name == "pbit_syndrome":
-        return PBitSyndromeDecoder(**kwargs)
+    if name == "pbit_syndrome" or name.startswith("pbit_syndrome_"):
+        return PBitSyndromeDecoder(name=name, **kwargs)
     if name == "pbit_annealed_optimizer":
         return PBitAnnealedOptimizerDecoder(**kwargs)
     if name == "pbit_nullspace_sampler":

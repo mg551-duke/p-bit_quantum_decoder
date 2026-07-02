@@ -1,0 +1,15 @@
+BB [[72,12,6]] CORRELATED(full-DEM) (memory_Z) campaign rho=0.30 beta=0.5->6 sweeps=1000 chains=128 legs=24 tgt=10 ps='0.005 0.004 0.003 0.002 0.001' gpus='0 1 2 3 4 5' start Wed Jul  1 10:40:41 AM PDT 2026
+=== p=0.005 target(tv5)=10 chunk=1000 maxn=200000 @ Wed Jul  1 10:40:41 AM PDT 2026 ===
+p=0.005 round=1 N=6000  tv1=224 tv2=214 tv3=209 tv4=210 tv5=209  inv5=0  Wed Jul  1 10:41:25 AM PDT 2026
+=== p=0.004 target(tv5)=10 chunk=2000 maxn=500000 @ Wed Jul  1 10:41:25 AM PDT 2026 ===
+p=0.004 round=1 N=12000  tv1=129 tv2=115 tv3=112 tv4=110 tv5=108  inv5=0  Wed Jul  1 10:42:26 AM PDT 2026
+=== p=0.003 target(tv5)=10 chunk=5000 maxn=2000000 @ Wed Jul  1 10:42:26 AM PDT 2026 ===
+p=0.003 round=1 N=30000  tv1=76 tv2=70 tv3=61 tv4=61 tv5=64  inv5=0  Wed Jul  1 10:44:45 AM PDT 2026
+=== p=0.002 target(tv5)=10 chunk=15000 maxn=5000000 @ Wed Jul  1 10:44:45 AM PDT 2026 ===
+p=0.002 round=1 N=90000  tv1=22 tv2=20 tv3=20 tv4=20 tv5=20  inv5=0  Wed Jul  1 10:50:10 AM PDT 2026
+=== p=0.001 target(tv5)=10 chunk=40000 maxn=15000000 @ Wed Jul  1 10:50:10 AM PDT 2026 ===
+p=0.001 round=1 N=240000  tv1=2 tv2=2 tv3=2 tv4=2 tv5=2  inv5=0  Wed Jul  1 10:58:38 AM PDT 2026
+p=0.001 round=2 N=480000  tv1=5 tv2=5 tv3=5 tv4=5 tv5=5  inv5=0  Wed Jul  1 11:07:15 AM PDT 2026
+p=0.001 round=3 N=720000  tv1=7 tv2=8 tv3=8 tv4=8 tv5=8  inv5=0  Wed Jul  1 11:16:44 AM PDT 2026
+p=0.001 round=4 N=960000  tv1=7 tv2=8 tv3=8 tv4=8 tv5=8  inv5=0  Wed Jul  1 11:28:52 AM PDT 2026
+p=0.001 round=5 N=1200000  tv1=14 tv2=15 tv3=15 tv4=15 tv5=15  inv5=0  Wed Jul  1 11:37:48 AM PDT 2026

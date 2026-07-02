@@ -1,0 +1,9 @@
+# circuit=circuit=bicycle_bivariate_288_12_18_memory_Z,distance=18,rounds=18,error_rate=0.004,noise_model=uniform_circuit,basis=CX,A=x^3+y^2+y^7,B=y^3+x+x^2.stim
+# detectors=5184 mechanisms=206352 observables=12 basis_filter=None
+# shots=1500 procs=80 batch=4 chains=128 sweeps=1000 beta=0.5->6.0 update=gibbs selection=min_weight device=cuda gamma=1.0 capture=sweep max_legs=24 target_valid=None
+# mean detector weight/shot=704.6
+pbit-cuda rho_scale=0.3 tv=1 LER=0.0000+-0.0000 (0/1500)  valid=0.997 invalid=4  LER_strict=0.0027 (4/1500)  meanW=208.6  3664.05 ms/shot (wall 5496s)  legs=1.34 sw_exec=1341.8  legs_max=24 legs_p99=12  sw_max=24000 sw_p99=11833
+pbit-cuda rho_scale=0.3 tv=2 LER=0.0000+-0.0000 (0/1500)  valid=0.997 invalid=4  LER_strict=0.0027 (4/1500)  meanW=208.6  3664.05 ms/shot (wall 5496s)  legs=1.34 sw_exec=1341.8  legs_max=24 legs_p99=12  sw_max=24000 sw_p99=11833
+pbit-cuda rho_scale=0.3 tv=3 LER=0.0000+-0.0000 (0/1500)  valid=0.997 invalid=4  LER_strict=0.0027 (4/1500)  meanW=208.6  3664.05 ms/shot (wall 5496s)  legs=1.34 sw_exec=1341.8  legs_max=24 legs_p99=12  sw_max=24000 sw_p99=11833
+pbit-cuda rho_scale=0.3 tv=4 LER=0.0000+-0.0000 (0/1500)  valid=0.997 invalid=4  LER_strict=0.0027 (4/1500)  meanW=208.6  3664.05 ms/shot (wall 5496s)  legs=1.34 sw_exec=1341.8  legs_max=24 legs_p99=12  sw_max=24000 sw_p99=11833
+pbit-cuda rho_scale=0.3 tv=5 LER=0.0000+-0.0000 (0/1500)  valid=0.997 invalid=4  LER_strict=0.0027 (4/1500)  meanW=208.6  3664.05 ms/shot (wall 5496s)  legs=1.34 sw_exec=1341.8  legs_max=24 legs_p99=12  sw_max=24000 sw_p99=11833

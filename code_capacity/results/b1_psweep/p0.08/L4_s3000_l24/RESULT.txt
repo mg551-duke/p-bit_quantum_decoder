@@ -1,0 +1,7 @@
+=== B1  p=0.08  runs=5000  target=legacy REACHED ===
+  same=622 (1.244e-01)  degen=4166 (8.332e-01)  logic=70 (1.400e-02)  nonconv=142 (2.840e-02)  nonconv_logic=139 (2.780e-02)
+  valid  (convergent)  correct=4788 (9.576e-01)   incorrect=70 (1.400e-02)
+  invalid(nonconverg.) correct=3 (6.000e-04)   incorrect=139 (2.780e-02)
+  LER(logic+nonconv)      = 4.240e-02 +- 2.9e-03
+  LER(logic+nonconv_logic)= 4.180e-02 +- 2.9e-03
+  meanW=69.96  75.9 ms/shot/core  wall=382s

@@ -1,0 +1,49 @@
+# circuit=circuit=bicycle_bivariate_144_12_12_memory_X,distance=12,rounds=12,error_rate=0.003,noise_model=uniform_circuit,basis=CX,A=x^3+y+y^2,B=y^3+x+x^2.stim
+# detectors=1728 mechanisms=67824 observables=12
+# shots=10000 procs=80 batch=31 chains=128 sweeps=400 beta=0.5->8.0 update=gibbs selection=min_weight device=cuda gamma=1.0 capture=sweep max_legs=16 target_valid=1
+# mean detector weight/shot=181.4
+pbit-cuda rho_scale=0.3    LER=0.0000+-0.0000 (0/10000)  valid=1.000  meanW=50.4  121.95 ms/shot (wall 1220s)  legs=1.01 sw_exec=314.8
+# circuit=circuit=bicycle_bivariate_144_12_12_memory_X,distance=12,rounds=12,error_rate=0.003,noise_model=uniform_circuit,basis=CX,A=x^3+y+y^2,B=y^3+x+x^2.stim
+# detectors=1728 mechanisms=67824 observables=12
+# shots=10000 procs=80 batch=31 chains=128 sweeps=400 beta=0.5->8.0 update=gibbs selection=min_weight device=cuda gamma=1.0 capture=sweep max_legs=16 target_valid=1
+# mean detector weight/shot=181.4
+pbit-cuda rho_scale=0.3    LER=0.0000+-0.0000 (0/10000)  valid=1.000  meanW=50.4  118.89 ms/shot (wall 1189s)  legs=1.00 sw_exec=305.3
+# circuit=circuit=bicycle_bivariate_144_12_12_memory_X,distance=12,rounds=12,error_rate=0.003,noise_model=uniform_circuit,basis=CX,A=x^3+y+y^2,B=y^3+x+x^2.stim
+# detectors=1728 mechanisms=67824 observables=12
+# shots=10000 procs=80 batch=31 chains=128 sweeps=400 beta=0.5->8.0 update=gibbs selection=min_weight device=cuda gamma=1.0 capture=sweep max_legs=16 target_valid=1
+# mean detector weight/shot=181.2
+pbit-cuda rho_scale=0.3    LER=0.0001+-0.0001 (1/10000)  valid=1.000  meanW=50.4  99.97 ms/shot (wall 1000s)  legs=1.00 sw_exec=295.3
+# circuit=circuit=bicycle_bivariate_144_12_12_memory_X,distance=12,rounds=12,error_rate=0.003,noise_model=uniform_circuit,basis=CX,A=x^3+y+y^2,B=y^3+x+x^2.stim
+# detectors=1728 mechanisms=67824 observables=12
+# shots=10000 procs=80 batch=31 chains=128 sweeps=400 beta=0.5->8.0 update=gibbs selection=min_weight device=cuda gamma=1.0 capture=sweep max_legs=16 target_valid=1
+# mean detector weight/shot=181.5
+pbit-cuda rho_scale=0.3    LER=0.0002+-0.0001 (2/10000)  valid=1.000  meanW=50.4  103.82 ms/shot (wall 1038s)  legs=1.00 sw_exec=295.5
+# circuit=circuit=bicycle_bivariate_144_12_12_memory_X,distance=12,rounds=12,error_rate=0.003,noise_model=uniform_circuit,basis=CX,A=x^3+y+y^2,B=y^3+x+x^2.stim
+# detectors=1728 mechanisms=67824 observables=12
+# shots=10000 procs=80 batch=31 chains=128 sweeps=400 beta=0.5->8.0 update=gibbs selection=min_weight device=cuda gamma=1.0 capture=sweep max_legs=16 target_valid=1
+# mean detector weight/shot=181.0
+pbit-cuda rho_scale=0.3    LER=0.0000+-0.0000 (0/10000)  valid=1.000  meanW=50.3  93.24 ms/shot (wall 932s)  legs=1.00 sw_exec=283.2
+# circuit=circuit=bicycle_bivariate_144_12_12_memory_X,distance=12,rounds=12,error_rate=0.003,noise_model=uniform_circuit,basis=CX,A=x^3+y+y^2,B=y^3+x+x^2.stim
+# detectors=1728 mechanisms=67824 observables=12
+# shots=10000 procs=80 batch=31 chains=128 sweeps=400 beta=0.5->8.0 update=gibbs selection=min_weight device=cuda gamma=1.0 capture=sweep max_legs=16 target_valid=1
+# mean detector weight/shot=181.0
+pbit-cuda rho_scale=0.3    LER=0.0000+-0.0000 (0/10000)  valid=1.000  meanW=50.4  104.24 ms/shot (wall 1042s)  legs=1.00 sw_exec=303.6
+# circuit=circuit=bicycle_bivariate_144_12_12_memory_X,distance=12,rounds=12,error_rate=0.003,noise_model=uniform_circuit,basis=CX,A=x^3+y+y^2,B=y^3+x+x^2.stim
+# detectors=1728 mechanisms=67824 observables=12
+# shots=10000 procs=80 batch=31 chains=128 sweeps=400 beta=0.5->8.0 update=gibbs selection=min_weight device=cuda gamma=1.0 capture=sweep max_legs=16 target_valid=1
+# mean detector weight/shot=181.1
+pbit-cuda rho_scale=0.3    LER=0.0000+-0.0000 (0/10000)  valid=1.000  meanW=50.4  87.46 ms/shot (wall 875s)  legs=1.00 sw_exec=277.4
+# circuit=circuit=bicycle_bivariate_144_12_12_memory_X,distance=12,rounds=12,error_rate=0.003,noise_model=uniform_circuit,basis=CX,A=x^3+y+y^2,B=y^3+x+x^2.stim
+# detectors=1728 mechanisms=67824 observables=12
+# shots=10000 procs=80 batch=31 chains=128 sweeps=400 beta=0.5->8.0 update=gibbs selection=min_weight device=cuda gamma=1.0 capture=sweep max_legs=16 target_valid=1
+# mean detector weight/shot=180.9
+pbit-cuda rho_scale=0.3    LER=0.0000+-0.0000 (0/10000)  valid=1.000  meanW=50.2  108.16 ms/shot (wall 1082s)  legs=1.00 sw_exec=300.9
+# circuit=circuit=bicycle_bivariate_144_12_12_memory_X,distance=12,rounds=12,error_rate=0.003,noise_model=uniform_circuit,basis=CX,A=x^3+y+y^2,B=y^3+x+x^2.stim
+# detectors=1728 mechanisms=67824 observables=12
+# shots=10000 procs=80 batch=31 chains=128 sweeps=400 beta=0.5->8.0 update=gibbs selection=min_weight device=cuda gamma=1.0 capture=sweep max_legs=16 target_valid=1
+# mean detector weight/shot=181.6
+pbit-cuda rho_scale=0.3    LER=0.0001+-0.0001 (1/10000)  valid=1.000  meanW=50.4  111.43 ms/shot (wall 1114s)  legs=1.01 sw_exec=293.5
+# circuit=circuit=bicycle_bivariate_144_12_12_memory_X,distance=12,rounds=12,error_rate=0.003,noise_model=uniform_circuit,basis=CX,A=x^3+y+y^2,B=y^3+x+x^2.stim
+# detectors=1728 mechanisms=67824 observables=12
+# shots=10000 procs=80 batch=31 chains=128 sweeps=400 beta=0.5->8.0 update=gibbs selection=min_weight device=cuda gamma=1.0 capture=sweep max_legs=16 target_valid=1
+# mean detector weight/shot=181.3

@@ -1,0 +1,9 @@
+{
+  "config_path": "experiments/configs/v1_tighten_ci.json",
+  "output_dir": "results/v1_tighten_ci",
+  "rows": {
+    "coset_distributions": 1325,
+    "summary": 6,
+    "trials": 600
+  }
+}

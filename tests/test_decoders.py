@@ -108,7 +108,12 @@ def test_pbit_syndrome_decoder_does_not_use_linear_solve(monkeypatch: pytest.Mon
         raise AssertionError("pbit_syndrome must not call solve_affine")
 
     monkeypatch.setattr("pbit_qec.decoders.gf2.solve_affine", fail_solve_affine)
-    result = PBitSyndromeDecoder(chains=1, sweeps=2, initial_probability=0.0).decode(
+    # weight_reduction=False isolates the core stochastic search: the optional
+    # weight-reduction pass computes a stabilizer nullspace (which uses solve_affine
+    # for codes lacking an h_x metadata shortcut) and is covered by its own tests.
+    result = PBitSyndromeDecoder(
+        chains=1, sweeps=2, initial_probability=0.0, weight_reduction=False
+    ).decode(
         code,
         syndrome,
         0.08,
@@ -143,6 +148,7 @@ def test_pbit_syndrome_decoder_stops_on_first_valid_state() -> None:
         chains=3,
         sweeps=20,
         initial_probability=0.0,
+        selection="best_energy",
         stop_on_first_valid=True,
     )
 
@@ -174,7 +180,7 @@ def test_pbit_syndrome_decoder_collects_valid_cosets() -> None:
     assert result.total_samples == 3
     assert sum(result.coset_counts.values()) >= 1
     assert result.metadata["collect_valid_samples"] is True
-    assert result.metadata["selection"] == "best_energy"
+    assert result.metadata["selection"] == "min_weight"
 
 
 def test_pbit_syndrome_decoder_can_stop_after_min_weight_solution_target() -> None:
@@ -226,8 +232,95 @@ def test_pbit_syndrome_min_weight_prefers_lightest_valid_solution() -> None:
     assert result.valid
     assert result.total_samples == 2
     assert int(result.correction.sum()) == 0
-    assert result.metadata["distinct_valid_solutions"] == 2
+    # Immediate per-flip capture records every distinct valid state visited within
+    # a sweep, so at least the target count is collected (here all of [111], [110],
+    # [010], [000] as the chain walks down), and the lightest still wins.
+    assert result.metadata["distinct_valid_solutions"] >= 2
     assert result.metadata["selected_weight"] == 0
+
+
+def test_pbit_syndrome_captures_transient_valid_states_within_a_sweep() -> None:
+    # Regression: valid states reached *mid-sweep* must be recorded immediately,
+    # not only at sweep boundaries. Under boundary-only sampling the number of
+    # distinct valid solutions can never exceed the number of boundary samples
+    # (total_samples); exceeding it proves within-sweep capture. The empty-check
+    # toy code makes every state valid, and the all-ones start walks to all-zeros
+    # within a single sweep, passing through intermediate valid states.
+    code = CSSCode(
+        H=np.zeros((0, 3), dtype=np.uint8),
+        A=np.zeros((1, 3), dtype=np.uint8),
+        qubit_labels=("q0", "q1", "q2"),
+        check_labels=(),
+        logical_labels=("logical",),
+        family="toy",
+        size=3,
+    )
+    for vectorized in (False, True):
+        decoder = PBitSyndromeDecoder(
+            chains=1,
+            sweeps=1,
+            initial_probability=1.0,
+            update="metropolis",
+            stop_on_first_valid=False,
+            collect_valid_samples=True,
+            selection="min_weight",
+            vectorized=vectorized,
+        )
+        result = decoder.decode(
+            code, np.zeros(0, dtype=np.uint8), 0.08, np.random.default_rng(22)
+        )
+        assert result.valid
+        assert result.total_samples == 2  # only the sweep 0 and sweep 1 boundaries
+        assert result.metadata["distinct_valid_solutions"] > result.total_samples
+        assert int(result.correction.sum()) == 0  # all-zeros captured mid-sweep
+
+
+def test_pbit_syndrome_coloring_requires_vectorized() -> None:
+    # Chromatic block Gibbs is only implemented on the batched path; the scalar
+    # path must reject it loudly rather than silently ignore the flag.
+    code = make_toric_code(3)
+    syndrome = np.zeros(code.m, dtype=np.uint8)
+    decoder = PBitSyndromeDecoder(coloring=True, vectorized=False)
+    with pytest.raises(ValueError, match="coloring requires vectorized"):
+        decoder.decode(code, syndrome, 0.08, np.random.default_rng(0))
+
+
+def test_pbit_syndrome_coloring_matches_sequential() -> None:
+    # Chromatic block Gibbs resamples whole check-disjoint color classes at once.
+    # It is the same sampler as the sequential per-spin scan (identical field /
+    # energy math), so on low-weight errors -- where the minimum-weight coset rep
+    # is unique -- both paths must recover the same valid, syndrome-consistent
+    # correction in the same logical class with the same weight. The colored
+    # path's incremental residual bookkeeping is also checked against a fresh
+    # recompute (a scatter-aliasing bug would desync ``final_residual_weight``).
+    code = make_toric_code(3)
+    common = dict(
+        chains=8,
+        sweeps=80,
+        beta_start=0.5,
+        beta_stop=5.0,
+        beta_schedule_shape="linear",
+        rho_scale=1.0,
+        selection="min_weight",
+        weight_reduction=True,
+        collect_valid_samples=True,
+    )
+    seq = PBitSyndromeDecoder(coloring=False, **common)
+    col = PBitSyndromeDecoder(coloring=True, **common)
+    for qubit in (0, 5, 11):
+        error = np.zeros(code.n, dtype=np.uint8)
+        error[qubit] = 1
+        syndrome = code.syndrome(error)
+        r_seq = seq.decode(code, syndrome, 0.08, np.random.default_rng(100 + qubit))
+        r_col = col.decode(code, syndrome, 0.08, np.random.default_rng(100 + qubit))
+        # Colored result is valid and its bookkeeping is internally consistent.
+        assert r_col.valid
+        recomputed = int((code.syndrome(r_col.correction) ^ syndrome).sum())
+        assert r_col.metadata["final_residual_weight"] == recomputed == 0
+        # Both paths land on the same (unique) minimum-weight correction.
+        assert r_seq.valid
+        assert int(r_col.correction.sum()) == int(r_seq.correction.sum()) == 1
+        assert r_col.logical_class == r_seq.logical_class
 
 
 def test_pbit_syndrome_decoder_rejects_unknown_selection() -> None:
@@ -543,7 +636,7 @@ def test_pbit_syndrome_rho_scale_is_reported_in_metadata() -> None:
     assert result.metadata["rho"] == pytest.approx(expected_rho)
 
 
-def test_pbit_anneal_prior_defaults_true_and_does_not_change_legacy_path() -> None:
+def test_pbit_anneal_prior_defaults_false_and_annealed_opt_in_is_reproducible() -> None:
     code = make_toric_code(3)
     error = np.zeros(code.n, dtype=np.uint8)
     error[[0, 4, 11]] = 1
@@ -552,16 +645,22 @@ def test_pbit_anneal_prior_defaults_true_and_does_not_change_legacy_path() -> No
         chains=4, sweeps=20, beta_start=0.3, beta_stop=2.0,
         selection="min_weight", stop_on_first_valid=False, collect_valid_samples=True,
     )
-    assert PBitSyndromeDecoder().anneal_prior is True
-    default = PBitSyndromeDecoder(**common).decode(code, syndrome, 0.08, np.random.default_rng(7))
-    explicit = PBitSyndromeDecoder(anneal_prior=True, **common).decode(
+    # The solution-finder default is the calibrated prior (anneal_prior=False).
+    assert PBitSyndromeDecoder().anneal_prior is False
+    # Opting into the annealed (legacy) prior must still reproduce its trajectory
+    # bit-for-bit, so the path remains available and deterministic.
+    first = PBitSyndromeDecoder(anneal_prior=True, **common).decode(
         code, syndrome, 0.08, np.random.default_rng(7)
     )
-    # Opting into the (default) annealed prior must reproduce the legacy trajectory
-    # bit-for-bit, so the new flag cannot regress existing behaviour.
-    assert np.array_equal(default.correction, explicit.correction)
-    assert default.coset_counts == explicit.coset_counts
-    assert default.metadata["anneal_prior"] is True
+    second = PBitSyndromeDecoder(anneal_prior=True, **common).decode(
+        code, syndrome, 0.08, np.random.default_rng(7)
+    )
+    assert np.array_equal(first.correction, second.correction)
+    assert first.coset_counts == second.coset_counts
+    assert first.metadata["anneal_prior"] is True
+    # A default-constructed run reports the calibrated prior.
+    default = PBitSyndromeDecoder(**common).decode(code, syndrome, 0.08, np.random.default_rng(7))
+    assert default.metadata["anneal_prior"] is False
 
 
 def test_pbit_calibrated_prior_keeps_channel_posterior_unannealed() -> None:
@@ -672,14 +771,19 @@ def test_pbit_syndrome_weight_reduction_keeps_valid_and_not_heavier() -> None:
         stop_on_first_valid=False,
     )
 
-    base = PBitSyndromeDecoder(**common).decode(code, syndrome, 0.08, np.random.default_rng(5))
+    # base pins weight_reduction=False to be the non-reduced min_weight baseline
+    # (the flag now defaults to True), so the A/B comparison stays meaningful.
+    base = PBitSyndromeDecoder(weight_reduction=False, **common).decode(
+        code, syndrome, 0.08, np.random.default_rng(5)
+    )
     reduced = PBitSyndromeDecoder(weight_reduction=True, **common).decode(
         code, syndrome, 0.08, np.random.default_rng(5)
     )
 
     assert base.valid
     assert reduced.valid
-    # The decoder must actually explore (not early-stop), so reduction can run.
+    # Reduction runs and never produces a heavier correction than plain min_weight,
+    # even when target_valid_solutions triggers an early return.
     assert reduced.metadata["distinct_valid_solutions"] > 1
     assert int((code.syndrome(reduced.correction) ^ syndrome).sum()) == 0
     assert int(reduced.correction.sum()) <= int(base.correction.sum())
@@ -706,6 +810,79 @@ def test_pbit_syndrome_weight_reduction_is_seed_deterministic_both_paths() -> No
         first = decoder.decode(code, syndrome, 0.08, np.random.default_rng(21))
         second = decoder.decode(code, syndrome, 0.08, np.random.default_rng(21))
 
+        assert first.valid
+        assert np.array_equal(first.correction, second.correction)
+        assert int((code.syndrome(first.correction) ^ syndrome).sum()) == 0
+
+
+def test_pbit_active_region_knobs_default_is_a_noop_both_paths() -> None:
+    # Setting gamma_active=gamma_far=prior_scale and idle_update_rate=1.0 must
+    # reproduce the default (unset) run bit-for-bit in both decode paths: the
+    # active-region machinery departs from baseline only when explicitly tuned.
+    code = make_toric_code(3)
+    error = np.zeros(code.n, dtype=np.uint8)
+    error[[1, 5, 12]] = 1
+    syndrome = code.syndrome(error)
+    common = dict(
+        chains=3, sweeps=25, beta_start=0.3, beta_stop=2.0,
+        selection="min_weight", collect_valid_samples=True, stop_on_first_valid=False,
+    )
+    for vectorized in (False, True):
+        default = PBitSyndromeDecoder(vectorized=vectorized, **common).decode(
+            code, syndrome, 0.08, np.random.default_rng(31)
+        )
+        explicit = PBitSyndromeDecoder(
+            vectorized=vectorized, gamma_active=1.0, gamma_far=1.0,
+            idle_update_rate=1.0, **common,
+        ).decode(code, syndrome, 0.08, np.random.default_rng(31))
+        assert np.array_equal(default.correction, explicit.correction)
+        assert default.coset_counts == explicit.coset_counts
+        assert (
+            default.metadata["distinct_valid_solutions"]
+            == explicit.metadata["distinct_valid_solutions"]
+        )
+
+
+def test_pbit_active_region_rejects_invalid_knobs() -> None:
+    code = make_toric_code(3)
+    syndrome = np.zeros(code.m, dtype=np.uint8)
+    for bad in (
+        dict(gamma_active=0.0), dict(gamma_active=-1.0),
+        dict(gamma_far=0.0), dict(gamma_far=-2.0),
+        dict(idle_update_rate=-0.1), dict(idle_update_rate=1.5),
+    ):
+        with pytest.raises(ValueError):
+            PBitSyndromeDecoder(**bad).decode(code, syndrome, 0.08, np.random.default_rng(0))
+
+
+def test_pbit_active_region_records_knobs_in_metadata() -> None:
+    code = make_toric_code(3)
+    syndrome = np.zeros(code.m, dtype=np.uint8)
+    result = PBitSyndromeDecoder(
+        chains=2, sweeps=10, gamma_active=0.5, gamma_far=3.0, idle_update_rate=0.25,
+    ).decode(code, syndrome, 0.08, np.random.default_rng(4))
+    assert result.metadata["gamma_active"] == 0.5
+    assert result.metadata["gamma_far"] == 3.0
+    assert result.metadata["idle_update_rate"] == 0.25
+
+
+def test_pbit_active_region_is_seed_deterministic_and_valid_both_paths() -> None:
+    # With the active-region knobs engaged (far bits sharpened, idle bits
+    # sub-sampled) the decoder stays deterministic per seed and still converges
+    # to a syndrome-satisfying correction.
+    code = make_toric_code(3)
+    error = np.zeros(code.n, dtype=np.uint8)
+    error[[0, 4, 11]] = 1
+    syndrome = code.syndrome(error)
+    for vectorized in (False, True):
+        decoder = PBitSyndromeDecoder(
+            chains=8, sweeps=80, beta_start=0.3, beta_stop=3.0,
+            selection="min_weight", collect_valid_samples=True, stop_on_first_valid=False,
+            gamma_active=1.0, gamma_far=2.5, idle_update_rate=0.3,
+            vectorized=vectorized,
+        )
+        first = decoder.decode(code, syndrome, 0.08, np.random.default_rng(17))
+        second = decoder.decode(code, syndrome, 0.08, np.random.default_rng(17))
         assert first.valid
         assert np.array_equal(first.correction, second.correction)
         assert int((code.syndrome(first.correction) ^ syndrome).sum()) == 0

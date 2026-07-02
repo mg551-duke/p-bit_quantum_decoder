@@ -1,0 +1,91 @@
+{
+  "base_seed": 20260620,
+  "base_settings": {
+    "collect_valid_samples": true,
+    "selection": "min_weight",
+    "stop_on_first_valid": false,
+    "update": "gibbs",
+    "weight_reduction": true
+  },
+  "configs": [
+    {
+      "beta_start": 0.3,
+      "beta_stop": 5.0,
+      "chains": 256,
+      "label": "rs1_b0.3-5_geometric_256x40",
+      "rho_scale": 1.0,
+      "shape": "geometric",
+      "sweeps": 40
+    },
+    {
+      "beta_start": 0.3,
+      "beta_stop": 5.0,
+      "chains": 256,
+      "label": "rs1_b0.3-5_geometric_256x80",
+      "rho_scale": 1.0,
+      "shape": "geometric",
+      "sweeps": 80
+    },
+    {
+      "beta_start": 0.3,
+      "beta_stop": 5.0,
+      "chains": 256,
+      "label": "rs1_b0.3-5_geometric_256x150",
+      "rho_scale": 1.0,
+      "shape": "geometric",
+      "sweeps": 150
+    },
+    {
+      "beta_start": 0.5,
+      "beta_stop": 5.0,
+      "chains": 256,
+      "label": "rs1_b0.5-5_geometric_256x40",
+      "rho_scale": 1.0,
+      "shape": "geometric",
+      "sweeps": 40
+    },
+    {
+      "beta_start": 0.5,
+      "beta_stop": 5.0,
+      "chains": 256,
+      "label": "rs1_b0.5-5_geometric_256x80",
+      "rho_scale": 1.0,
+      "shape": "geometric",
+      "sweeps": 80
+    },
+    {
+      "beta_start": 0.5,
+      "beta_stop": 5.0,
+      "chains": 256,
+      "label": "rs1_b0.5-5_geometric_256x150",
+      "rho_scale": 1.0,
+      "shape": "geometric",
+      "sweeps": 150
+    }
+  ],
+  "family": "bb",
+  "generated_at": "2026-06-15T08:19:30.409696+00:00",
+  "git_commit": "75b01af1f1a461b2b193a099f56ddbfeea221fc0",
+  "num_configs": 6,
+  "num_points": 12,
+  "numpy": "2.4.6",
+  "outputs": {
+    "best_by_p": "schedule_best_by_p.csv",
+    "summary": "schedule_summary.csv",
+    "trials": "schedule_trials.csv"
+  },
+  "p_values": [
+    0.04,
+    0.06
+  ],
+  "platform": "Linux-5.15.0-122-generic-x86_64-with-glibc2.35",
+  "python": "3.14.5",
+  "seed_scheme": {
+    "decode_seed": "base_seed + 500_000_000 + p_index*1_000_000 + trial",
+    "error_seed": "base_seed + p_index*1_000_000 + trial",
+    "note": "depends only on (p_index, trial); paired across configs"
+  },
+  "size": 144,
+  "trials": 150,
+  "workers": 24
+}

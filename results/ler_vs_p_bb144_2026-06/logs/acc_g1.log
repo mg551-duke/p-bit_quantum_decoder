@@ -1,0 +1,7 @@
+### more_sweeps
+# circuit=circuit=bicycle_bivariate_144_12_12_memory_X,distance=12,rounds=12,error_rate=0.003,noise_model=uniform_circuit,basis=CX,A=x^3+y+y^2,B=y^3+x+x^2.stim
+# detectors=1728 mechanisms=67824 observables=12
+# shots=10000 procs=80 batch=31 chains=128 sweeps=600 beta=0.5->8.0 update=gibbs selection=min_weight device=cuda gamma=1.0 capture=sweep max_legs=16 target_valid=4
+# mean detector weight/shot=181.5
+pbit-cuda rho_scale=0.6    LER=0.0003+-0.0002 (3/10000)  valid=1.000  meanW=55.8  202.18 ms/shot (wall 2022s)  legs=1.01 sw_exec=502.8
+DONE

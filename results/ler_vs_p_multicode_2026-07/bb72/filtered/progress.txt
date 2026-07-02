@@ -1,0 +1,11 @@
+BB [[72,12,6]] FILTERED-Z (memory_Z) campaign rho=0.30 beta=0.5->6 sweeps=1000 chains=128 legs=24 tgt=10 ps='0.005 0.004 0.003 0.002 0.001' gpus='0 1 2 3 4 5' start Wed Jul  1 10:29:03 AM PDT 2026
+=== p=0.005 target(tv5)=10 chunk=1000 maxn=200000 @ Wed Jul  1 10:29:03 AM PDT 2026 ===
+p=0.005 round=1 N=6000  tv1=726 tv2=671 tv3=664 tv4=655 tv5=648  inv5=0  Wed Jul  1 10:29:16 AM PDT 2026
+=== p=0.004 target(tv5)=10 chunk=2000 maxn=500000 @ Wed Jul  1 10:29:16 AM PDT 2026 ===
+p=0.004 round=1 N=12000  tv1=578 tv2=539 tv3=530 tv4=520 tv5=518  inv5=0  Wed Jul  1 10:29:28 AM PDT 2026
+=== p=0.003 target(tv5)=10 chunk=5000 maxn=2000000 @ Wed Jul  1 10:29:28 AM PDT 2026 ===
+p=0.003 round=1 N=30000  tv1=413 tv2=371 tv3=370 tv4=371 tv5=372  inv5=0  Wed Jul  1 10:29:46 AM PDT 2026
+=== p=0.002 target(tv5)=10 chunk=15000 maxn=5000000 @ Wed Jul  1 10:29:46 AM PDT 2026 ===
+p=0.002 round=1 N=90000  tv1=212 tv2=193 tv3=189 tv4=188 tv5=189  inv5=0  Wed Jul  1 10:30:16 AM PDT 2026
+=== p=0.001 target(tv5)=10 chunk=40000 maxn=15000000 @ Wed Jul  1 10:30:16 AM PDT 2026 ===
+p=0.001 round=1 N=240000  tv1=34 tv2=32 tv3=32 tv4=32 tv5=32  inv5=0  Wed Jul  1 10:30:59 AM PDT 2026

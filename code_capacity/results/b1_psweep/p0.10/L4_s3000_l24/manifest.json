@@ -1,0 +1,55 @@
+{
+  "base_seed": 20260618,
+  "codes": [
+    {
+      "family": "B1",
+      "hz_max_col_weight": 3,
+      "hz_max_row_weight": 6,
+      "k": 24,
+      "lz_rows": 24,
+      "m_x_checks": 441,
+      "m_z_checks": 441,
+      "n": 882,
+      "source": "/home/mert/p-bit_quantum_decoder/code_capacity/codes/B1_HxHzLxLz.npz"
+    }
+  ],
+  "config_map": null,
+  "decoder_defaults": {
+    "beta_schedule_shape": "linear",
+    "beta_start": 0.5,
+    "beta_stop": 5.0,
+    "chains": 256,
+    "collect_valid_samples": true,
+    "coloring": true,
+    "rho_scale": 0.35,
+    "selection": "min_weight",
+    "stop_on_first_valid": false,
+    "sweeps": 3000,
+    "target_valid_solutions": 0,
+    "update": "gibbs",
+    "weight_reduction": true
+  },
+  "generated_at": "2026-06-23T19:23:47.701395+00:00",
+  "git_commit": "e67c5ac4c821d457e4c374b60381966d281e8218",
+  "max_shots": 60000,
+  "name": "b1_p0.10_L4_s3000_l24",
+  "numpy": "2.4.6",
+  "outputs": {
+    "result": "RESULT.txt",
+    "summary": "summary.csv"
+  },
+  "p_values": [
+    0.1
+  ],
+  "platform": "Linux-5.15.0-122-generic-x86_64-with-glibc2.35",
+  "python": "3.12.11",
+  "sector": "x_errors (bit-flip): H=Hz, A=Lz, stabilizers=Hx",
+  "seed_scheme": {
+    "decode": "5e11 + base_seed + code_index*1e9 + p_index*1e6 + shot",
+    "error": "base_seed + code_index*1e9 + p_index*1e6 + shot"
+  },
+  "shots_per_task": 20,
+  "target_errors": 40,
+  "target_metric": "legacy",
+  "workers": 64
+}

@@ -1,0 +1,7 @@
+=== B1  p=0.05  runs=1140000  target=logical_content REACHED ===
+  same=683713 (5.997e-01)  degen=456274 (4.002e-01)  logic=1 (8.772e-07)  nonconv=12 (1.053e-05)  nonconv_logic=11 (9.649e-06)
+  valid  (convergent)  correct=1139987 (1.000e+00)   incorrect=1 (8.772e-07)
+  invalid(nonconverg.) correct=1 (8.772e-07)   incorrect=11 (9.649e-06)
+  LER(logic+nonconv)      = 1.140e-05 +- 3.2e-06
+  LER(logic+nonconv_logic)= 1.053e-05 +- 3.0e-06
+  meanW=44.01  9.9 ms/shot/core  wall=11798s

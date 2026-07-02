@@ -1,0 +1,13 @@
+decoder,p,errors,shots,ler,ler_stderr,ul95
+p-bit filtered (ours, tuned),0.002,23,2048000,1.1230e-05,2.34e-06,1.5071e-05
+p-bit filtered (ours, tuned),0.003,123,384000,3.2031e-04,2.89e-05,3.6768e-04
+p-bit filtered (ours, tuned),0.004,299,64000,4.6719e-03,2.70e-04,5.1150e-03
+p-bit filtered (ours, tuned),0.005,206,6400,3.2188e-02,2.24e-03,3.5865e-02
+RelayBP-300sets (ref),0.002,21,868028,2.4193e-05,5.28e-06,3.2851e-05
+RelayBP-300sets (ref),0.003,22,46081,4.7742e-04,1.02e-04,6.4435e-04
+RelayBP-300sets (ref),0.004,23,5360,4.2910e-03,8.95e-04,5.7584e-03
+RelayBP-300sets (ref),0.005,21,439,4.7836e-02,1.04e-02,6.4955e-02
+p-bit correlated / full DEM (ours),0.002,33,14940000,2.2088e-06,3.85e-07,2.8394e-06
+p-bit correlated / full DEM (ours),0.003,15,600000,2.5000e-05,6.45e-06,3.5586e-05
+p-bit correlated / full DEM (ours),0.004,53,96000,5.5208e-04,7.58e-05,6.7645e-04
+p-bit correlated / full DEM (ours),0.005,139,18000,7.7222e-03,6.55e-04,8.7964e-03

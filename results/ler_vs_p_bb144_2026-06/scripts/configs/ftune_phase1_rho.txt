@@ -1,0 +1,11 @@
+# phase 1: rho_scale sweep on filtered memory_Z DEM (basis Z), p=0.004.
+# fixed: chains=128 sweeps=500 gamma=1.0 beta 0.5->8.0 (defaults), min_weight, legs=24.
+# rho = rho_scale * max_lambda; brackets the prior full-DEM optimum (0.3) wider.
+rho010 | --chains 128 --sweeps 500 --rho-scales 0.10 --gamma 1.0
+rho015 | --chains 128 --sweeps 500 --rho-scales 0.15 --gamma 1.0
+rho020 | --chains 128 --sweeps 500 --rho-scales 0.20 --gamma 1.0
+rho030 | --chains 128 --sweeps 500 --rho-scales 0.30 --gamma 1.0
+rho045 | --chains 128 --sweeps 500 --rho-scales 0.45 --gamma 1.0
+rho060 | --chains 128 --sweeps 500 --rho-scales 0.60 --gamma 1.0
+rho090 | --chains 128 --sweeps 500 --rho-scales 0.90 --gamma 1.0
+rho130 | --chains 128 --sweeps 500 --rho-scales 1.30 --gamma 1.0

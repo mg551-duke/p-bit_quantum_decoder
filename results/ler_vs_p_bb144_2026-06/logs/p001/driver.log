@@ -1,0 +1,5 @@
+campaign start Tue Jun 23 01:50:24 PM PDT 2026 assign='0:filtered 1:correlated 2:correlated'
+launched filtered on GPU 0 (pid 1803350)
+launched correlated on GPU 1 (pid 1803354)
+launched correlated on GPU 2 (pid 1803361)
+campaign all workers exited Thu Jun 25 03:58:52 PM PDT 2026

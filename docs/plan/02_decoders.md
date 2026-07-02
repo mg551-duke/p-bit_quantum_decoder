@@ -19,13 +19,45 @@ valid-hit count, final residual weight, best residual weight, and `used_linear_s
 The first committed mode relies only on Bernoulli randomness and asynchronous update order for
 symmetry breaking. `stop_on_first_valid = true` returns the first syndrome-valid correction, while
 `collect_valid_samples = true` continues after convergence and groups valid states by logical
-class. The focused syndrome artifact uses `selection = "min_weight"` with
-`target_valid_solutions = 10`: the decoder stops after ten distinct valid physical corrections, or
-after the configured sweep budget, and returns the minimum-Hamming-weight valid correction with
-prior energy as the tie-break. `selection = "best_energy"` and `selection = "counts"` remain
-available for comparison. Persistent disorder is deliberately left off by default and should be
-added only as a follow-up comparison if the Bernoulli-only baseline cannot find valid corrections
-reliably.
+class. `selection = "best_energy"`, `selection = "counts"`, `selection = "min_weight"`, and
+`selection = "ml_coset"` are all available. Persistent disorder is deliberately left off by
+default and should be added only as a follow-up comparison if the Bernoulli-only baseline cannot
+find valid corrections reliably.
+
+### Syndrome penalty `rho`
+
+The penalty weight `rho` multiplies the residual-syndrome term in the energy. Resolution
+precedence is: an explicit `rho`, then a p-adaptive `rho_scale * max(lambda_j)` when `rho_scale`
+is set, then the shared `default_rho(lambda) = max(8.0, 4.0 * max(lambda_j))` heuristic. The
+production large-code configs set `rho_scale = 1.0` (`rho ~ max(lambda_j)`, the per-qubit
+log-likelihood). The much larger `default_rho` over-penalizes residuals and traps chains away from
+the true low-weight coset; `rho_scale = 1.0` restores full coverage (`valid_rate = 1.0`) at far
+lower chain counts.
+
+### Selection contract
+
+`min_weight`, `counts`, and `ml_coset` aggregate over the full ensemble of valid samples, so they
+require exploring past the first valid hit. `stop_on_first_valid = true` returns the first valid
+sample in chain order and is therefore only compatible with `selection = "best_energy"`; combining
+it with an aggregation selection raises `ValueError`. Use `stop_on_first_valid = false` (optionally
+with `target_valid_solutions` to cap exploration) for those modes. `min_weight` returns the
+lowest-Hamming-weight valid correction with prior energy as the tie-break.
+
+### Weight reduction
+
+With `weight_reduction = true`, each per-coset representative is post-processed by greedily XORing
+stabilizer generators (the nullspace of `[H; A]`, or the low-weight complementary CSS checks
+`metadata['h_x']` when available) to lower its Hamming weight while preserving both syndrome and
+logical coset. The incoming global best correction and its own reduction are always folded into the
+candidate pool, so the returned correction can never regress above what plain selection would have
+returned.
+
+### Vectorized batched path
+
+`vectorized = true` (default) advances all chains together as rows of a `(chains, n)` state matrix.
+Bits are still updated sequentially within a sweep (asynchronous Gibbs/Metropolis) so per-chain
+dynamics match the scalar fallback; only the per-bit work is vectorized across chains. Results are
+deterministic given the seed but draw from a different random stream than the scalar path.
 
 ## PBitCosetSamplerDecoder
 

@@ -1,0 +1,4 @@
+nohup: ignoring input
+launched filtered on GPU 0 (pid 1803350)
+launched correlated on GPU 1 (pid 1803354)
+launched correlated on GPU 2 (pid 1803361)

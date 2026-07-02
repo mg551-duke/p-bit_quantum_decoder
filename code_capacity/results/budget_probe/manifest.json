@@ -1,0 +1,66 @@
+{
+  "base_seed": 20260618,
+  "base_settings": {
+    "collect_valid_samples": true,
+    "selection": "min_weight",
+    "stop_on_first_valid": false,
+    "update": "gibbs",
+    "weight_reduction": true
+  },
+  "beta_pairs": [
+    "0.5:5.0"
+  ],
+  "chains": [
+    64,
+    128,
+    256
+  ],
+  "chunk": 8,
+  "codes": [
+    {
+      "family": "B1",
+      "source": "code_capacity/codes/B1_HxHzLxLz.npz",
+      "tag": "B1"
+    },
+    {
+      "family": "B2",
+      "source": "code_capacity/codes/B2_HxHzLxLz.npz",
+      "tag": "B2"
+    }
+  ],
+  "generated_at": "2026-06-19T06:57:40.446863+00:00",
+  "git_commit": "e67c5ac4c821d457e4c374b60381966d281e8218",
+  "name": "budget_probe",
+  "num_configs": 9,
+  "numpy": "2.4.6",
+  "outputs": {
+    "best_by_p": "tune_best_by_p.csv",
+    "config_map": "config_map.json",
+    "summary": "tune_summary.csv"
+  },
+  "p_values": [
+    0.06,
+    0.07
+  ],
+  "platform": "Linux-5.15.0-122-generic-x86_64-with-glibc2.35",
+  "python": "3.14.5",
+  "ranking": [
+    "ler",
+    "selected_weight_mean",
+    "fvs_p95",
+    "secs_per_decode"
+  ],
+  "rho_scales": [
+    0.35
+  ],
+  "shapes": [
+    "linear"
+  ],
+  "sweeps": [
+    40,
+    60,
+    100
+  ],
+  "trials": 96,
+  "workers": 40
+}

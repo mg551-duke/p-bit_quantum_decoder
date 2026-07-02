@@ -1,0 +1,12 @@
+[11:03:43] START name=b1_p0.06_L2_s800_l4 codes=['B1_HxHzLxLz.npz'] p=[0.06] target=40 metric=legacy workers=64 decoder={'chains': 256, 'sweeps': 800, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 0.35, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[11:03:43] CONFIG[gpu] B1 p=0.06: chains=256 sweeps=800 beta=0.5->5.0 rho_scale=0.35 sel=min_weight max_legs=4 target_valid=4 colors=10
+[11:04:13] B1 p=0.06 [gpu] runs=5000 valid_correct=4995 valid_incorrect=0 invalid_correct=0 invalid_incorrect=5 valid=0.99900 legs<=4 LERlegacy=1.000e-03 LERcontent=1.000e-03 legacy=5/40
+[11:04:42] B1 p=0.06 [gpu] runs=10000 valid_correct=9993 valid_incorrect=0 invalid_correct=1 invalid_incorrect=6 valid=0.99930 legs<=4 LERlegacy=7.000e-04 LERcontent=6.000e-04 legacy=7/40
+[11:05:11] B1 p=0.06 [gpu] runs=15000 valid_correct=14987 valid_incorrect=0 invalid_correct=1 invalid_incorrect=12 valid=0.99913 legs<=4 LERlegacy=8.667e-04 LERcontent=8.000e-04 legacy=13/40
+[11:05:40] B1 p=0.06 [gpu] runs=20000 valid_correct=19981 valid_incorrect=0 invalid_correct=3 invalid_incorrect=16 valid=0.99905 legs<=4 LERlegacy=9.500e-04 LERcontent=8.000e-04 legacy=19/40
+[11:06:09] B1 p=0.06 [gpu] runs=25000 valid_correct=24975 valid_incorrect=1 invalid_correct=4 invalid_incorrect=20 valid=0.99904 legs<=4 LERlegacy=1.000e-03 LERcontent=8.400e-04 legacy=25/40
+[11:06:38] B1 p=0.06 [gpu] runs=30000 valid_correct=29970 valid_incorrect=1 invalid_correct=4 invalid_incorrect=25 valid=0.99903 legs<=4 LERlegacy=1.000e-03 LERcontent=8.667e-04 legacy=30/40
+[11:07:07] B1 p=0.06 [gpu] runs=35000 valid_correct=34965 valid_incorrect=1 invalid_correct=4 invalid_incorrect=30 valid=0.99903 legs<=4 LERlegacy=1.000e-03 LERcontent=8.857e-04 legacy=35/40
+[11:07:36] B1 p=0.06 [gpu] runs=40000 valid_correct=39959 valid_incorrect=1 invalid_correct=5 invalid_incorrect=35 valid=0.99900 legs<=4 LERlegacy=1.025e-03 LERcontent=9.000e-04 legacy=41/40
+[11:07:36] DONE B1 p=0.06: LER(legacy)=1.025e-03 LER(content)=9.000e-04 runs=40000
+[11:07:36] ALLDONE -> /home/mert/p-bit_quantum_decoder/code_capacity/results/b1_psweep/p0.06/L2_s800_l4/summary.csv

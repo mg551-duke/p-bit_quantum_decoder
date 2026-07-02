@@ -1,0 +1,25 @@
+[10:55:47] START name=b1_gpu_p06 codes=['B1_HxHzLxLz.npz'] p=[0.06] target=40 metric=legacy workers=64 decoder={'chains': 256, 'sweeps': 1500, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 0.35, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[10:55:48] CONFIG[gpu] B1 p=0.06: chains=256 sweeps=1500 beta=0.5->5.0 rho_scale=0.35 sel=min_weight max_legs=24 target_valid=None colors=10
+[10:57:45] B1 p=0.06 [gpu] runs=8000 valid_correct=7999 valid_incorrect=0 invalid_correct=1 invalid_incorrect=0 valid=0.99987 legs<=24 LERlegacy=1.250e-04 LERcontent=0.000e+00 legacy=1/40
+[10:59:42] B1 p=0.06 [gpu] runs=16000 valid_correct=15998 valid_incorrect=0 invalid_correct=1 invalid_incorrect=1 valid=0.99987 legs<=24 LERlegacy=1.250e-04 LERcontent=6.250e-05 legacy=2/40
+[11:01:17] B1 p=0.06 [gpu] runs=24000 valid_correct=23998 valid_incorrect=0 invalid_correct=1 invalid_incorrect=1 valid=0.99992 legs<=24 LERlegacy=8.333e-05 LERcontent=4.167e-05 legacy=2/40
+[11:03:14] B1 p=0.06 [gpu] runs=32000 valid_correct=31994 valid_incorrect=0 invalid_correct=1 invalid_incorrect=5 valid=0.99981 legs<=24 LERlegacy=1.875e-04 LERcontent=1.563e-04 legacy=6/40
+[11:05:12] B1 p=0.06 [gpu] runs=40000 valid_correct=39992 valid_incorrect=0 invalid_correct=1 invalid_incorrect=7 valid=0.99980 legs<=24 LERlegacy=2.000e-04 LERcontent=1.750e-04 legacy=8/40
+[11:07:09] B1 p=0.06 [gpu] runs=48000 valid_correct=47989 valid_incorrect=1 invalid_correct=1 invalid_incorrect=9 valid=0.99979 legs<=24 LERlegacy=2.292e-04 LERcontent=2.083e-04 legacy=11/40
+[11:08:52] B1 p=0.06 [gpu] runs=56000 valid_correct=55989 valid_incorrect=1 invalid_correct=1 invalid_incorrect=9 valid=0.99982 legs<=24 LERlegacy=1.964e-04 LERcontent=1.786e-04 legacy=11/40
+[11:10:49] B1 p=0.06 [gpu] runs=64000 valid_correct=63986 valid_incorrect=2 invalid_correct=1 invalid_incorrect=11 valid=0.99981 legs<=24 LERlegacy=2.188e-04 LERcontent=2.031e-04 legacy=14/40
+[11:12:46] B1 p=0.06 [gpu] runs=72000 valid_correct=71984 valid_incorrect=2 invalid_correct=1 invalid_incorrect=13 valid=0.99981 legs<=24 LERlegacy=2.222e-04 LERcontent=2.083e-04 legacy=16/40
+[11:14:43] B1 p=0.06 [gpu] runs=80000 valid_correct=79979 valid_incorrect=3 invalid_correct=4 invalid_incorrect=14 valid=0.99977 legs<=24 LERlegacy=2.625e-04 LERcontent=2.125e-04 legacy=21/40
+[11:16:40] B1 p=0.06 [gpu] runs=88000 valid_correct=87977 valid_incorrect=4 invalid_correct=4 invalid_incorrect=15 valid=0.99978 legs<=24 LERlegacy=2.614e-04 LERcontent=2.159e-04 legacy=23/40
+[11:18:37] B1 p=0.06 [gpu] runs=96000 valid_correct=95974 valid_incorrect=4 invalid_correct=4 invalid_incorrect=18 valid=0.99977 legs<=24 LERlegacy=2.708e-04 LERcontent=2.292e-04 legacy=26/40
+[11:20:34] B1 p=0.06 [gpu] runs=104000 valid_correct=103973 valid_incorrect=4 invalid_correct=4 invalid_incorrect=19 valid=0.99978 legs<=24 LERlegacy=2.596e-04 LERcontent=2.212e-04 legacy=27/40
+[11:22:31] B1 p=0.06 [gpu] runs=112000 valid_correct=111971 valid_incorrect=4 invalid_correct=5 invalid_incorrect=20 valid=0.99978 legs<=24 LERlegacy=2.589e-04 LERcontent=2.143e-04 legacy=29/40
+[11:24:14] B1 p=0.06 [gpu] runs=120000 valid_correct=119971 valid_incorrect=4 invalid_correct=5 invalid_incorrect=20 valid=0.99979 legs<=24 LERlegacy=2.417e-04 LERcontent=2.000e-04 legacy=29/40
+[11:27:34] B1 p=0.06 [gpu] runs=128000 valid_correct=127970 valid_incorrect=4 invalid_correct=5 invalid_incorrect=21 valid=0.99980 legs<=24 LERlegacy=2.344e-04 LERcontent=1.953e-04 legacy=30/40
+[11:29:31] B1 p=0.06 [gpu] runs=136000 valid_correct=135967 valid_incorrect=6 invalid_correct=5 invalid_incorrect=22 valid=0.99980 legs<=24 LERlegacy=2.426e-04 LERcontent=2.059e-04 legacy=33/40
+[11:31:28] B1 p=0.06 [gpu] runs=144000 valid_correct=143964 valid_incorrect=7 invalid_correct=5 invalid_incorrect=24 valid=0.99980 legs<=24 LERlegacy=2.500e-04 LERcontent=2.153e-04 legacy=36/40
+[11:33:21] B1 p=0.06 [gpu] runs=152000 valid_correct=151962 valid_incorrect=9 invalid_correct=5 invalid_incorrect=24 valid=0.99981 legs<=24 LERlegacy=2.500e-04 LERcontent=2.171e-04 legacy=38/40
+[11:35:17] B1 p=0.06 [gpu] runs=160000 valid_correct=159961 valid_incorrect=9 invalid_correct=5 invalid_incorrect=25 valid=0.99981 legs<=24 LERlegacy=2.437e-04 LERcontent=2.125e-04 legacy=39/40
+[11:37:14] B1 p=0.06 [gpu] runs=168000 valid_correct=167958 valid_incorrect=11 invalid_correct=5 invalid_incorrect=26 valid=0.99982 legs<=24 LERlegacy=2.500e-04 LERcontent=2.202e-04 legacy=42/40
+[11:37:14] DONE B1 p=0.06: LER(legacy)=2.500e-04 LER(content)=2.202e-04 runs=168000
+[11:37:14] ALLDONE -> code_capacity/results/b1_gpu_p06/summary.csv

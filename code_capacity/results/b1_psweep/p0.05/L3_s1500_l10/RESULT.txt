@@ -1,0 +1,7 @@
+=== B1  p=0.05  runs=60000  target=legacy CAP ===
+  same=36010 (6.002e-01)  degen=23990 (3.998e-01)  logic=0 (0.000e+00)  nonconv=0 (0.000e+00)  nonconv_logic=0 (0.000e+00)
+  valid  (convergent)  correct=60000 (1.000e+00)   incorrect=0 (0.000e+00)
+  invalid(nonconverg.) correct=0 (0.000e+00)   incorrect=0 (0.000e+00)
+  LER(logic+nonconv)      = 0.000e+00 +- 0.0e+00
+  LER(logic+nonconv_logic)= 0.000e+00 +- 0.0e+00
+  meanW=43.97  9.8 ms/shot/core  wall=615s

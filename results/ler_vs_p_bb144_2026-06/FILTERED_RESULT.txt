@@ -1,0 +1,25 @@
+--- p=0.005 FINAL N=6400 @ Mon Jun 22 08:49:26 PM PDT 2026 ---
+p=0.005 tv=1  LER=4.281e-02 +-2.6e-03  ul95=4.71e-02  errors=274/6400  invalid=16
+p=0.005 tv=2  LER=3.828e-02 +-2.4e-03  ul95=4.23e-02  errors=245/6400  invalid=16
+p=0.005 tv=3  LER=3.516e-02 +-2.3e-03  ul95=3.90e-02  errors=225/6400  invalid=16
+p=0.005 tv=4  LER=3.375e-02 +-2.3e-03  ul95=3.75e-02  errors=216/6400  invalid=16
+p=0.005 tv=5  LER=3.219e-02 +-2.2e-03  ul95=3.59e-02  errors=206/6400  invalid=16
+--- p=0.004 FINAL N=64000 @ Mon Jun 22 09:22:41 PM PDT 2026 ---
+p=0.004 tv=1  LER=6.391e-03 +-3.2e-04  ul95=6.91e-03  errors=409/64000  invalid=6
+p=0.004 tv=2  LER=5.484e-03 +-2.9e-04  ul95=5.96e-03  errors=351/64000  invalid=6
+p=0.004 tv=3  LER=5.156e-03 +-2.8e-04  ul95=5.62e-03  errors=330/64000  invalid=6
+p=0.004 tv=4  LER=5.000e-03 +-2.8e-04  ul95=5.46e-03  errors=320/64000  invalid=6
+p=0.004 tv=5  LER=4.672e-03 +-2.7e-04  ul95=5.11e-03  errors=299/64000  invalid=6
+--- p=0.003 FINAL N=384000 @ Mon Jun 22 10:20:08 PM PDT 2026 ---
+p=0.003 tv=1  LER=4.740e-04 +-3.5e-05  ul95=5.32e-04  errors=182/384000  invalid=8
+p=0.003 tv=2  LER=3.906e-04 +-3.2e-05  ul95=4.43e-04  errors=150/384000  invalid=8
+p=0.003 tv=3  LER=3.620e-04 +-3.1e-05  ul95=4.12e-04  errors=139/384000  invalid=8
+p=0.003 tv=4  LER=3.516e-04 +-3.0e-05  ul95=4.01e-04  errors=135/384000  invalid=8
+p=0.003 tv=5  LER=3.203e-04 +-2.9e-05  ul95=3.68e-04  errors=123/384000  invalid=8
+--- p=0.002 FINAL N=2048000 @ Tue Jun 23 12:06:45 AM PDT 2026 ---
+p=0.002 tv=1  LER=1.807e-05 +-3.0e-06  ul95=2.29e-05  errors=37/2048000  invalid=9
+p=0.002 tv=2  LER=1.660e-05 +-2.8e-06  ul95=2.13e-05  errors=34/2048000  invalid=9
+p=0.002 tv=3  LER=1.514e-05 +-2.7e-06  ul95=1.96e-05  errors=31/2048000  invalid=9
+p=0.002 tv=4  LER=1.318e-05 +-2.5e-06  ul95=1.73e-05  errors=27/2048000  invalid=9
+p=0.002 tv=5  LER=1.123e-05 +-2.3e-06  ul95=1.51e-05  errors=23/2048000  invalid=9
+ALLDONE @ Tue Jun 23 12:06:45 AM PDT 2026

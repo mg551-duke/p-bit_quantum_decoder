@@ -1,0 +1,20 @@
+loaded B1_HxHzLxLz.npz: {'family': 'B1', 'n': 882, 'k': 24, 'm_z_checks': 441, 'm_x_checks': 441, 'hz_max_col_weight': 3, 'hz_max_row_weight': 6, 'lz_rows': 24}
+[11:03:14] START name=b1_p0.05_L1_s300_l1 codes=['B1_HxHzLxLz.npz'] p=[0.05] target=40 metric=legacy workers=64 decoder={'chains': 256, 'sweeps': 300, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 0.35, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[11:03:18] CONFIG[gpu] B1 p=0.05: chains=256 sweeps=300 beta=0.5->5.0 rho_scale=0.35 sel=min_weight max_legs=1 target_valid=1 colors=10
+[11:03:30] B1 p=0.05 [gpu] runs=5000 valid_correct=4997 valid_incorrect=0 invalid_correct=2 invalid_incorrect=1 valid=0.99940 legs<=1 LERlegacy=6.000e-04 LERcontent=2.000e-04 legacy=3/40
+[11:03:41] B1 p=0.05 [gpu] runs=10000 valid_correct=9994 valid_incorrect=0 invalid_correct=3 invalid_incorrect=3 valid=0.99940 legs<=1 LERlegacy=6.000e-04 LERcontent=3.000e-04 legacy=6/40
+[11:03:52] B1 p=0.05 [gpu] runs=15000 valid_correct=14991 valid_incorrect=0 invalid_correct=4 invalid_incorrect=5 valid=0.99940 legs<=1 LERlegacy=6.000e-04 LERcontent=3.333e-04 legacy=9/40
+[11:04:03] B1 p=0.05 [gpu] runs=20000 valid_correct=19988 valid_incorrect=0 invalid_correct=5 invalid_incorrect=7 valid=0.99940 legs<=1 LERlegacy=6.000e-04 LERcontent=3.500e-04 legacy=12/40
+[11:04:14] B1 p=0.05 [gpu] runs=25000 valid_correct=24985 valid_incorrect=0 invalid_correct=5 invalid_incorrect=10 valid=0.99940 legs<=1 LERlegacy=6.000e-04 LERcontent=4.000e-04 legacy=15/40
+[11:04:25] B1 p=0.05 [gpu] runs=30000 valid_correct=29982 valid_incorrect=0 invalid_correct=5 invalid_incorrect=13 valid=0.99940 legs<=1 LERlegacy=6.000e-04 LERcontent=4.333e-04 legacy=18/40
+[11:04:36] B1 p=0.05 [gpu] runs=35000 valid_correct=34979 valid_incorrect=0 invalid_correct=5 invalid_incorrect=16 valid=0.99940 legs<=1 LERlegacy=6.000e-04 LERcontent=4.571e-04 legacy=21/40
+[11:04:47] B1 p=0.05 [gpu] runs=40000 valid_correct=39974 valid_incorrect=0 invalid_correct=6 invalid_incorrect=20 valid=0.99935 legs<=1 LERlegacy=6.500e-04 LERcontent=5.000e-04 legacy=26/40
+[11:04:58] B1 p=0.05 [gpu] runs=45000 valid_correct=44971 valid_incorrect=0 invalid_correct=7 invalid_incorrect=22 valid=0.99936 legs<=1 LERlegacy=6.444e-04 LERcontent=4.889e-04 legacy=29/40
+[11:05:09] B1 p=0.05 [gpu] runs=50000 valid_correct=49969 valid_incorrect=0 invalid_correct=7 invalid_incorrect=24 valid=0.99938 legs<=1 LERlegacy=6.200e-04 LERcontent=4.800e-04 legacy=31/40
+[11:05:20] B1 p=0.05 [gpu] runs=55000 valid_correct=54968 valid_incorrect=0 invalid_correct=7 invalid_incorrect=25 valid=0.99942 legs<=1 LERlegacy=5.818e-04 LERcontent=4.545e-04 legacy=32/40
+[11:05:31] B1 p=0.05 [gpu] runs=60000 valid_correct=59966 valid_incorrect=0 invalid_correct=7 invalid_incorrect=27 valid=0.99943 legs<=1 LERlegacy=5.667e-04 LERcontent=4.500e-04 legacy=34/40
+[11:05:31] DONE B1 p=0.05: LER(legacy)=5.667e-04 LER(content)=4.500e-04 runs=60000
+[11:05:31] ALLDONE -> /home/mert/p-bit_quantum_decoder/code_capacity/results/b1_psweep/p0.05/L1_s300_l1/summary.csv
+
+summary: /home/mert/p-bit_quantum_decoder/code_capacity/results/b1_psweep/p0.05/L1_s300_l1/summary.csv
+result:  /home/mert/p-bit_quantum_decoder/code_capacity/results/b1_psweep/p0.05/L1_s300_l1/RESULT.txt

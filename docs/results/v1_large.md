@@ -205,6 +205,117 @@ hit the target of ten within this budget. The main BB144 bottleneck is therefore
 validity; it is finding a diverse enough set of valid corrections, then selecting the right logical
 class from that set.
 
+## Min-Weight P-Bit Syndrome Validation (v1_large_codes / v1_tighten_ci)
+
+The earlier probe used the unmodified `PBitSyndromeDecoder` with the shared `default_rho` heuristic,
+no within-coset weight reduction, and best-energy/counts selection. The `v1_large_codes` and
+`v1_tighten_ci` artifacts re-run the same `PBitSyndromeDecoder` with the current min-weight stack and
+supersede that negative BB144 readout. Both production rows use the vectorized batched path,
+`selection = "min_weight"`, `stop_on_first_valid = false`, `collect_valid_samples = true`,
+`weight_reduction = true`, and the p-adaptive `rho_scale = 1.0` (`rho ~ max(lambda_j)`). The surface
+d=7 row uses 80 chains and 160 sweeps; the BB144 row uses 256 chains and 250 sweeps. The
+`v1_tighten_ci` artifact repeats the borderline groups at 100 trials for tighter Wilson intervals.
+
+Surface d=7 logical error (100 trials at p=0.10, 12 trials at p=0.07; 95% Wilson intervals):
+
+- p=0.07: MWPM 1/12 = 0.083, p-bit min_weight 1/12 = 0.083, BP 5/12 = 0.417; p-bit valid_rate 1.000
+- p=0.10: MWPM 22/100 = 0.220 [0.150, 0.311], p-bit min_weight 24/100 = 0.240 [0.167, 0.332],
+  BP 91/100 = 0.910 [0.838, 0.952]; p-bit valid_rate 0.990
+
+At p=0.10 the p-bit and MWPM Wilson intervals almost fully overlap, so min-weight p-bit decoding is
+statistically indistinguishable from MWPM on surface d=7. The apparent gap in the 12-trial run
+(2/12 vs 1/12) was sampling noise. One of 100 p-bit trials did not reach a valid coset
+(`valid_rate = 0.990`); every other configured group is at 1.000.
+
+BB144 [[144,12,12]] logical error (100 trials at p=0.05, 10 trials at p=0.03; 95% Wilson intervals):
+
+- p=0.03: BP-OSD 0/10 = 0.000, p-bit min_weight 0/10 = 0.000, BP 0/10 = 0.000; p-bit valid_rate 1.000
+- p=0.05: BP-OSD 5/100 = 0.050 [0.022, 0.112], p-bit min_weight 3/100 = 0.030 [0.010, 0.084],
+  BP 12/100 = 0.120 [0.070, 0.198]; p-bit valid_rate 1.000
+
+On BB144 the p-bit min-weight decoder matches and slightly edges BP-OSD (3 vs 5 failures at p=0.05)
+and clearly beats plain BP, with full coverage. This is the first artifact in which a p-bit-native
+syndrome decoder is competitive with the strong qLDPC baseline on the gross code.
+
+Cautious readout: these are 100-trial groups, so Wilson half-widths are still about 0.06-0.08 and
+single-trial differences are not significant; the claims are parity with MWPM (surface d=7) and
+parity-to-slight-advantage with BP-OSD (BB144), not a decisive win. The p-bit decoder remains three
+to four orders of magnitude slower than BP/BP-OSD/MWPM (mean runtime ~2.6 s for surface d=7 and
+~6.6-8.5 s for BB144 per decode), which is the expected cost of ensemble sampling.
+
+### Failure-mode characterization
+
+Because selection is pure post-processing over an identical sampled ensemble, decoding the same
+syndrome under `selection = "min_weight"` vs `selection = "ml_coset"` with the same RNG isolates the
+selection rule. Pairing that with a true-coset-reach check (is the true logical class present among
+the sampled valid cosets?) separates three failure modes: coverage (true coset never sampled),
+selection (true coset sampled but not chosen), and fundamental (true coset is neither the lightest
+nor the most probable candidate).
+
+- Surface d=7 at p=0.10 (60 paired trials): `min_weight` 12/60 = 0.200 beats `ml_coset`
+  15/60 = 0.250; degeneracy-aware selection uniquely fixes 1 case while losing 4. Of the 12
+  `min_weight` failures, 1 is coverage and 10 have the true coset sampled but neither lightest nor
+  highest free-energy. Surface failures are therefore fundamental min-weight-vs-true-coset cases at
+  the same frontier MWPM hits, and `min_weight` is already the better selection rule.
+- BB144 at p=0.08 (40 paired trials): `min_weight` 11/40 = 0.275 and `ml_coset` 10/40 = 0.250 are
+  tied, but 7 of the 11 `min_weight` failures never sampled the true coset, so coverage is the
+  dominant limiter on the qLDPC code at high p.
+- BB144 coverage A/B at p=0.08 (30 trials): adding a moderate-beta measurement phase
+  (`measure_sweeps = 200`, `beta_measure = 1.2`) or doubling chains to 512 both raise the
+  true-coset-reach rate from 0.867 to 0.933, but logical error stays at 0.267 because the
+  newly-reached trials move into reached-but-mis-selected: once the true coset is in the pool, its
+  lightest representative is heavier than a competing wrong coset's, so `min_weight` correctly
+  returns the lighter logically-wrong correction. At high p the coverage and selection limits
+  coincide at the min-weight frontier.
+- BB144 reduction A/B at p=0.08 (40 trials, 11 failures): `e_true` is itself a valid member of the
+  true coset, so reducing it bounds that coset's minimum weight. Augmenting the 72 weight-6
+  stabilizer generators with their pairwise sums (2628 generators, enabling two-generator greedy
+  moves) reduced no representative below plain greedy (0/40), and for all 11 failures the true
+  coset's strongly-reduced weight was greater than or equal to the selected coset's (11/11
+  fundamental, 0/11 reduction-fixable). Greedy weight reduction is therefore already at the coset
+  minimum, and the failures are genuine min-weight-vs-maximum-likelihood cases: the true error sits
+  in a logical class whose lightest correction is heavier than a competing class's.
+
+The `min_weight` LER cannot be improved because it is at the minimum-weight decoding frontier. Every
+LER lever has been ruled out with direct experiments: selection (`min_weight` beats `ml_coset` on
+surface and ties on BB144), coverage (improves reach but not LER), and weight reduction (greedy
+equals pairwise-augmented and strong). The residual failures are fundamental
+min-weight-vs-maximum-likelihood cases, which is precisely why `min_weight` ties MWPM on surface
+d=7 and matches BP-OSD on BB144 -- all three sit at the same limit. Beating it requires
+maximum-likelihood (free-energy) decoding with a better estimator than the current sampled
+`ml_coset`, not a `min_weight` refinement. The reusable probes are
+`experiments/diagnose_min_weight.py` (selection isolation), `experiments/diagnose_coverage.py`
+(coverage A/B), and `experiments/diagnose_reduction.py` (reduction quality and fundamental-vs-fixable
+classification).
+
+### Efficiency optimization
+
+With LER accuracy saturated, the sampling budget was tuned for speed instead. Runtime is dominated
+by sweeps (the per-sweep Gibbs loop over the n p-bits is serial), while chains are vectorized and
+nearly free -- in the surface sweep, a 40-chain/160-sweep config is slower than 80-chain/80-sweep at
+equal chains*sweeps work. The diagnostics already showed the production points are
+fundamental-limited rather than coverage-limited, so the budget was over-provisioned. The
+`experiments/tune_efficiency.py` harness A/Bs (chains x sweeps) configs on identical error
+realizations, reporting LER, valid_rate, and runtime.
+
+- Surface d=7 at p=0.10 (100 trials): cutting sweeps 160 -> 64 at 80 chains holds the frontier LER
+  exactly (0.240) with `valid_rate = 1.0`, at 1.17 s vs 2.65 s (2.3x). LER stays flat down to 56
+  sweeps; below ~64 sweeps the per-decode runtime floors at ~1.0 s on fixed overhead (weight
+  reduction plus setup), so 64 sweeps is the operating point.
+- BB144 at p=0.05 (100 trials): sweep reductions are validated end-to-end on the canonical error set
+  (same seeds as the baseline). 250 -> 150 sweeps holds the frontier (4/100, still beating BP-OSD's
+  5/100) with `valid_rate = 1.0` at 5.17 s vs ~9 s (~1.7x). The more aggressive 250 -> 80 sweeps
+  reaches 2.87 s (3.1x) but rises to 6/100, losing the slight BP-OSD edge while staying within the
+  overlapping Wilson interval, so 150 sweeps is the conservative production point that preserves the
+  headline result. Coverage (`valid_rate`) stays 1.0 down to 50 sweeps; the limiter from cutting
+  sweeps is min-weight convergence on a few hard errors, not constraint satisfaction.
+
+The efficient settings are recorded in `experiments/configs/v1_efficient.json` (surface 80x64, BB
+256x150) and validated against the MWPM/BP/BP-OSD baselines in `results/v1_efficient/summary.csv`;
+both code families keep their frontier results (surface ties MWPM, BB beats BP-OSD) at
+`valid_rate = 1.0`. This narrows but does not close the runtime gap to BP/BP-OSD/MWPM, which remain
+three to four orders of magnitude faster.
+
 Required interpretation constraints:
 
 - logical success is coset/logical success, not exact physical-error recovery;

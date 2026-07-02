@@ -1,0 +1,83 @@
+=== B1  p=0.1  runs=320  target=legacy REACHED ===
+  same=0 (0.000e+00)  degen=0 (0.000e+00)  logic=0 (0.000e+00)  nonconv=320 (1.000e+00)  nonconv_logic=320 (1.000e+00)
+  LER(logic+nonconv)      = 1.000e+00 +- 5.6e-02
+  LER(logic+nonconv_logic)= 1.000e+00 +- 5.6e-02
+  meanW=82.92  5917.5 ms/shot/core  wall=133s
+
+=== B1  p=0.09  runs=320  target=legacy REACHED ===
+  same=4 (1.250e-02)  degen=18 (5.625e-02)  logic=0 (0.000e+00)  nonconv=298 (9.313e-01)  nonconv_logic=296 (9.250e-01)
+  LER(logic+nonconv)      = 9.313e-01 +- 5.4e-02
+  LER(logic+nonconv_logic)= 9.250e-01 +- 5.4e-02
+  meanW=84.67  6212.4 ms/shot/core  wall=137s
+
+=== B1  p=0.08  runs=320  target=legacy REACHED ===
+  same=22 (6.875e-02)  degen=94 (2.938e-01)  logic=0 (0.000e+00)  nonconv=204 (6.375e-01)  nonconv_logic=196 (6.125e-01)
+  LER(logic+nonconv)      = 6.375e-01 +- 4.5e-02
+  LER(logic+nonconv_logic)= 6.125e-01 +- 4.4e-02
+  meanW=71.72  6270.5 ms/shot/core  wall=143s
+
+=== B1  p=0.07  runs=320  target=legacy REACHED ===
+  same=68 (2.125e-01)  degen=175 (5.469e-01)  logic=0 (0.000e+00)  nonconv=77 (2.406e-01)  nonconv_logic=73 (2.281e-01)
+  LER(logic+nonconv)      = 2.406e-01 +- 2.7e-02
+  LER(logic+nonconv_logic)= 2.281e-01 +- 2.7e-02
+  meanW=60.86  4965.3 ms/shot/core  wall=114s
+
+=== B1  p=0.06  runs=320  target=legacy REACHED ===
+  same=126 (3.937e-01)  degen=174 (5.437e-01)  logic=0 (0.000e+00)  nonconv=20 (6.250e-02)  nonconv_logic=16 (5.000e-02)
+  LER(logic+nonconv)      = 6.250e-02 +- 1.4e-02
+  LER(logic+nonconv_logic)= 5.000e-02 +- 1.3e-02
+  meanW=52.98  5908.6 ms/shot/core  wall=129s
+
+=== B1  p=0.05  runs=2240  target=legacy REACHED ===
+  same=1324 (5.911e-01)  degen=906 (4.045e-01)  logic=0 (0.000e+00)  nonconv=10 (4.464e-03)  nonconv_logic=8 (3.571e-03)
+  LER(logic+nonconv)      = 4.464e-03 +- 1.4e-03
+  LER(logic+nonconv_logic)= 3.571e-03 +- 1.3e-03
+  meanW=43.95  5500.1 ms/shot/core  wall=845s
+
+=== B1  p=0.04  runs=5760  target=legacy REACHED ===
+  same=4434 (7.698e-01)  degen=1316 (2.285e-01)  logic=0 (0.000e+00)  nonconv=10 (1.736e-03)  nonconv_logic=4 (6.944e-04)
+  LER(logic+nonconv)      = 1.736e-03 +- 5.5e-04
+  LER(logic+nonconv_logic)= 6.944e-04 +- 3.5e-04
+  meanW=35.17  5149.5 ms/shot/core  wall=2036s
+
+=== B2  p=0.1  runs=320  target=legacy REACHED ===
+  same=0 (0.000e+00)  degen=0 (0.000e+00)  logic=0 (0.000e+00)  nonconv=320 (1.000e+00)  nonconv_logic=320 (1.000e+00)
+  LER(logic+nonconv)      = 1.000e+00 +- 5.6e-02
+  LER(logic+nonconv_logic)= 1.000e+00 +- 5.6e-02
+  meanW=90.32  6199.0 ms/shot/core  wall=139s
+
+=== B2  p=0.09  runs=320  target=legacy REACHED ===
+  same=1 (3.125e-03)  degen=1 (3.125e-03)  logic=0 (0.000e+00)  nonconv=318 (9.938e-01)  nonconv_logic=318 (9.938e-01)
+  LER(logic+nonconv)      = 9.938e-01 +- 5.6e-02
+  LER(logic+nonconv_logic)= 9.938e-01 +- 5.6e-02
+  meanW=95.22  6890.3 ms/shot/core  wall=152s
+
+=== B2  p=0.08  runs=320  target=legacy REACHED ===
+  same=28 (8.750e-02)  degen=11 (3.438e-02)  logic=0 (0.000e+00)  nonconv=281 (8.781e-01)  nonconv_logic=278 (8.688e-01)
+  LER(logic+nonconv)      = 8.781e-01 +- 5.2e-02
+  LER(logic+nonconv_logic)= 8.688e-01 +- 5.2e-02
+  meanW=81.04  6844.1 ms/shot/core  wall=150s
+
+=== B2  p=0.07  runs=320  target=legacy REACHED ===
+  same=96 (3.000e-01)  degen=23 (7.187e-02)  logic=0 (0.000e+00)  nonconv=201 (6.281e-01)  nonconv_logic=200 (6.250e-01)
+  LER(logic+nonconv)      = 6.281e-01 +- 4.4e-02
+  LER(logic+nonconv_logic)= 6.250e-01 +- 4.4e-02
+  meanW=66.49  7152.4 ms/shot/core  wall=154s
+
+=== B2  p=0.06  runs=320  target=legacy REACHED ===
+  same=233 (7.281e-01)  degen=35 (1.094e-01)  logic=0 (0.000e+00)  nonconv=52 (1.625e-01)  nonconv_logic=48 (1.500e-01)
+  LER(logic+nonconv)      = 1.625e-01 +- 2.3e-02
+  LER(logic+nonconv_logic)= 1.500e-01 +- 2.2e-02
+  meanW=53.27  6298.4 ms/shot/core  wall=144s
+
+=== B2  p=0.05  runs=640  target=legacy REACHED ===
+  same=590 (9.219e-01)  degen=38 (5.937e-02)  logic=1 (1.563e-03)  nonconv=11 (1.719e-02)  nonconv_logic=10 (1.562e-02)
+  LER(logic+nonconv)      = 1.875e-02 +- 5.4e-03
+  LER(logic+nonconv_logic)= 1.719e-02 +- 5.2e-03
+  meanW=44.16  6318.8 ms/shot/core  wall=275s
+
+=== B2  p=0.04  runs=2560  target=legacy REACHED ===
+  same=2465 (9.629e-01)  degen=83 (3.242e-02)  logic=0 (0.000e+00)  nonconv=12 (4.687e-03)  nonconv_logic=10 (3.906e-03)
+  LER(logic+nonconv)      = 4.687e-03 +- 1.4e-03
+  LER(logic+nonconv_logic)= 3.906e-03 +- 1.2e-03
+  meanW=35.34  6612.4 ms/shot/core  wall=1159s

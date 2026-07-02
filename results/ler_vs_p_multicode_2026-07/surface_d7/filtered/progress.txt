@@ -1,0 +1,11 @@
+SURFACE d=7 FILTERED-X campaign rho=0.25 beta=0.5->16 sweeps=1000 chains=128 legs=24 tgt=10 ps='0.005 0.004 0.003 0.002 0.001' gpus='0 1 2 3 4 5' start Wed Jul  1 09:30:04 AM PDT 2026
+=== p=0.005 target(tv5)=10 chunk=3000 maxn=60000 @ Wed Jul  1 09:30:04 AM PDT 2026 ===
+p=0.005 round=1 N=18000  tv1=249 tv2=232 tv3=227 tv4=225 tv5=224  inv5=0  Wed Jul  1 09:30:11 AM PDT 2026
+=== p=0.004 target(tv5)=10 chunk=5000 maxn=120000 @ Wed Jul  1 09:30:11 AM PDT 2026 ===
+p=0.004 round=1 N=30000  tv1=163 tv2=140 tv3=142 tv4=142 tv5=142  inv5=0  Wed Jul  1 09:30:25 AM PDT 2026
+=== p=0.003 target(tv5)=10 chunk=10000 maxn=300000 @ Wed Jul  1 09:30:25 AM PDT 2026 ===
+p=0.003 round=1 N=60000  tv1=136 tv2=118 tv3=116 tv4=116 tv5=116  inv5=0  Wed Jul  1 09:30:40 AM PDT 2026
+=== p=0.002 target(tv5)=10 chunk=30000 maxn=800000 @ Wed Jul  1 09:30:40 AM PDT 2026 ===
+p=0.002 round=1 N=180000  tv1=59 tv2=57 tv3=55 tv4=55 tv5=55  inv5=0  Wed Jul  1 09:31:06 AM PDT 2026
+=== p=0.001 target(tv5)=10 chunk=100000 maxn=3000000 @ Wed Jul  1 09:31:06 AM PDT 2026 ===
+p=0.001 round=1 N=600000  tv1=18 tv2=13 tv3=13 tv4=12 tv5=12  inv5=0  Wed Jul  1 09:32:11 AM PDT 2026

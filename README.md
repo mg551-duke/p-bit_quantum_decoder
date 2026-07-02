@@ -1,19 +1,28 @@
 # p-bit QEC Decoder Prototype
 
-This repository is a research-grade prototype for testing whether finite-temperature
-probabilistic-Ising dynamics can help degenerate quantum error correction decoding.
+This repository is a research-grade prototype for probabilistic (p-bit) decoding of degenerate
+quantum error correction codes.
 
-The central hypothesis is:
+## Primary objective: minimum-weight valid correction
 
-> QEC decoding should choose the most likely logical/coset class, not necessarily the single
-> lowest-energy correction. Sampling many syndrome-compatible corrections may therefore beat
-> pure Ising-style optimization on degenerate instances.
+The decoder follows a RelayBP-style recipe: **generate many syndrome-valid corrections, then return
+the minimum-weight one** (prior energy as tie-break). The many candidate solutions are produced by
+finite-temperature p-bit/Gibbs sampling. This is implemented in `PBitSyndromeDecoder` via
+`selection = "min_weight"` with `target_valid_solutions`
+(see `experiments/configs/v1_pbit_syndrome.json`).
 
-For one Pauli sector, the object of interest is:
+## Secondary objective: coset posterior (retained as exact diagnostic)
+
+The project began from a coset-posterior hypothesis: QEC decoding should choose the most likely
+logical/coset class, not necessarily the single lowest-energy correction. For one Pauli sector the
+object of interest was:
 
 ```text
 P(l | s) proportional to sum_{e: H e = s, A e = l} exp[-E_prior(e)]
 ```
+
+This view is retained through `ExactCosetDecoder` and the coset diagnostics, which remain the ground
+truth for small codes, but it is the **secondary objective**, behind the minimum-weight recipe above.
 
 The prototype implements small toric and surface-code sectors, exact small-code coset
 enumeration, finite-temperature p-bit/Gibbs conditional sampling, a p-bit-native syndrome solver
@@ -73,6 +82,29 @@ uv run python scripts/make_plots.py --results results/v1_pbit_syndrome --figures
 The heavier sampler-setting target from the original study brief is encoded in
 `experiments/configs/v1_full_target.json`; it keeps the default 16-chain/1000-sweep sampler
 settings, but is not used by CI.
+
+## Annealing-schedule tuning
+
+`PBitSyndromeDecoder` supports a tunable temperature-ramp `beta_schedule_shape`
+(`geometric` default, `linear`, `sigmoid`). The `pbit-qec-tune-schedule` harness
+sweeps `rho_scale`, `beta_start`/`beta_stop`, and shape on paired error
+realizations, reporting logical error rate (Wilson 95% interval), syndrome-valid
+rate, and convergence speed (`first_valid_sweep` percentiles); `pbit-qec-plot-schedule`
+renders the figures.
+
+```bash
+uv run python -m pbit_qec.schedule_tuning --family bb --size 144 \
+  --p 0.04 0.06 --trials 150 --chains 256 --sweeps 150 \
+  --rho-scales 1.0 1.5 2.0 --beta-pairs 0.3:5.0 0.5:5.0 0.3:8.0 \
+  --shapes geometric linear sigmoid --workers 32 --name sched_bb144
+uv run python -m pbit_qec.schedule_plots \
+  --summary results/sched_bb144/schedule_summary.csv --figures figures/sched_bb144 --demo-beta 0.5 5.0
+```
+
+Findings and recommended operating points: `docs/results/schedule_tuning.md`.
+Headline: raising BB144 `beta_start` 0.3 -> 0.5 cuts first-valid-sweep p95 ~4-10x
+at equal logical error, letting `sweeps` drop ~150 -> ~40 (≈3x cheaper) at p=0.06;
+`rho_scale ≈ 1.0` is required near threshold (`rho_scale=2.0` is catastrophic).
 
 ## Outputs
 

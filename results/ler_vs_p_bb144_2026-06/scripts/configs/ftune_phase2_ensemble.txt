@@ -1,0 +1,10 @@
+# phase 2: ensemble/annealing levers around rho=0.20 (phase-1 best), filtered p=0.004.
+# tests chains, sweeps, anneal beta_stop, and rho fine-grid. 7 configs -> GPUs 0-6
+# (GPU7 still finishing phase-1 rho130). capture tv=1..5; seeds disjoint (SEED0=2000).
+base020 | --chains 128 --sweeps 500 --rho-scales 0.20 --gamma 1.0
+c256    | --chains 256 --sweeps 500 --rho-scales 0.20 --gamma 1.0
+s1000   | --chains 128 --sweeps 1000 --rho-scales 0.20 --gamma 1.0
+r017    | --chains 128 --sweeps 500 --rho-scales 0.17 --gamma 1.0
+r025    | --chains 128 --sweeps 500 --rho-scales 0.25 --gamma 1.0
+b12     | --chains 128 --sweeps 500 --rho-scales 0.20 --gamma 1.0 --beta-stop 12
+b16     | --chains 128 --sweeps 500 --rho-scales 0.20 --gamma 1.0 --beta-stop 16

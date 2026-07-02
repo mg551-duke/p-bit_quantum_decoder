@@ -1,0 +1,6 @@
+code_family,code,distance,rounds,p,decoder,chains,sweeps,max_legs,target_valid,rho_scale,errors,shots,ler,ler_stderr,min_valid,ms_per_shot,gpu_seconds,gpus,date,status
+bb,144_12_12,12,12,0.005,ColoredBlockGibbsDecoder,128,500,12,1,0.3,63,6000,1.05e-2,1.3e-3,0.979,489,2932,6,2026-06-17,done
+bb,144_12_12,12,12,0.004,ColoredBlockGibbsDecoder,128,500,12,1,0.3,67,62000,1.08e-3,1.3e-4,0.999,236,14632,6,2026-06-17,done
+bb,144_12_12,12,12,0.003,ColoredBlockGibbsDecoder,128,400,16,1,0.3,51,650000,7.85e-5,1.1e-5,1.000,100,64737,6-8,2026-06-17,done
+bb,144_12_12,12,12,0.002,ColoredBlockGibbsDecoder,128,500,12,1,0.3,10,1060000,9.434e-06,2.98e-06,0,72,,6,2026-06-17,done
+bb,144_12_12,12,12,0.001,ColoredBlockGibbsDecoder,128,500,12,1,0.3,,,,,,,,0,2026-06-17,skipped_infeasible

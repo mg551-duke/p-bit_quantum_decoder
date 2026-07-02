@@ -1,0 +1,5 @@
+CORRELATED(full-DEM) 288 campaign (memory_Z) sweeps=1000 rho=0.30 chains=128 beta=0.5->6 tgt=5 ps='0.005 0.004' gpus='0 1 2 3 4 5' start Thu Jul  2 11:52:47 AM PDT 2026
+p=0.005 RESUMED through round=2 N=4800 tv5=22 (target 5) @ Thu Jul  2 11:52:47 AM PDT 2026
+=== p=0.005 target(tv5)=5 chunk=400 maxn=400000 @ Thu Jul  2 11:52:47 AM PDT 2026 ===
+p=0.004 RESUMED through round=12 N=99000 tv5=4 (target 5) @ Thu Jul  2 11:52:48 AM PDT 2026
+=== p=0.004 target(tv5)=5 chunk=1500 maxn=8000000 @ Thu Jul  2 11:52:48 AM PDT 2026 ===

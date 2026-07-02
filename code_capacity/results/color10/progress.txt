@@ -1,0 +1,78 @@
+[15:15:05] START name=color10 codes=['B1_HxHzLxLz.npz', 'B2_HxHzLxLz.npz'] p=[0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1] target=10 metric=legacy workers=16 decoder={'chains': 256, 'sweeps': 150, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 1.0, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[15:15:05] CONFIG B1 p=0.04: {'chains': 256, 'sweeps': 100, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 1.0, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[15:17:02] B1 p=0.04 round=1 runs=320 same=236 degen=83 logic=0 nonconv=1 (nc_logic=1)  legacy=1/10
+[15:17:53] START name=color10 codes=['B1_HxHzLxLz.npz', 'B2_HxHzLxLz.npz'] p=[0.1, 0.09, 0.08, 0.07, 0.06, 0.05, 0.04] target=10 metric=legacy workers=16 decoder={'chains': 256, 'sweeps': 150, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 1.0, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[15:17:53] CONFIG B1 p=0.1: {'chains': 256, 'sweeps': 100, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 0.2, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[15:20:05] B1 p=0.1 round=1 runs=320 same=0 degen=0 logic=0 nonconv=320 (nc_logic=320)  legacy=320/10
+[15:20:06] DONE B1 p=0.1: LER(legacy)=1.000e+00 LER(content)=1.000e+00 runs=320
+[15:20:06] CONFIG B1 p=0.09: {'chains': 256, 'sweeps': 100, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 0.35, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[15:22:23] B1 p=0.09 round=1 runs=320 same=4 degen=18 logic=0 nonconv=298 (nc_logic=296)  legacy=298/10
+[15:22:23] DONE B1 p=0.09: LER(legacy)=9.313e-01 LER(content)=9.250e-01 runs=320
+[15:22:23] CONFIG B1 p=0.08: {'chains': 256, 'sweeps': 100, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 0.35, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[15:24:46] B1 p=0.08 round=1 runs=320 same=22 degen=94 logic=0 nonconv=204 (nc_logic=196)  legacy=204/10
+[15:24:46] DONE B1 p=0.08: LER(legacy)=6.375e-01 LER(content)=6.125e-01 runs=320
+[15:24:46] CONFIG B1 p=0.07: {'chains': 256, 'sweeps': 100, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 0.35, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[15:26:40] B1 p=0.07 round=1 runs=320 same=68 degen=175 logic=0 nonconv=77 (nc_logic=73)  legacy=77/10
+[15:26:40] DONE B1 p=0.07: LER(legacy)=2.406e-01 LER(content)=2.281e-01 runs=320
+[15:26:40] CONFIG B1 p=0.06: {'chains': 256, 'sweeps': 100, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 0.35, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[15:28:48] B1 p=0.06 round=1 runs=320 same=126 degen=174 logic=0 nonconv=20 (nc_logic=16)  legacy=20/10
+[15:28:48] DONE B1 p=0.06: LER(legacy)=6.250e-02 LER(content)=5.000e-02 runs=320
+[15:28:48] CONFIG B1 p=0.05: {'chains': 256, 'sweeps': 100, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 0.5, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[15:30:48] B1 p=0.05 round=1 runs=320 same=185 degen=132 logic=0 nonconv=3 (nc_logic=2)  legacy=3/10
+[15:32:45] B1 p=0.05 round=2 runs=640 same=369 degen=267 logic=0 nonconv=4 (nc_logic=3)  legacy=4/10
+[15:34:42] B1 p=0.05 round=3 runs=960 same=550 degen=406 logic=0 nonconv=4 (nc_logic=3)  legacy=4/10
+[15:36:32] B1 p=0.05 round=4 runs=1280 same=747 degen=527 logic=0 nonconv=6 (nc_logic=5)  legacy=6/10
+[15:38:19] B1 p=0.05 round=5 runs=1600 same=937 degen=655 logic=0 nonconv=8 (nc_logic=7)  legacy=8/10
+[15:40:36] B1 p=0.05 round=6 runs=1920 same=1129 degen=782 logic=0 nonconv=9 (nc_logic=7)  legacy=9/10
+[15:42:53] B1 p=0.05 round=7 runs=2240 same=1324 degen=906 logic=0 nonconv=10 (nc_logic=8)  legacy=10/10
+[15:42:53] DONE B1 p=0.05: LER(legacy)=4.464e-03 LER(content)=3.571e-03 runs=2240
+[15:42:53] CONFIG B1 p=0.04: {'chains': 256, 'sweeps': 100, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 1.0, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[15:45:06] B1 p=0.04 round=1 runs=320 same=242 degen=77 logic=0 nonconv=1 (nc_logic=1)  legacy=1/10
+[15:47:02] B1 p=0.04 round=2 runs=640 same=494 degen=145 logic=0 nonconv=1 (nc_logic=1)  legacy=1/10
+[15:49:02] B1 p=0.04 round=3 runs=960 same=739 degen=219 logic=0 nonconv=2 (nc_logic=2)  legacy=2/10
+[15:51:06] B1 p=0.04 round=4 runs=1280 same=981 degen=297 logic=0 nonconv=2 (nc_logic=2)  legacy=2/10
+[15:53:08] B1 p=0.04 round=5 runs=1600 same=1234 degen=363 logic=0 nonconv=3 (nc_logic=2)  legacy=3/10
+[15:54:54] B1 p=0.04 round=6 runs=1920 same=1480 degen=437 logic=0 nonconv=3 (nc_logic=2)  legacy=3/10
+[15:56:37] B1 p=0.04 round=7 runs=2240 same=1726 degen=511 logic=0 nonconv=3 (nc_logic=2)  legacy=3/10
+[15:58:13] B1 p=0.04 round=8 runs=2560 same=1957 degen=600 logic=0 nonconv=3 (nc_logic=2)  legacy=3/10
+[15:59:53] B1 p=0.04 round=9 runs=2880 same=2211 degen=666 logic=0 nonconv=3 (nc_logic=2)  legacy=3/10
+[16:01:35] B1 p=0.04 round=10 runs=3200 same=2458 degen=739 logic=0 nonconv=3 (nc_logic=2)  legacy=3/10
+[16:03:18] B1 p=0.04 round=11 runs=3520 same=2692 degen=822 logic=0 nonconv=6 (nc_logic=4)  legacy=6/10
+[16:05:13] B1 p=0.04 round=12 runs=3840 same=2945 degen=888 logic=0 nonconv=7 (nc_logic=4)  legacy=7/10
+[16:07:05] B1 p=0.04 round=13 runs=4160 same=3198 degen=954 logic=0 nonconv=8 (nc_logic=4)  legacy=8/10
+[16:09:06] B1 p=0.04 round=14 runs=4480 same=3446 degen=1026 logic=0 nonconv=8 (nc_logic=4)  legacy=8/10
+[16:11:10] B1 p=0.04 round=15 runs=4800 same=3679 degen=1113 logic=0 nonconv=8 (nc_logic=4)  legacy=8/10
+[16:13:17] B1 p=0.04 round=16 runs=5120 same=3919 degen=1193 logic=0 nonconv=8 (nc_logic=4)  legacy=8/10
+[16:15:06] B1 p=0.04 round=17 runs=5440 same=4185 degen=1247 logic=0 nonconv=8 (nc_logic=4)  legacy=8/10
+[16:16:50] B1 p=0.04 round=18 runs=5760 same=4434 degen=1316 logic=0 nonconv=10 (nc_logic=4)  legacy=10/10
+[16:16:50] DONE B1 p=0.04: LER(legacy)=1.736e-03 LER(content)=6.944e-04 runs=5760
+[16:16:50] CONFIG B2 p=0.1: {'chains': 256, 'sweeps': 100, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 0.2, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[16:19:08] B2 p=0.1 round=1 runs=320 same=0 degen=0 logic=0 nonconv=320 (nc_logic=320)  legacy=320/10
+[16:19:08] DONE B2 p=0.1: LER(legacy)=1.000e+00 LER(content)=1.000e+00 runs=320
+[16:19:08] CONFIG B2 p=0.09: {'chains': 256, 'sweeps': 100, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 0.35, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[16:21:41] B2 p=0.09 round=1 runs=320 same=1 degen=1 logic=0 nonconv=318 (nc_logic=318)  legacy=318/10
+[16:21:41] DONE B2 p=0.09: LER(legacy)=9.938e-01 LER(content)=9.938e-01 runs=320
+[16:21:41] CONFIG B2 p=0.08: {'chains': 256, 'sweeps': 100, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 0.35, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[16:24:11] B2 p=0.08 round=1 runs=320 same=28 degen=11 logic=0 nonconv=281 (nc_logic=278)  legacy=281/10
+[16:24:11] DONE B2 p=0.08: LER(legacy)=8.781e-01 LER(content)=8.688e-01 runs=320
+[16:24:11] CONFIG B2 p=0.07: {'chains': 256, 'sweeps': 100, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 0.35, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[16:26:45] B2 p=0.07 round=1 runs=320 same=96 degen=23 logic=0 nonconv=201 (nc_logic=200)  legacy=201/10
+[16:26:45] DONE B2 p=0.07: LER(legacy)=6.281e-01 LER(content)=6.250e-01 runs=320
+[16:26:45] CONFIG B2 p=0.06: {'chains': 256, 'sweeps': 100, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 0.35, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[16:29:08] B2 p=0.06 round=1 runs=320 same=233 degen=35 logic=0 nonconv=52 (nc_logic=48)  legacy=52/10
+[16:29:08] DONE B2 p=0.06: LER(legacy)=1.625e-01 LER(content)=1.500e-01 runs=320
+[16:29:08] CONFIG B2 p=0.05: {'chains': 256, 'sweeps': 100, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 0.35, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[16:31:17] B2 p=0.05 round=1 runs=320 same=296 degen=17 logic=0 nonconv=7 (nc_logic=7)  legacy=7/10
+[16:33:43] B2 p=0.05 round=2 runs=640 same=590 degen=38 logic=1 nonconv=11 (nc_logic=10)  legacy=12/10
+[16:33:43] DONE B2 p=0.05: LER(legacy)=1.875e-02 LER(content)=1.719e-02 runs=640
+[16:33:43] CONFIG B2 p=0.04: {'chains': 256, 'sweeps': 100, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 1.0, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[16:36:12] B2 p=0.04 round=1 runs=320 same=309 degen=11 logic=0 nonconv=0 (nc_logic=0)  legacy=0/10
+[16:38:37] B2 p=0.04 round=2 runs=640 same=615 degen=25 logic=0 nonconv=0 (nc_logic=0)  legacy=0/10
+[16:41:03] B2 p=0.04 round=3 runs=960 same=927 degen=32 logic=0 nonconv=1 (nc_logic=1)  legacy=1/10
+[16:43:45] B2 p=0.04 round=4 runs=1280 same=1238 degen=40 logic=0 nonconv=2 (nc_logic=2)  legacy=2/10
+[16:46:19] B2 p=0.04 round=5 runs=1600 same=1549 degen=46 logic=0 nonconv=5 (nc_logic=4)  legacy=5/10
+[16:48:41] B2 p=0.04 round=6 runs=1920 same=1855 degen=59 logic=0 nonconv=6 (nc_logic=5)  legacy=6/10
+[16:50:41] B2 p=0.04 round=7 runs=2240 same=2161 degen=70 logic=0 nonconv=9 (nc_logic=7)  legacy=9/10
+[16:53:02] B2 p=0.04 round=8 runs=2560 same=2465 degen=83 logic=0 nonconv=12 (nc_logic=10)  legacy=12/10
+[16:53:02] DONE B2 p=0.04: LER(legacy)=4.687e-03 LER(content)=3.906e-03 runs=2560
+[16:53:02] ALLDONE -> /home/mert/p-bit_quantum_decoder/code_capacity/results/color10/summary.csv

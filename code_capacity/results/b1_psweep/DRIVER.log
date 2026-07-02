@@ -1,0 +1,113 @@
+[11:03:13] === B1 p-sweep START  ps=[0.04 0.05 0.06 0.07 0.08 0.09 0.10] gpus=[1 2 3 4 5 6 7] target=40 maxshots=60000 chains=256 rho=0.35 ===
+[11:03:13] p=0.04 gpu=1 START L1_s300_l1 (sweeps=300 legs=1 tv=1)
+[11:03:13] p=0.05 gpu=2 START L1_s300_l1 (sweeps=300 legs=1 tv=1)
+[11:03:13] p=0.06 gpu=3 START L1_s300_l1 (sweeps=300 legs=1 tv=1)
+[11:03:13] p=0.07 gpu=4 START L1_s300_l1 (sweeps=300 legs=1 tv=1)
+[11:03:13] p=0.08 gpu=5 START L1_s300_l1 (sweeps=300 legs=1 tv=1)
+[11:03:13] p=0.09 gpu=6 START L1_s300_l1 (sweeps=300 legs=1 tv=1)
+[11:03:13] p=0.10 gpu=7 START L1_s300_l1 (sweeps=300 legs=1 tv=1)
+[11:03:31] p=0.07 gpu=4 DONE  L1_s300_l1 -> LER(logic+nonconv)      = 8.060e-02 +- 4.0e-03  valid=0.91940
+[11:03:31] p=0.07 gpu=4 START L2_s800_l4 (sweeps=800 legs=4 tv=4)
+[11:03:32] p=0.08 gpu=5 DONE  L1_s300_l1 -> LER(logic+nonconv)      = 3.674e-01 +- 8.6e-03  valid=0.63320
+[11:03:32] p=0.08 gpu=5 START L2_s800_l4 (sweeps=800 legs=4 tv=4)
+[11:03:32] p=0.09 gpu=6 DONE  L1_s300_l1 -> LER(logic+nonconv)      = 7.556e-01 +- 1.2e-02  valid=0.24440
+[11:03:32] p=0.09 gpu=6 START L2_s800_l4 (sweeps=800 legs=4 tv=4)
+[11:03:33] p=0.10 gpu=7 DONE  L1_s300_l1 -> LER(logic+nonconv)      = 9.524e-01 +- 1.4e-02  valid=0.04780
+[11:03:33] p=0.10 gpu=7 START L2_s800_l4 (sweeps=800 legs=4 tv=4)
+[11:03:42] p=0.06 gpu=3 DONE  L1_s300_l1 -> LER(logic+nonconv)      = 7.300e-03 +- 8.5e-04  valid=0.99270
+[11:03:42] p=0.06 gpu=3 START L2_s800_l4 (sweeps=800 legs=4 tv=4)
+[11:04:07] p=0.07 gpu=4 DONE  L2_s800_l4 -> LER(logic+nonconv)      = 1.700e-02 +- 1.8e-03  valid=0.98300
+[11:04:07] p=0.07 gpu=4 START L3_s1500_l10 (sweeps=1500 legs=10 tv=8)
+[11:04:24] p=0.08 gpu=5 DONE  L2_s800_l4 -> LER(logic+nonconv)      = 1.370e-01 +- 5.2e-03  valid=0.86400
+[11:04:24] p=0.08 gpu=5 START L3_s1500_l10 (sweeps=1500 legs=10 tv=8)
+[11:04:57] p=0.09 gpu=6 DONE  L2_s800_l4 -> LER(logic+nonconv)      = 4.808e-01 +- 9.8e-03  valid=0.52260
+[11:04:57] p=0.09 gpu=6 START L3_s1500_l10 (sweeps=1500 legs=10 tv=8)
+[11:05:06] p=0.04 gpu=1 DONE  L1_s300_l1 -> LER(logic+nonconv)      = 1.000e-04 +- 4.1e-05  valid=0.99990
+[11:05:06] p=0.04 gpu=1 START L2_s800_l4 (sweeps=800 legs=4 tv=4)
+[11:05:20] p=0.10 gpu=7 DONE  L2_s800_l4 -> LER(logic+nonconv)      = 8.352e-01 +- 1.3e-02  valid=0.16880
+[11:05:20] p=0.10 gpu=7 START L3_s1500_l10 (sweeps=1500 legs=10 tv=8)
+[11:05:31] p=0.05 gpu=2 DONE  L1_s300_l1 -> LER(logic+nonconv)      = 5.667e-04 +- 9.7e-05  valid=0.99943
+[11:05:32] p=0.05 gpu=2 START L2_s800_l4 (sweeps=800 legs=4 tv=4)
+[11:06:41] p=0.07 gpu=4 DONE  L3_s1500_l10 -> LER(logic+nonconv)      = 6.300e-03 +- 7.9e-04  valid=0.99400
+[11:06:41] p=0.07 gpu=4 START L4_s3000_l24 (sweeps=3000 legs=24 tv=8)
+[11:06:44] p=0.08 gpu=5 DONE  L3_s1500_l10 -> LER(logic+nonconv)      = 7.680e-02 +- 3.9e-03  valid=0.92760
+[11:06:44] p=0.08 gpu=5 START L4_s3000_l24 (sweeps=3000 legs=24 tv=8)
+[11:07:37] p=0.06 gpu=3 DONE  L2_s800_l4 -> LER(logic+nonconv)      = 1.025e-03 +- 1.6e-04  valid=0.99900
+[11:07:37] p=0.06 gpu=3 START L3_s1500_l10 (sweeps=1500 legs=10 tv=8)
+[11:10:32] === B1 p-sweep START  ps=[0.04 0.05 0.06 0.07 0.08 0.09 0.10] gpus=[1 2 3 4 5] target=40 maxshots=60000 chains=256 rho=0.35 ===
+[11:10:32] p=0.04 gpu=1 SKIP L1_s300_l1 (already complete)
+[11:10:32] p=0.05 gpu=2 SKIP L1_s300_l1 (already complete)
+[11:10:32] p=0.07 gpu=4 SKIP L1_s300_l1 (already complete)
+[11:10:32] p=0.06 gpu=3 SKIP L1_s300_l1 (already complete)
+[11:10:32] p=0.08 gpu=5 SKIP L1_s300_l1 (already complete)
+[11:10:32] p=0.04 gpu=1 START L2_s800_l4 (sweeps=800 legs=4 tv=4)
+[11:10:32] p=0.07 gpu=4 SKIP L2_s800_l4 (already complete)
+[11:10:32] p=0.05 gpu=2 START L2_s800_l4 (sweeps=800 legs=4 tv=4)
+[11:10:32] p=0.06 gpu=3 SKIP L2_s800_l4 (already complete)
+[11:10:32] p=0.08 gpu=5 SKIP L2_s800_l4 (already complete)
+[11:10:32] p=0.07 gpu=4 SKIP L3_s1500_l10 (already complete)
+[11:10:32] p=0.06 gpu=3 START L3_s1500_l10 (sweeps=1500 legs=10 tv=8)
+[11:10:32] p=0.08 gpu=5 SKIP L3_s1500_l10 (already complete)
+[11:10:32] p=0.07 gpu=4 START L4_s3000_l24 (sweeps=3000 legs=24 tv=8)
+[11:10:32] p=0.08 gpu=5 START L4_s3000_l24 (sweeps=3000 legs=24 tv=8)
+[11:14:37] p=0.04 gpu=1 DONE  L2_s800_l4 -> LER(logic+nonconv)      = 1.667e-05 +- 1.7e-05  valid=0.99998
+[11:14:37] p=0.04 gpu=1 START L3_s1500_l10 (sweeps=1500 legs=10 tv=8)
+[11:16:04] p=0.05 gpu=2 DONE  L2_s800_l4 -> LER(logic+nonconv)      = 5.000e-05 +- 2.9e-05  valid=0.99995
+[11:16:04] p=0.05 gpu=2 START L3_s1500_l10 (sweeps=1500 legs=10 tv=8)
+[11:16:59] p=0.08 gpu=5 DONE  L4_s3000_l24 -> LER(logic+nonconv)      = 4.240e-02 +- 2.9e-03  valid=0.97160
+[11:16:59] p=0.08 gpu=5 LADDER COMPLETE
+[11:22:03] p=0.04 gpu=1 DONE  L3_s1500_l10 -> LER(logic+nonconv)      = 0.000e+00 +- 0.0e+00  valid=1.00000
+[11:22:03] p=0.04 gpu=1 START L4_s3000_l24 (sweeps=3000 legs=24 tv=8)
+[11:23:39] p=0.06 gpu=3 DONE  L3_s1500_l10 -> LER(logic+nonconv)      = 3.167e-04 +- 7.3e-05  valid=0.99970
+[11:23:39] p=0.06 gpu=3 START L4_s3000_l24 (sweeps=3000 legs=24 tv=8)
+[11:24:28] p=0.07 gpu=4 DONE  L4_s3000_l24 -> LER(logic+nonconv)      = 2.850e-03 +- 3.8e-04  valid=0.99780
+[11:24:28] p=0.07 gpu=4 LADDER COMPLETE
+[11:26:21] p=0.05 gpu=2 DONE  L3_s1500_l10 -> LER(logic+nonconv)      = 0.000e+00 +- 0.0e+00  valid=1.00000
+[11:26:21] p=0.05 gpu=2 START L4_s3000_l24 (sweeps=3000 legs=24 tv=8)
+[11:44:27] p=0.05 gpu=2 DONE  L4_s3000_l24 -> LER(logic+nonconv)      = 0.000e+00 +- 0.0e+00  valid=1.00000
+[11:44:27] p=0.05 gpu=2 LADDER COMPLETE
+[11:44:27] p=0.10 gpu=2 SKIP L1_s300_l1 (already complete)
+[11:44:27] p=0.10 gpu=2 SKIP L2_s800_l4 (already complete)
+[11:44:27] p=0.10 gpu=2 START L3_s1500_l10 (sweeps=1500 legs=10 tv=8)
+[11:44:33] p=0.04 gpu=1 DONE  L4_s3000_l24 -> LER(logic+nonconv)      = 0.000e+00 +- 0.0e+00  valid=1.00000
+[11:44:33] p=0.04 gpu=1 LADDER COMPLETE
+[11:44:33] p=0.09 gpu=1 SKIP L1_s300_l1 (already complete)
+[11:44:33] p=0.09 gpu=1 SKIP L2_s800_l4 (already complete)
+[11:44:33] p=0.09 gpu=1 START L3_s1500_l10 (sweeps=1500 legs=10 tv=8)
+[11:49:41] p=0.09 gpu=1 DONE  L3_s1500_l10 -> LER(logic+nonconv)      = 3.376e-01 +- 8.2e-03  valid=0.68420
+[11:49:41] p=0.09 gpu=1 START L4_s3000_l24 (sweeps=3000 legs=24 tv=8)
+[11:52:07] p=0.10 gpu=2 DONE  L3_s1500_l10 -> LER(logic+nonconv)      = 7.174e-01 +- 1.2e-02  valid=0.31980
+[11:52:07] p=0.10 gpu=2 START L4_s3000_l24 (sweeps=3000 legs=24 tv=8)
+[12:00:26] p=0.06 gpu=3 DONE  L4_s3000_l24 -> LER(logic+nonconv)      = 1.167e-04 +- 4.4e-05  valid=0.99990
+[12:00:26] p=0.06 gpu=3 LADDER COMPLETE
+[12:06:59] p=0.09 gpu=1 DONE  L4_s3000_l24 -> LER(logic+nonconv)      = 2.262e-01 +- 6.7e-03  valid=0.86420
+[12:06:59] p=0.09 gpu=1 LADDER COMPLETE
+[12:23:48] p=0.10 gpu=2 DONE  L4_s3000_l24 -> LER(logic+nonconv)      = 6.042e-01 +- 1.1e-02  valid=0.63420
+[12:23:48] p=0.10 gpu=2 LADDER COMPLETE
+[12:23:48] === B1 p-sweep ALL COMPLETE ===
+# B1 LER-vs-p sweep: /home/mert/p-bit_quantum_decoder/code_capacity/results/b1_psweep
+# ladder steps (cheap->expensive): L1_s300_l1, L2_s800_l4, L3_s1500_l10, L4_s3000_l24
+
+== LER(legacy=logic+nonconv) ==
+step                p=0.04      p=0.05      p=0.06      p=0.07      p=0.08      p=0.09       p=0.1
+L1_s300_l1     1.00e-04( 6) 5.67e-04(34) 7.30e-03(73) 8.06e-02(403) 3.67e-01(1837) 7.56e-01(3778) 9.52e-01(4762)
+L2_s800_l4     1.67e-05( 1) 5.00e-05( 3) 1.03e-03(41) 1.70e-02(85) 1.37e-01(685) 4.81e-01(2404) 8.35e-01(4176)
+L3_s1500_l10        <5e-05      <5e-05 3.17e-04(19) 6.30e-03(63) 7.68e-02(384) 3.38e-01(1688) 7.17e-01(3587)
+L4_s3000_l24        <5e-05      <5e-05 1.17e-04( 7) 2.85e-03(57) 4.24e-02(212) 2.26e-01(1131) 6.04e-01(3021)
+
+== LER(content=logic+nonconv_logic) ==
+step                p=0.04      p=0.05      p=0.06      p=0.07      p=0.08      p=0.09       p=0.1
+L1_s300_l1     8.33e-05( 5) 4.50e-04(27) 6.40e-03(64) 7.22e-02(361) 3.43e-01(1717) 7.37e-01(3683) 9.49e-01(4744)
+L2_s800_l4     1.67e-05( 1) 3.33e-05( 2) 9.00e-04(36) 1.62e-02(81) 1.31e-01(657) 4.69e-01(2347) 8.28e-01(4142)
+L3_s1500_l10        <5e-05      <5e-05 2.83e-04(17) 6.00e-03(60) 7.46e-02(373) 3.32e-01(1660) 7.12e-01(3562)
+L4_s3000_l24        <5e-05      <5e-05 1.17e-04( 7) 2.65e-03(53) 4.18e-02(209) 2.25e-01(1124) 6.03e-01(3014)
+
+== 2x2 outcome grid @ deepest step L4_s3000_l24 ==
+     p     runs  valid_corr valid_incorr  inval_corr inval_incorr  valid_frac
+  0.04    60000       60000            0           0            0     1.00000
+  0.05    60000       60000            0           0            0     1.00000
+  0.06    60000       59993            1           0            6     0.99990
+  0.07    20000       19943           13           4           40     0.99780
+  0.08     5000        4788           70           3          139     0.97160
+  0.09     5000        3869          452           7          672     0.86420
+   0.1     5000        1979         1192           7         1822     0.63420

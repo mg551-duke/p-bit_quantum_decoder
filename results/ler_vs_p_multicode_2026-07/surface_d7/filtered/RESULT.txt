@@ -1,0 +1,31 @@
+--- p=0.005 FINAL N=18000 ms_shot=1.28 @ Wed Jul  1 09:30:11 AM PDT 2026 ---
+p=0.005 tv=1  LER=1.383e-02 +-8.8e-04  ul95=1.53e-02  errors=249/18000  invalid=0
+p=0.005 tv=2  LER=1.289e-02 +-8.5e-04  ul95=1.43e-02  errors=232/18000  invalid=0
+p=0.005 tv=3  LER=1.261e-02 +-8.4e-04  ul95=1.40e-02  errors=227/18000  invalid=0
+p=0.005 tv=4  LER=1.250e-02 +-8.3e-04  ul95=1.39e-02  errors=225/18000  invalid=0
+p=0.005 tv=5  LER=1.244e-02 +-8.3e-04  ul95=1.38e-02  errors=224/18000  invalid=0
+--- p=0.004 FINAL N=30000 ms_shot=1.87 @ Wed Jul  1 09:30:25 AM PDT 2026 ---
+p=0.004 tv=1  LER=5.433e-03 +-4.3e-04  ul95=6.13e-03  errors=163/30000  invalid=0
+p=0.004 tv=2  LER=4.667e-03 +-3.9e-04  ul95=5.31e-03  errors=140/30000  invalid=0
+p=0.004 tv=3  LER=4.733e-03 +-4.0e-04  ul95=5.38e-03  errors=142/30000  invalid=0
+p=0.004 tv=4  LER=4.733e-03 +-4.0e-04  ul95=5.38e-03  errors=142/30000  invalid=0
+p=0.004 tv=5  LER=4.733e-03 +-4.0e-04  ul95=5.38e-03  errors=142/30000  invalid=0
+--- p=0.003 FINAL N=60000 ms_shot=0.79 @ Wed Jul  1 09:30:40 AM PDT 2026 ---
+p=0.003 tv=1  LER=2.267e-03 +-1.9e-04  ul95=2.59e-03  errors=136/60000  invalid=0
+p=0.003 tv=2  LER=1.967e-03 +-1.8e-04  ul95=2.26e-03  errors=118/60000  invalid=0
+p=0.003 tv=3  LER=1.933e-03 +-1.8e-04  ul95=2.23e-03  errors=116/60000  invalid=0
+p=0.003 tv=4  LER=1.933e-03 +-1.8e-04  ul95=2.23e-03  errors=116/60000  invalid=0
+p=0.003 tv=5  LER=1.933e-03 +-1.8e-04  ul95=2.23e-03  errors=116/60000  invalid=0
+--- p=0.002 FINAL N=180000 ms_shot=0.74 @ Wed Jul  1 09:31:06 AM PDT 2026 ---
+p=0.002 tv=1  LER=3.278e-04 +-4.3e-05  ul95=3.98e-04  errors=59/180000  invalid=0
+p=0.002 tv=2  LER=3.167e-04 +-4.2e-05  ul95=3.85e-04  errors=57/180000  invalid=0
+p=0.002 tv=3  LER=3.056e-04 +-4.1e-05  ul95=3.73e-04  errors=55/180000  invalid=0
+p=0.002 tv=4  LER=3.056e-04 +-4.1e-05  ul95=3.73e-04  errors=55/180000  invalid=0
+p=0.002 tv=5  LER=3.056e-04 +-4.1e-05  ul95=3.73e-04  errors=55/180000  invalid=0
+--- p=0.001 FINAL N=600000 ms_shot=0.43 @ Wed Jul  1 09:32:11 AM PDT 2026 ---
+p=0.001 tv=1  LER=3.000e-05 +-7.1e-06  ul95=4.16e-05  errors=18/600000  invalid=0
+p=0.001 tv=2  LER=2.167e-05 +-6.0e-06  ul95=3.15e-05  errors=13/600000  invalid=0
+p=0.001 tv=3  LER=2.167e-05 +-6.0e-06  ul95=3.15e-05  errors=13/600000  invalid=0
+p=0.001 tv=4  LER=2.000e-05 +-5.8e-06  ul95=2.95e-05  errors=12/600000  invalid=0
+p=0.001 tv=5  LER=2.000e-05 +-5.8e-06  ul95=2.95e-05  errors=12/600000  invalid=0
+ALLDONE @ Wed Jul  1 09:32:11 AM PDT 2026

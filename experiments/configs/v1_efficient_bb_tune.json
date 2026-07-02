@@ -1,0 +1,62 @@
+{
+  "seed": 20260620,
+  "output_dir": "results/v1_efficient_bb_tune",
+  "p_values": [0.05],
+  "decoders": ["bp"],
+  "decoder_settings": {
+    "mwpm": {},
+    "bp_osd": {
+      "max_iter": 100,
+      "bp_method": "minimum_sum",
+      "ms_scaling_factor": 0.625,
+      "schedule": "parallel",
+      "osd_method": "OSD_CS",
+      "osd_order": 10,
+      "omp_thread_count": 1
+    },
+    "pbit_syndrome_bb": {
+      "chains": 256,
+      "sweeps": 150,
+      "beta_start": 0.3,
+      "beta_stop": 5.0,
+      "rho_scale": 1.0,
+      "update": "gibbs",
+      "stop_on_first_valid": false,
+      "collect_valid_samples": true,
+      "selection": "min_weight",
+      "weight_reduction": true,
+      "target_valid_solutions": 0
+    },
+    "pbit_syndrome_bb_s200": {
+      "chains": 256,
+      "sweeps": 200,
+      "beta_start": 0.3,
+      "beta_stop": 5.0,
+      "rho_scale": 1.0,
+      "update": "gibbs",
+      "stop_on_first_valid": false,
+      "collect_valid_samples": true,
+      "selection": "min_weight",
+      "weight_reduction": true,
+      "target_valid_solutions": 0
+    }
+  },
+  "sweeps": [
+    {
+      "family": "surface",
+      "size": 7,
+      "trials": 1,
+      "exact": false,
+      "p_values": [0.10],
+      "decoders": ["mwpm"]
+    },
+    {
+      "family": "bb",
+      "size": 144,
+      "trials": 100,
+      "exact": false,
+      "p_values": [0.05],
+      "decoders": ["bp_osd", "pbit_syndrome_bb"]
+    }
+  ]
+}

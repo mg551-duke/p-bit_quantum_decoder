@@ -1,0 +1,3 @@
+loaded B1_HxHzLxLz.npz: {'family': 'B1', 'n': 882, 'k': 24, 'm_z_checks': 441, 'm_x_checks': 441, 'hz_max_col_weight': 3, 'hz_max_row_weight': 6, 'lz_rows': 24}
+[11:46:29] START name=b1_p0.09_L4_s3000_l24 codes=['B1_HxHzLxLz.npz'] p=[0.09] target=40 metric=legacy workers=64 decoder={'chains': 256, 'sweeps': 3000, 'beta_start': 0.5, 'beta_stop': 5.0, 'beta_schedule_shape': 'linear', 'rho_scale': 0.35, 'update': 'gibbs', 'selection': 'min_weight', 'weight_reduction': True, 'collect_valid_samples': True, 'stop_on_first_valid': False, 'target_valid_solutions': 0, 'coloring': True}
+[11:46:29] CONFIG[gpu] B1 p=0.09: chains=256 sweeps=3000 beta=0.5->5.0 rho_scale=0.35 sel=min_weight max_legs=24 target_valid=8 colors=10

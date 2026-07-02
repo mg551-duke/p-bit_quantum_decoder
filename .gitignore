@@ -1,8 +1,14 @@
 .venv/
+.venv*/
 .pytest_cache/
 .ruff_cache/
 __pycache__/
 *.py[cod]
 
+# scratch/backup files
+*.bak
+
 results/smoke/
+results/smoke_sched/
+results/*.log
 figures/smoke/

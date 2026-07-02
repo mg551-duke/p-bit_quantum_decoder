@@ -1,0 +1,11 @@
+# phase 3: sweeps knee at rho=0.20, chains=128, filtered p=0.004. SHOTS=24000.
+# s500 (a+b=48k) and s1000 (a+b+c=72k) get tight stats to confirm s1000<s500;
+# s750/s1250/s1500 map the knee. seeds disjoint (SEED0=3000).
+s500a  | --chains 128 --sweeps 500  --rho-scales 0.20 --gamma 1.0
+s500b  | --chains 128 --sweeps 500  --rho-scales 0.20 --gamma 1.0
+s750   | --chains 128 --sweeps 750  --rho-scales 0.20 --gamma 1.0
+s1000a | --chains 128 --sweeps 1000 --rho-scales 0.20 --gamma 1.0
+s1000b | --chains 128 --sweeps 1000 --rho-scales 0.20 --gamma 1.0
+s1000c | --chains 128 --sweeps 1000 --rho-scales 0.20 --gamma 1.0
+s1250  | --chains 128 --sweeps 1250 --rho-scales 0.20 --gamma 1.0
+s1500  | --chains 128 --sweeps 1500 --rho-scales 0.20 --gamma 1.0

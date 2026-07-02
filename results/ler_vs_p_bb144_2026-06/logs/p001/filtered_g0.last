@@ -1,0 +1,4 @@
+# circuit=circuit=bicycle_bivariate_144_12_12_memory_Z,distance=12,rounds=12,error_rate=0.001,noise_model=uniform_circuit,basis=CX,A=x^3+y+y^2,B=y^3+x+x^2.stim
+# detectors=936 mechanisms=8784 observables=12 basis_filter=Z
+# shots=40000 procs=80 batch=125 chains=128 sweeps=750 beta=0.5->8.0 update=gibbs selection=min_weight device=cuda gamma=1.0 capture=sweep max_legs=24 target_valid=None
+# mean detector weight/shot=34.0

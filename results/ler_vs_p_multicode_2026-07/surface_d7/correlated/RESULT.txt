@@ -1,0 +1,31 @@
+--- p=0.005 FINAL N=12000 ms_shot=7.32 @ Wed Jul  1 09:49:02 AM PDT 2026 ---
+p=0.005 tv=1  LER=4.250e-03 +-6.0e-04  ul95=5.23e-03  errors=51/12000  invalid=0
+p=0.005 tv=2  LER=3.917e-03 +-5.7e-04  ul95=4.85e-03  errors=47/12000  invalid=0
+p=0.005 tv=3  LER=4.000e-03 +-5.8e-04  ul95=4.95e-03  errors=48/12000  invalid=0
+p=0.005 tv=4  LER=3.833e-03 +-5.7e-04  ul95=4.76e-03  errors=46/12000  invalid=0
+p=0.005 tv=5  LER=3.917e-03 +-5.7e-04  ul95=4.85e-03  errors=47/12000  invalid=0
+--- p=0.004 FINAL N=24000 ms_shot=7.27 @ Wed Jul  1 09:49:40 AM PDT 2026 ---
+p=0.004 tv=1  LER=1.667e-03 +-2.6e-04  ul95=2.10e-03  errors=40/24000  invalid=0
+p=0.004 tv=2  LER=1.542e-03 +-2.5e-04  ul95=1.96e-03  errors=37/24000  invalid=0
+p=0.004 tv=3  LER=1.458e-03 +-2.5e-04  ul95=1.86e-03  errors=35/24000  invalid=0
+p=0.004 tv=4  LER=1.417e-03 +-2.4e-04  ul95=1.82e-03  errors=34/24000  invalid=0
+p=0.004 tv=5  LER=1.417e-03 +-2.4e-04  ul95=1.82e-03  errors=34/24000  invalid=0
+--- p=0.003 FINAL N=36000 ms_shot=5.74 @ Wed Jul  1 09:50:20 AM PDT 2026 ---
+p=0.003 tv=1  LER=8.611e-04 +-1.5e-04  ul95=1.11e-03  errors=31/36000  invalid=0
+p=0.003 tv=2  LER=8.333e-04 +-1.5e-04  ul95=1.08e-03  errors=30/36000  invalid=0
+p=0.003 tv=3  LER=8.056e-04 +-1.5e-04  ul95=1.05e-03  errors=29/36000  invalid=0
+p=0.003 tv=4  LER=8.056e-04 +-1.5e-04  ul95=1.05e-03  errors=29/36000  invalid=0
+p=0.003 tv=5  LER=8.056e-04 +-1.5e-04  ul95=1.05e-03  errors=29/36000  invalid=0
+--- p=0.002 FINAL N=144000 ms_shot=4.09 @ Wed Jul  1 09:53:10 AM PDT 2026 ---
+p=0.002 tv=1  LER=1.250e-04 +-2.9e-05  ul95=1.73e-04  errors=18/144000  invalid=0
+p=0.002 tv=2  LER=1.111e-04 +-2.8e-05  ul95=1.57e-04  errors=16/144000  invalid=0
+p=0.002 tv=3  LER=1.042e-04 +-2.7e-05  ul95=1.48e-04  errors=15/144000  invalid=0
+p=0.002 tv=4  LER=1.042e-04 +-2.7e-05  ul95=1.48e-04  errors=15/144000  invalid=0
+p=0.002 tv=5  LER=9.722e-05 +-2.6e-05  ul95=1.40e-04  errors=14/144000  invalid=0
+--- p=0.001 FINAL N=1800000 ms_shot=3.46 @ Wed Jul  1 10:13:55 AM PDT 2026 ---
+p=0.001 tv=1  LER=8.889e-06 +-2.2e-06  ul95=1.25e-05  errors=16/1800000  invalid=0
+p=0.001 tv=2  LER=6.667e-06 +-1.9e-06  ul95=9.82e-06  errors=12/1800000  invalid=0
+p=0.001 tv=3  LER=6.667e-06 +-1.9e-06  ul95=9.82e-06  errors=12/1800000  invalid=0
+p=0.001 tv=4  LER=5.556e-06 +-1.8e-06  ul95=8.44e-06  errors=10/1800000  invalid=0
+p=0.001 tv=5  LER=5.556e-06 +-1.8e-06  ul95=8.44e-06  errors=10/1800000  invalid=0
+ALLDONE @ Wed Jul  1 10:13:55 AM PDT 2026

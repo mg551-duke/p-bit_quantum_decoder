@@ -1,0 +1,5 @@
+=== B1 p=0.04 POOLED L1_s300_l1 (gpus=[3, 4, 5]) ===
+  runs=146000  valid_correct=145987 valid_incorrect=0 invalid_correct=3 invalid_incorrect=10  valid_frac=0.99991
+  content errors (true logical = logic+nonconv_logic) = 10
+  LER(content) = 6.849e-05 +- 2.2e-05
+  LER(legacy)  = 8.904e-05
