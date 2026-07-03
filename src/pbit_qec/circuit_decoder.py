@@ -180,17 +180,23 @@ void fused_color_sweep(
         const float flip_delta = g * sign * lam[i] + kappa * syn_delta;
         const float u = uniforms[t];
         bool flip;
+        // Idle gating: idle bits (bit==0 && bef==0) are resampled only with
+        // probability idle_rate (rate=0 => frozen). For Gibbs this folds into the
+        // resample probability using the SAME uniform -- distribution-equivalent
+        // to gating the whole update, with no second RNG draw. Metropolis keeps a
+        // separate idle uniform. Prior/energy bookkeeping below stays physical.
+        const bool gate_idle = (!active) && (idle_rate < 1.0f);
         if (metropolis) {
             flip = (flip_delta <= 0.0f) || (u < expf(-flip_delta));
+            if (flip && gate_idle && !(uniforms_idle[t] < idle_rate)) {
+                flip = false;
+            }
         } else {
-            const float p1 = 0.5f * (1.0f - tanhf(0.5f * flip_delta * sign));
+            float p1 = 0.5f * (1.0f - tanhf(0.5f * flip_delta * sign));
+            if (gate_idle) {
+                p1 = (1.0f - idle_rate) * (float)bit + idle_rate * p1;
+            }
             flip = (u < p1) ^ (bit != 0);
-        }
-        // Soft idle gating: idle bits (bit==0 && bef==0) flip only with prob
-        // idle_rate. Prior/energy bookkeeping below stays physical (uses lam[i],
-        // syn_delta), so only the flip decision is biased.
-        if (flip && !active && idle_rate < 1.0f && !(uniforms_idle[t] < idle_rate)) {
-            flip = false;
         }
         if (flip) {
             states[sidx] = bit ^ (unsigned char)1;
@@ -1040,20 +1046,29 @@ class ColoredBlockGibbsDecoder:
             else:
                 flip_delta = self.gamma * sign * lam[:, None] + kappa_sweep * syn_delta
             uniforms = rng.random((cols.size, rows), dtype=self.dtype)
+            # Idle bits (e_j=0, v_j=0) are resampled only with prob idle_rate
+            # (rate=0 => frozen). Gibbs folds the gate into the resample
+            # probability using the SAME uniform (distribution-equivalent, no
+            # second draw); Metropolis keeps a separate idle uniform. The fused
+            # kernel mirrors this exactly so both paths share the RNG stream.
+            gate_idle = idle_gate and not metropolis
             if metropolis:
                 with np.errstate(over="ignore"):
                     threshold = xp.exp(-flip_delta)
                 flip = (flip_delta <= 0.0) | (uniforms < threshold)
+                if idle_gate:
+                    active = (bits != 0) | (before > 0)
+                    idle_uniforms = rng.random((cols.size, rows), dtype=self.dtype)
+                    flip = flip & (active | (idle_uniforms < idle_rate_f))
             else:
                 delta_one_minus_zero = flip_delta * sign
                 probability_one = 0.5 * (1.0 - xp.tanh(0.5 * delta_one_minus_zero))
+                if gate_idle:
+                    active = (bits != 0) | (before > 0)
+                    bitf = bits.astype(self.dtype)
+                    gated = (1.0 - idle_rate_f) * bitf + idle_rate_f * probability_one
+                    probability_one = xp.where(active, probability_one, gated)
                 flip = (uniforms < probability_one) ^ bits.astype(bool)
-            if idle_gate:
-                # Match the fused kernel: draw the idle-gate uniforms right after
-                # the flip uniforms so both paths share one RNG stream.
-                active = (bits != 0) | (before > 0)
-                idle_uniforms = rng.random((cols.size, rows), dtype=self.dtype)
-                flip = flip & (active | (idle_uniforms < idle_rate_f))
             if not self._on_gpu and not flip.any():
                 # CPU-only fast path: skip the scatter when nothing toggled (invalid
                 # is unchanged). On GPU this guard would force a device->host sync
@@ -1102,7 +1117,8 @@ class ColoredBlockGibbsDecoder:
         idle_rate = np.float32(self.idle_update_rate)
         idle_gate = self._idle_gate
         kappa = np.float32(self.rho * beta)
-        metro = np.int32(1 if self.update == "metropolis" else 0)
+        metro_bool = self.update == "metropolis"
+        metro = np.int32(1 if metro_bool else 0)
         rows32 = np.int32(rows)
         threads = 256
         for block in self._colors:
@@ -1110,11 +1126,15 @@ class ColoredBlockGibbsDecoder:
             if k == 0:
                 continue
             uniforms = rng.random((k, rows), dtype=xp.float32)
-            # Draw the idle-gate uniforms in the same per-color order as the
-            # reference _sweep so the streams match. Only when gating is active,
-            # so defaults stay bit-for-bit identical to the pre-gate kernel; when
-            # off, the kernel never dereferences the placeholder (idle_rate>=1).
-            idle_uniforms = rng.random((k, rows), dtype=xp.float32) if idle_gate else uniforms
+            # Metropolis idle gating needs a 2nd uniform (drawn right after the
+            # flip uniforms so the stream matches the reference _sweep). Gibbs
+            # folds the gate into the resample probability with the SAME uniform,
+            # so it needs no extra draw. When no gate is active the kernel never
+            # dereferences the placeholder (idle_rate>=1).
+            idle_uniforms = (
+                rng.random((k, rows), dtype=xp.float32)
+                if (idle_gate and metro_bool) else uniforms
+            )
             total = k * rows
             blocks = min((total + threads - 1) // threads, 65535)
             self._fused_kernel(
