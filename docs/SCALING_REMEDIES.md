@@ -36,3 +36,36 @@ Reference LERs (shot-level, from the 2026-06/07 campaigns):
    heterogeneous schedules, randomized color orders).
 3. Decoder theory (mixing, first-passage to the valid manifold, logical-sector
    coverage within a finite budget).
+
+## 2026-07-02 (PDT) -- Remedy #1 result: flip-gating is a GPU cost ADDER
+
+Branches `scaling-remedy-{soft,hard}-active-gating` (shared implementation at
+`06572d6`). GPU fused==reference validated bit-for-bit for baseline, hard
+(`idle_update_rate=0.0`) and soft (`0.05`).
+
+**A/B benchmark** (bb72 correlated full-DEM memory_Z, `p=0.003`, 10000 shots,
+seed 12345, baseline config above, one config per GPU 0/1/2):
+
+| config | tv5 LER | ms/shot | sw_exec | legs_max |
+|---|---|---|---|---|
+| baseline (idle=1.0) | 2.7e-3 (27/10k) | **24.09** | 711 | 1 |
+| hard (idle=0.0) | 2.1e-3 (21/10k) | 32.05 (+33%) | 744 | 2 |
+| soft (idle=0.05) | 2.3e-3 (23/10k) | 30.44 (+26%) | 713 | 1 |
+
+**LER is neutral** (27/21/23 events overlap within CI at `gamma=1.0`), but
+**cost went UP, not down.**
+
+**Root cause.** In the dense vectorized kernel, gating is applied as a *mask
+after* every column's flip is computed (`flip &= active | idle_uniforms<rate`),
+and idle gating draws an *extra* `(cols x rows)` uniform each color each sweep
+(doubles RNG). So flip-suppression strictly *adds* work; it cannot reduce
+compute because all columns are still processed. Hard gating can also force
+extra restart legs by freezing a bit a shot needed to move (`legs_max=2`).
+
+**Takeaway.** Flip-suppression active-region gating is not a GPU cost remedy
+(it is LER-neutral overhead). Real savings require cutting the **column count**
+processed: e.g. *static per-shot active-region pruning* -- at init keep only
+columns within radius-`r` (1-2 Tanner hops) of a violated detector, freeze the
+rest for the whole decode (done once, shrinks the problem at low `p`). The
+prior-scaling knobs (`gamma_active`/`gamma_far`) are a separate *accuracy* lever
+and have not yet been tested for LER improvement.
