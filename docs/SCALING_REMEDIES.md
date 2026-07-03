@@ -108,3 +108,32 @@ only makes convergence harder); `<1` trades LER for speed (cliff below ~0.6);
 0 by the syndrome term). **To improve LER the lever is ensemble budget
 (chains/legs), not active-region.** The masking fix stands as a real correctness/
 efficiency win regardless.
+
+## 2026-07-02 (PDT) -- Remedy #1 at bb144 scale (d=12)
+
+Throughput comparison, bb144 correlated full-DEM memory_Z (1728 det / 67752 mech
+/ 12 obs), `p=0.003` (representative sub-threshold point; mean detector
+weight/shot 181), 3000 shots, seed 12345, baseline config. Sub-threshold LER
+(~8e-5) needs a full campaign so only cost is read here (0-1 events/3k):
+
+| config | ms/shot | vs base | sw_exec | legs_max | meanW |
+|---|---|---|---|---|---|
+| baseline | **263.3** | -- | 787 | 24 | 50.1 |
+| hard (idle=0.0) | 267.9 | +1.8% | 820 | 24 | 50.0 |
+| soft (idle=0.05) | 269.4 | +2.3% | 842 | 24 | 50.0 |
+| **ga0.7** | **132.8** | **-49.6%** | 551 | 1 | 52.9 |
+
+- **Masking fix holds at scale**: gating is cost-neutral on bb144 too (+1.8-2.3%,
+  was +26-33% before the fix).
+- **`ga0.7` halves cost** on bb144 (-49.6%, vs -24% on bb72) for only +5.6% meanW.
+  Reason: baseline bb144 hits `legs_max=24` (many shots exhaust all restart legs
+  under the strong prior) whereas `ga0.7` converges in a single leg (`legs_max=1`,
+  `sw_exec` 551 vs 787). The weaker near-syndrome prior makes the dense bb144
+  syndrome far easier to satisfy.
+
+**Bottom line.** Active-region is a **throughput/robustness lever, not an accuracy
+lever.** For raw speed on the expensive code, `gamma_active~0.7` is a big win
+(~2x on bb144) at a modest accuracy cost (bb72 showed +46% LER; the bb144 LER
+cost is unquantified and needs a campaign). For **best LER**, keep
+`gamma_active=1.0` and use the masking-fixed gating freely (now free). Neither
+gating nor prior scaling lowers LER below baseline.
