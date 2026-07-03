@@ -62,10 +62,49 @@ and idle gating draws an *extra* `(cols x rows)` uniform each color each sweep
 compute because all columns are still processed. Hard gating can also force
 extra restart legs by freezing a bit a shot needed to move (`legs_max=2`).
 
-**Takeaway.** Flip-suppression active-region gating is not a GPU cost remedy
-(it is LER-neutral overhead). Real savings require cutting the **column count**
-processed: e.g. *static per-shot active-region pruning* -- at init keep only
-columns within radius-`r` (1-2 Tanner hops) of a violated detector, freeze the
-rest for the whole decode (done once, shrinks the problem at low `p`). The
-prior-scaling knobs (`gamma_active`/`gamma_far`) are a separate *accuracy* lever
-and have not yet been tested for LER improvement.
+**Takeaway (superseded below).** The +26-33% was a *masking bug*, not a
+fundamental limit -- see the fix in the next section, which makes gating
+cost-neutral. The prior-scaling knobs (`gamma_active`/`gamma_far`) are a separate
+lever, characterized below.
+
+## 2026-07-02 (PDT) -- Remedy #1 follow-up: masking fix + `gamma_active` sweep
+
+**Masking fix** (`2da5b87`). The extra RNG draw was the culprit. Fold the Gibbs
+idle gate into the resample probability using the *same* uniform -- idle bits get
+`p1' = (1-rate)*bit + rate*p1` (rate=0 => frozen), which is distribution-
+equivalent to gating the whole update with probability `rate` but needs no second
+draw. Metropolis keeps its 2-uniform gate. Applied identically to the CUDA
+kernel, reference `_sweep`, and the fused launcher; `fused==reference` stays
+bit-for-bit (validated baseline/hard/soft/prior-only/soft+prior).
+
+Post-fix isolated gating A/B (bb72 correlated, `p=0.003`, 10k):
+
+| config | ms/shot (before -> after) | tv5 LER |
+|---|---|---|
+| baseline | 24.09 -> **23.85** | 2.7e-3 |
+| hard (idle=0.0) | 32.05 (+33%) -> **24.96 (+4.7%)** | 2.3e-3 |
+| soft (idle=0.05) | 30.44 (+26%) -> **23.74 (~0%)** | 2.5e-3 |
+
+=> gating is now **cost-neutral and LER-neutral**; the residual +4.7% for hard is
+an occasional extra restart leg.
+
+**`gamma_active` sweep** (prior strength on OFF bits adjacent to a violated
+detector -- the candidates to turn ON). bb72 correlated, `p=0.003`:
+
+| `gamma_active` | tv5 LER | ms/shot | note |
+|---|---|---|---|
+| 0.3 / 0.5 | ~0.99 (meanW 293-746) | 46-54 | **catastrophic** (wrong coset) |
+| 0.7 | 3.5e-3 | 20.1 (-24%) | cheaper, worse LER |
+| **1.0 (baseline)** | **2.4e-3** | 26.3 | **LER-optimal** |
+| 1.1 / 1.2 | ~2.6-2.9e-3 (same) | 36 / 50 | same LER, more cost |
+| 1.3 | 3.5e-3 | 88 (legs_max 17) | worse LER AND cost |
+| >=1.5 | -- | -- | impractically slow |
+
+**Takeaway.** Active-region (gating + prior scaling) is a **cost/robustness
+dial, not an accuracy lever**: `gamma_active=1.0` is LER-optimal (min-weight
+selection already yields the sparsest valid correction, so sharpening the prior
+only makes convergence harder); `<1` trades LER for speed (cliff below ~0.6);
+`>1.2` degrades both. `gamma_far` barely matters (idle bits are already pinned to
+0 by the syndrome term). **To improve LER the lever is ensemble budget
+(chains/legs), not active-region.** The masking fix stands as a real correctness/
+efficiency win regardless.
